@@ -208,7 +208,7 @@ Essa lacuna foi corrigida nas versões atuais dos dois documentos, com o **Épic
 
 | **Sprint 3 — Área do Paciente** | 7–8 | Interface do paciente com acesso autenticado, visualização da dieta, marcação de refeições | Planejado |
 
-| **Sprint 4 — Evolução e Polimento** | 9–10 | Gráfico de evolução, ajustes de UX, testes de usabilidade e de fluxo de autenticação | Planejado |
+| **Sprint 4 — Evolução e Polimento** | 9–10 | Gráfico de evolução, ajustes de UX e validação do fluxo de autenticação | Planejado |
 
 | **Sprint 5 — Entrega Final** | 11–12 | Correção de bugs, documentação, preparação da apresentação | Planejado |
 
@@ -232,13 +232,13 @@ Essa lacuna foi corrigida nas versões atuais dos dois documentos, com o **Épic
 
 | **R1** | Escopo mal definido gerando retrabalho: funcionalidades novas podem ser inseridas durante o desenvolvimento, comprometendo o prazo do MVP. | Alta | Alto | Congelar o escopo do MVP após aprovação do RVS. Utilizar um backlog versionado no GitHub Projects. Qualquer nova funcionalidade é registrada como v2. |
 
-| **R2** | Limitação técnica de autenticação: integração do Supabase Auth com Row Level Security (RLS) pode exigir configuração cuidadosa para garantir isolamento de dados entre pacientes e nutricionistas. | Baixa | Alto | Implementar e testar as políticas de RLS no Sprint 1 antes de desenvolver as demais funcionalidades. Documentar as regras de acesso no README do repositório. |
+| **R2** | Limitação técnica de autenticação: integração do Supabase Auth com Row Level Security (RLS) pode exigir configuração cuidadosa para garantir isolamento de dados entre pacientes e nutricionistas. | Baixa | Alto | Implementar e validar as políticas de RLS no Sprint 1 antes de desenvolver as demais funcionalidades. Documentar as regras de acesso no README do repositório. |
 
 | **R3** | Disponibilidade do time: conflito com outras disciplinas, provas ou compromissos pessoais pode reduzir a capacidade produtiva em semanas críticas. | Média | Alto | Distribuir tarefas com responsáveis claros desde o Sprint 0. Manter buffer de 2 semanas no cronograma (Sprints 11–12). Realizar reunião semanal de sincronização de 30 minutos. |
 
 
 
-> **Atualização do Risco R2:** com a incorporação da autenticação ao escopo formal do MVP e o planejamento de implementação e testes de RLS já no Sprint 1, a probabilidade do risco foi revista de **Média** para **Baixa** em relação à versão anterior da RVS.
+> **Atualização do Risco R2:** com a incorporação da autenticação ao escopo formal do MVP e o planejamento de implementação e validação de RLS já no Sprint 1, a probabilidade do risco foi revista de **Média** para **Baixa** em relação à versão anterior da RVS.
 
 
 

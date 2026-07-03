@@ -50,7 +50,7 @@
 
  * **Geração de PDF no Client-Side:** Atende perfeitamente ao requisito de emissão de relatórios (RF026) sem onerar o backend ou estourar as limitações do Supabase Free Tier. O documento é gerado diretamente a partir do estado da aplicação no navegador.
  * **Agenda e Conflitos:** A lógica de validação de horários sobrepostos (RF032) será executada via funções de banco ou validações na camada cliente, aproveitando a tipagem nativa de data/hora do PostgreSQL/Supabase.
- * **Riscos Técnicos Resolvidos:** Operações simultâneas de agendamento podem gerar concorrência. Mitigado por regras restritivas e integridade assegurada por testes de integração (0% de consultas sobrepostas).
+ * **Riscos Técnicos Resolvidos:** Operações simultâneas de agendamento podem gerar concorrência. Mitigado por regras restritivas no banco de dados e integridade assegurada pela validação de conflitos (0% de consultas sobrepostas).
 
  ### 3.2 E — Viabilidade Econômica (Economic)
  * Como projeto acadêmico, o custo financeiro direto de execução permanece zero (R$ 0,00).
@@ -87,7 +87,7 @@
  * **Sprint 2 — Plano Alimentar + Medidas Corporais (Semanas 5-6):** Criação de planos alimentares e inclusão do Módulo de Medidas Corporais (RF020), permitindo salvar circunferências e percentual de gordura.
  * **Sprint 3 — Área do Paciente + Agenda de Consultas (Semanas 7-8):** Interface do paciente para visualizar dietas e marcação de refeições. Implementação do Módulo de Agenda (RF029-RF032) com validação de sobreposição de horários.
  * **Sprint 4 — Emissão de Relatórios + Gráficos de Evolução (Semanas 9-10):** Integração dos gráficos de evolução temporal (peso e medidas) e implementação do Módulo de Relatórios em PDF via client-side (RF026).
- * **Sprint 5 — Testes, Polimento e Entrega (Semanas 11-12):** Execução de testes de integração da agenda (0% de conflito), validação de responsividade mobile (360px), correção de bugs e fechamento da documentação.
+ * **Sprint 5 — Polimento e Entrega (Semanas 11-12):** Validação de responsividade mobile (360px), correção de bugs e fechamento da documentação.
 
  ---
 
@@ -96,7 +96,7 @@
  | # | Risco | Prob. | Imp. | Ação de Mitigação Prioritária |
  | :--- | :--- | :--- | :--- | :--- |
  | **R1** | **Scope Creep (Expansão excessiva):** Novas ideias surgirem a partir do escopo já ampliado da v1.1. | Alta | Alto | Bloqueio total de escopo. Qualquer funcionalidade extra (como integração com Google Calendar ou banco PRO) está formalmente adiada para a v2. |
- | **R2** | **Vazamento de Anotações Clínicas:** Falha nas políticas de RLS expor dados sensíveis do Art. 11 da LGPD. | Baixa | Alto | Criação de testes unitários específicos para a tabela de anotações no Supabase, garantindo rejeição automática de leituras vindas de pacientes. |
+ | **R2** | **Vazamento de Anotações Clínicas:** Falha nas políticas de RLS expor dados sensíveis do Art. 11 da LGPD. | Baixa | Alto | Criação de políticas de RLS específicas para a tabela de anotações no Supabase, garantindo rejeição automática de leituras vindas de pacientes. |
  | **R3** | **Estouro de prazo nas Sprints 3 e 4:** A alta densidade de novas telas (Agenda + PDF) sobrecarregar o time. | Média | Alto | Utilização de componentes prontos de calendário (bibliotecas padrão de React) e geração simplificada de PDF baseada em templates diretos. |
 
  ---

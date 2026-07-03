@@ -1328,7 +1328,7 @@ O sistema deve garantir a integridade da agenda de consultas.
 
 
 
-- **0% de consultas sobrepostas** criadas com sucesso durante os testes de integração envolvendo agendamentos simultâneos.
+- **0% de consultas sobrepostas** criadas com sucesso em cenários de agendamentos simultâneos.
 
 # 4. Matriz de Rastreabilidade
 
@@ -1552,7 +1552,7 @@ Todos os requisitos presentes neste documento foram elaborados seguindo critéri
 
 | **Atomicidade** | Cada requisito deve tratar apenas de uma funcionalidade ou restrição. | Cada requisito funcional descreve apenas uma responsabilidade. Ex.: RF020 trata exclusivamente do registro de medidas corporais, enquanto o histórico foi separado em RF021. |
 
-| **Verificabilidade** | Deve ser possível comprovar objetivamente se o requisito foi atendido. | Todos os RNFs possuem métricas mensuráveis (ex.: relatório em até 3 segundos; 0% de consultas sobrepostas). Os RFs descrevem comportamentos diretamente testáveis. |
+| **Verificabilidade** | Deve ser possível comprovar objetivamente se o requisito foi atendido. | Todos os RNFs possuem métricas mensuráveis (ex.: relatório em até 3 segundos; 0% de consultas sobrepostas). Os RFs descrevem comportamentos diretamente verificáveis. |
 
 | **Clareza** | Os requisitos devem evitar termos subjetivos e utilizar critérios objetivos e mensuráveis. | Foram eliminados termos vagos como "rápido", "eficiente" ou "fácil", substituindo-os por métricas quantitativas em todos os requisitos não funcionais, inclusive os adicionados na versão 1.1. |
 

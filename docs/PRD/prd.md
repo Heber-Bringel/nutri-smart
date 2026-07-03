@@ -51,14 +51,6 @@ A segurança e o isolamento de dados são garantidos pelo uso de autenticação 
   - Banco de dados PostgreSQL hospedado no Supabase.
   - Implementação rigorosa de **Row Level Security (RLS)** nas tabelas de pacientes, consultas, medidas e anotações para garantir isolamento absoluto de dados entre nutricionistas e pacientes.
 
-## Decisões de Teste
-
-- **Estratégia de Teste:** Os testes devem focar estritamente no comportamento externo e nas regras de negócio (seams), evitando acoplamento com a implementação interna dos componentes React ou com o SDK do Supabase.
-- **Módulos Testados:**
-  - **Módulo de Agenda (Validação de Conflitos):** Garantir que o validador de agendamento rejeite horários sobrepostos (0% de consultas sobrepostas em cenários concorrentes).
-  - **Módulo de Cálculos Clínicos:** Testes unitários para validar a exatidão das fórmulas de Mifflin-St Jeor (TMB) e Harris-Benedict (GET), além das faixas de IMC da OMS.
-  - **Módulo de Autenticação e RLS:** Testar a integridade das políticas do banco de dados (RLS) via testes de API, garantindo que um paciente nunca consiga ler ou escrever dados de outro paciente ou anotações clínicas privadas do nutricionista.
-- **Prior Art (Referência):** Testes unitários limpos focados em casos de uso de domínio (`LoginUseCase`, `CreateAppointmentUseCase`), usando stubs/mocks para os adaptadores de banco de dados (`PatientRepositoryMock`).
 
 ## Fora de Escopo
 

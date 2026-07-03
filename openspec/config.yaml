@@ -16,7 +16,7 @@ context: |
     - React Big Calendar → ReactBigCalendarAdapter
   Strategy: validação de agendamento por papel de usuário via IAgendamentoValidator
   Observer: efeitos colaterais da agenda (lembretes, cache) via ConsultaEventEmitter — nunca inline no use case
-  Casos de uso de domínio são a unidade testável (ex: LoginUseCase, CreateAppointmentUseCase),
+  Casos de uso de domínio são a unidade isolável (ex: LoginUseCase, CreateAppointmentUseCase),
   isolados de React e do SDK do Supabase via stubs/mocks (ex: PatientRepositoryMock)
 
   Fora de escopo do MVP (não propor, nem como "melhoria pequena"):
@@ -38,8 +38,4 @@ rules:
     - Se a change tocar na tabela de anotações clínicas ou dados de paciente, o design.md deve incluir a policy de RLS proposta
     - Se a change envolver Supabase, jsPDF ou o calendário, o design.md deve nomear o Adapter e a interface de domínio que ele implementa (nunca acoplar o use case direto ao SDK externo)
     - Se a change tocar agenda, indicar onde entra o Strategy (IAgendamentoValidator) e o Observer (ConsultaEventEmitter)
-    - Referenciar o ADR correspondente quando existir (ADR 0004 — auth; ADR 0005 — GoF/relatórios)
-  tasks:
-    - Toda change em clinical-measurements ou patients deve incluir uma task de teste de RLS (rejeição de leitura cruzada entre nutricionista/paciente) — mitigação do risco R2
-    - Toda change em scheduling deve incluir uma task de teste de conflito de horário (RF032/RNF013)
-    - Toda change que introduzir um use case novo deve incluir teste unitário do use case com mocks/stubs dos adapters — sem acoplar o teste ao SDK do Supabase ou a componentes React
+    - Referenciar o ADR correspondente quando existir (ADR 0004 — auth; ADR 0005 — GoF/relatórios)
