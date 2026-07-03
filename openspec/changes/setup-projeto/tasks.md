@@ -1,14 +1,14 @@
 ## 1. Setup do Projeto com Vite + React 19 + TypeScript
 
-- [ ] 1.1 Criar o projeto com `npm create vite@latest . -- --template react-ts`
-- [ ] 1.2 Atualizar `package.json` para usar `react@^19` e `react-dom@^19`
-- [ ] 1.3 Instalar `@vitejs/plugin-react-swc` e configurar `vite.config.ts`
-- [ ] 1.4 Configurar `typescript@^5`, `@types/react`, `@types/react-dom` nas dependências
+- [x] 1.1 Criar o projeto com `npm create vite@latest . -- --template react-ts`
+- [x] 1.2 Atualizar `package.json` para usar `react@^19` e `react-dom@^19`
+- [x] 1.3 Instalar `@vitejs/plugin-react-swc` e configurar `vite.config.ts`
+- [x] 1.4 Configurar `typescript@^5`, `@types/react`, `@types/react-dom` nas dependências
 
 ## 2. Configuração do TypeScript
 
-- [ ] 2.1 Configurar `tsconfig.json` com `"strict": true` e `"jsx": "react-jsx"`
-- [ ] 2.2 Configurar paths absolutos com alias `@/` apontando para `src/` no `tsconfig.json` e `vite.config.ts`
+- [x] 2.1 Configurar `tsconfig.json` com `"strict": true` e `"jsx": "react-jsx"`
+- [x] 2.2 Configurar paths absolutos com alias `@/` apontando para `src/` no `tsconfig.json` e `vite.config.ts`
 - [ ] 2.3 Verificar compilação com `npx tsc --noEmit` sem erros
 
 ## 3. Estrutura de Diretórios
