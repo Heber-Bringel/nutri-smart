@@ -16,7 +16,7 @@ Além disso, o fluxo de agendamento de consultas necessita aplicar regras distin
 
 Também foi identificado que a criação de uma consulta gera múltiplos efeitos colaterais independentes, como envio de notificações, registro de auditoria, invalidação de cache e preparação de relatórios. Centralizar essas responsabilidades em um único serviço viola o princípio da responsabilidade única e dificulta a evolução do sistema.
 
-Diante desses riscos, tornou-se necessário adotar padrões de projeto capazes de reduzir dependências diretas, facilitar testes, permitir substituição de tecnologias e promover extensibilidade.
+Diante desses riscos, tornou-se necessário adotar padrões de projeto capazes de reduzir dependências diretas, facilitar manutenção, permitir substituição de tecnologias e promover extensibilidade.
 
 ## Decisão
 

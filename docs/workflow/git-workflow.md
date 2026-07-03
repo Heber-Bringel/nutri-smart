@@ -55,7 +55,6 @@ bugfix/<descrição-curta>
 hotfix/<descrição-curta>
 refactor/<descrição-curta>
 docs/<descrição-curta>
-test/<descrição-curta>
 chore/<descrição-curta>
 ```
 
@@ -97,7 +96,6 @@ feat(scheduling): adiciona validação de conflito de horário
 fix(patients): corrige filtro da listagem de pacientes
 docs(workflow): atualiza fluxo de code review
 refactor(nutritional-assessment): extrai cálculo de TMB para use case isolado
-test(scheduling): adiciona teste unitário do IAgendamentoValidator
 chore: atualiza dependências do Supabase client
 ```
 
@@ -122,16 +120,10 @@ openspec/changes/<nome-da-change>/
 ## RF / HU cobertos
 
 
-## Como testar
-
-
 ## Checklist
 - [ ] `openspec validate` sem erros
 - [ ] `/opsx:verify` rodado e aprovado
 - [ ] Lint e formatter passaram localmente (`npm run lint`)
-- [ ] Testes unitários dos use cases novos, com mock dos adapters
-- [ ] Se tocou em `patients` ou `clinical-measurements`: teste de RLS incluído
-- [ ] Se tocou em `scheduling`: teste de conflito de horário incluído
 - [ ] Se usou Supabase/jsPDF/calendário: Adapter nomeado no design.md, sem SDK vazando pro domínio
 - [ ] Build local funcionando (`npm run build`)
 ```
@@ -198,7 +190,6 @@ docs/
 openspec/
 supabase/
 src/
-tests/
 
 README.md
 CONTRIBUTING.md           ← aponta pros dois arquivos de docs/workflow/
@@ -211,7 +202,7 @@ CONTRIBUTING.md           ← aponta pros dois arquivos de docs/workflow/
 Sem GitHub Projects, as **labels fazem o papel de organização visual** das Issues na aba padrão do GitHub:
 
 ```
-tipo:       feature · bug · docs · refactor · test · chore
+tipo:       feature · bug · docs · refactor · chore
 épico:      epico-0-auth · epico-1-patients · epico-2-nutritional-assessment ·
             epico-3-patient-adherence · epico-4-clinical-measurements ·
             epico-5-reports · epico-6-scheduling
