@@ -25,6 +25,6 @@
 
 ## 5. Verificação Final
 
-- [ ] 5.1 Executar `npm run build` e confirmar build bem-sucedido
-- [ ] 5.2 Executar `npx tsc --noEmit` e confirmar zero erros de tipo
-- [ ] 5.3 Executar `npm run dev` e confirmar que o servidor de desenvolvimento inicia sem erros
+- [x] 5.1 Executar `npm run build` e confirmar build bem-sucedido
+- [x] 5.2 Executar `npx tsc --noEmit` e confirmar zero erros de tipo
+- [x] 5.3 Executar `npm run dev` e confirmar que o servidor de desenvolvimento inicia sem erros
