@@ -1,0 +1,45 @@
+schema: spec-driven
+
+context: |
+  Projeto acadêmico: NutriSmart (Engenharia de Software 2, 2026.1)
+  Stack: React 18 (SPA), Supabase Free Tier (Postgres + Auth + RLS), Tailwind CSS, jsPDF (client-side)
+  Deploy: Vercel Free Tier
+  Dois perfis de usuário: nutricionista (primário) e paciente (secundário)
+  Cálculos nutricionais (IMC, TMB via Mifflin-St Jeor, GET) são 100% locais — sem API externa
+  Relatórios em PDF são gerados no client-side a partir dos dados já carregados do Supabase
+  Escopo está CONGELADO na ERS v1.1 — qualquer funcionalidade fora do RF001–RF033 é v2, não MVP
+
+  Arquitetura (PRD — Decisões de Implementação):
+  Bibliotecas externas SEMPRE acessadas via Adapter, nunca direto no domínio:
+    - Supabase Auth  → SupabaseAuthAdapter implementa IAuthService (ADR 0004)
+    - jsPDF          → JsPdfReportAdapter implementa ReportGenerator (ADR 0005)
+    - React Big Calendar → ReactBigCalendarAdapter
+  Strategy: validação de agendamento por papel de usuário via IAgendamentoValidator
+  Observer: efeitos colaterais da agenda (lembretes, cache) via ConsultaEventEmitter — nunca inline no use case
+  Casos de uso de domínio são a unidade testável (ex: LoginUseCase, CreateAppointmentUseCase),
+  isolados de React e do SDK do Supabase via stubs/mocks (ex: PatientRepositoryMock)
+
+  Fora de escopo do MVP (não propor, nem como "melhoria pequena"):
+    - Integração bidirecional com Google Calendar / Outlook
+    - Faturamento, cobrança ou gateway de pagamento
+    - Notificações via WhatsApp Business API / SMS
+    - App nativo iOS/Android publicado em loja
+    - White label / customização de tema por nutricionista
+
+rules:
+  proposal:
+    - Referenciar o(s) RF e HU correspondente(s) da Atividade Prática v1.2 (ex: "Implementa RF020, HU-11")
+    - Conferir a lista "Fora de escopo" do PRD antes de propor — se a ideia cair nela, marcar como candidata a v2 e parar (mitigação do risco R1)
+    - Se a ideia não corresponder a nenhum RF existente, marcar explicitamente como candidata a v2 e parar — não expandir escopo
+  specs:
+    - Usar Given/When/Then nos cenários
+    - Todo cenário que envolva dado de paciente ou anotação clínica deve descrever explicitamente a regra de RLS aplicável (quem pode ler o quê)
+  design:
+    - Se a change tocar na tabela de anotações clínicas ou dados de paciente, o design.md deve incluir a policy de RLS proposta
+    - Se a change envolver Supabase, jsPDF ou o calendário, o design.md deve nomear o Adapter e a interface de domínio que ele implementa (nunca acoplar o use case direto ao SDK externo)
+    - Se a change tocar agenda, indicar onde entra o Strategy (IAgendamentoValidator) e o Observer (ConsultaEventEmitter)
+    - Referenciar o ADR correspondente quando existir (ADR 0004 — auth; ADR 0005 — GoF/relatórios)
+  tasks:
+    - Toda change em clinical-measurements ou patients deve incluir uma task de teste de RLS (rejeição de leitura cruzada entre nutricionista/paciente) — mitigação do risco R2
+    - Toda change em scheduling deve incluir uma task de teste de conflito de horário (RF032/RNF013)
+    - Toda change que introduzir um use case novo deve incluir teste unitário do use case com mocks/stubs dos adapters — sem acoplar o teste ao SDK do Supabase ou a componentes React
