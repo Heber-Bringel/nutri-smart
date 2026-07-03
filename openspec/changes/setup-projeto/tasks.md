@@ -9,12 +9,12 @@
 
 - [x] 2.1 Configurar `tsconfig.json` com `"strict": true` e `"jsx": "react-jsx"`
 - [x] 2.2 Configurar paths absolutos com alias `@/` apontando para `src/` no `tsconfig.json` e `vite.config.ts`
-- [ ] 2.3 Verificar compilação com `npx tsc --noEmit` sem erros
+- [x] 2.3 Verificar compilação com `npx tsc --noEmit` sem erros
 
 ## 3. Estrutura de Diretórios
 
-- [ ] 3.1 Criar estrutura `src/app/`, `src/viewmodel/`, `src/usecase/`, `src/model/entities/`, `src/model/services/`, `src/infra/`, `src/di/`
-- [ ] 3.2 Adicionar arquivos `.gitkeep` em diretórios vazios (se necessário)
+- [x] 3.1 Criar estrutura `src/app/`, `src/viewmodel/`, `src/usecase/`, `src/model/entities/`, `src/model/services/`, `src/infra/`, `src/di/`
+- [x] 3.2 Adicionar arquivos `.gitkeep` em diretórios vazios (se necessário)
 
 ## 4. Atualização da Documentação
 
