@@ -132,7 +132,7 @@ Esta versão amplia o escopo original com acompanhamento clínico mais completo 
 
 
 
-- **Front-end:** React 18 (SPA) — interface reativa para nutricionista e paciente.
+- **Front-end:** React 19+ com TypeScript (SPA) — interface reativa e type-safe para nutricionista e paciente.
 
 
 

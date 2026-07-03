@@ -73,7 +73,7 @@ Antes de iniciar qualquer tarefa, o agente **deve consultar** os seguintes docum
 | **ERS** | [ERS.md](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/Context/ERS.md) | Requisitos funcionais (RF001–RF033) e não-funcionais |
 | **Casos de Uso** | [USE_CASES.md](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/Context/USE_CASES.md) | Fluxos detalhados de cada funcionalidade |
 | **ADR 0002** | [0002](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/ADRs/0002-escolha-do-estilo-e-organizacao-de-codigo.md) | Arquitetura (Clean Architecture + MVVM), estrutura de pastas |
-| **ADR 0003** | [0003](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/ADRs/0003-definicao-da-stack-tecnologica-do-mvp.md) | Stack tecnológica (React 18, Supabase, Tailwind, jsPDF) |
+| **ADR 0003** | [0003](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/ADRs/0003-definicao-da-stack-tecnologica-do-mvp.md) | Stack tecnológica (React 19+ com TypeScript, Supabase, Tailwind, jsPDF) |
 | **ADR 0004** | [0004](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/ADRs/0004-autenticacao-controle-de-acesso.md) | Autenticação (Supabase Auth, IAuthService) |
 | **ADR 0005** | [0005](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/ADRs/0005-adocao-padroes-projeto.md) | Padrões GoF (Adapter, Factory, Strategy, Observer) |
 | **OpenSpec Config** | [config.yaml](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/openspec/config.yaml) | Regras de proposal, specs, design e tasks |
@@ -134,7 +134,7 @@ Antes de iniciar qualquer tarefa, o agente **deve consultar** os seguintes docum
 
 | Camada | Tecnologia |
 |---|---|
-| Frontend | React 18 + Vite |
+| Frontend | React 19+ com TypeScript + Vite |
 | Estilização | Tailwind CSS |
 | BaaS / Banco | Supabase Free Tier (PostgreSQL + Auth + RLS) |
 | Relatórios PDF | jsPDF (client-side) |
