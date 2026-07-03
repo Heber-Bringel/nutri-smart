@@ -18,10 +18,10 @@
 
 ## 4. Atualização da Documentação
 
-- [ ] 4.1 Atualizar `docs/ADRs/0003-definicao-da-stack-tecnologica-do-mvp.md` — trocar "React 18" por "React 19+", adicionar TypeScript
-- [ ] 4.2 Atualizar `docs/Context/ERS.md` seção 1.4 — trocar "React 18" por "React 19+", adicionar TypeScript
-- [ ] 4.3 Atualizar `docs/PRD/prd.md` se houver referências a React 18
-- [ ] 4.4 Verificar demais documentos do projeto por referências a React 18 ou JavaScript puro
+- [x] 4.1 Atualizar `docs/ADRs/0003-definicao-da-stack-tecnologica-do-mvp.md` — trocar "React 18" por "React 19+", adicionar TypeScript
+- [x] 4.2 Atualizar `docs/Context/ERS.md` seção 1.4 — trocar "React 18" por "React 19+", adicionar TypeScript
+- [x] 4.3 Atualizar `docs/PRD/prd.md` se houver referências a React 18
+- [x] 4.4 Verificar demais documentos do projeto por referências a React 18 ou JavaScript puro
 
 ## 5. Verificação Final
 
