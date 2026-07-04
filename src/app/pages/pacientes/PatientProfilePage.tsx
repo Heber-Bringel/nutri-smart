@@ -13,6 +13,7 @@ export function PatientProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -33,6 +34,17 @@ export function PatientProfilePage() {
       setError(err?.message || 'Erro ao excluir paciente.');
       setDeleting(false);
       setShowDeleteDialog(false);
+    }
+  }
+
+  async function handleResendInvite() {
+    if (!paciente) return;
+    setInviteMessage(null);
+    try {
+      await Container.pacienteService.resendInvite(paciente.email);
+      setInviteMessage('Link de convite reenviado com sucesso!');
+    } catch (err: any) {
+      setInviteMessage(err?.message || 'Erro ao reenviar convite.');
     }
   }
 
@@ -62,6 +74,32 @@ export function PatientProfilePage() {
       </div>
 
       <PatientInfoCard paciente={paciente} />
+
+      {!paciente.usuarioId && (
+        <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '6px' }}>
+          <p style={{ margin: '0 0 0.5rem' }}><strong>Convite pendente</strong></p>
+          <p style={{ margin: '0 0 0.5rem', fontSize: '0.9rem', color: '#6b7280' }}>
+            O paciente ainda não confirmou o convite. O acesso será vinculado automaticamente quando ele criar a conta com o e-mail {paciente.email}.
+          </p>
+          <button
+            onClick={handleResendInvite}
+            style={{
+              padding: '0.4rem 0.8rem',
+              backgroundColor: '#f59e0b',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+            }}
+          >
+            Reenviar Convite
+          </button>
+          {inviteMessage && (
+            <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: '#6b7280' }}>{inviteMessage}</p>
+          )}
+        </div>
+      )}
 
       <div style={{ marginTop: '1.5rem' }}>
         <button

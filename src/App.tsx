@@ -4,6 +4,9 @@ import { LoginPage } from './app/pages/auth/LoginPage';
 import { PatientsPage } from './app/pages/dashboard/PatientsPage';
 import { PatientDietPage } from './app/pages/diet/PatientDietPage';
 import { ProtectedRoute } from './app/components/ProtectedRoute';
+import { PatientListPage } from './app/pages/pacientes/PatientListPage';
+import { PatientFormPage } from './app/pages/pacientes/PatientFormPage';
+import { PatientProfilePage } from './app/pages/pacientes/PatientProfilePage';
 
 export function App() {
   return (
@@ -15,7 +18,23 @@ export function App() {
             path="/dashboard/pacientes"
             element={
               <ProtectedRoute allowedRole="nutricionista">
-                <PatientsPage />
+                <PatientListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/pacientes/novo"
+            element={
+              <ProtectedRoute allowedRole="nutricionista">
+                <PatientFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/pacientes/:id"
+            element={
+              <ProtectedRoute allowedRole="nutricionista">
+                <PatientProfilePage />
               </ProtectedRoute>
             }
           />

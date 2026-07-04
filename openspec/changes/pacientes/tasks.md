@@ -44,9 +44,9 @@
 
 ## 7. Roteamento e Integração
 
-- [ ] 7.1 Configurar rota `/patients/new` para PatientFormPage
-- [ ] 7.2 Configurar rota `/patients` para PatientListPage
-- [ ] 7.3 Configurar rota `/patients/:id` para PatientProfilePage
-- [ ] 7.4 Integrar link de reenvio de invite na UI quando o envio falhar
+- [x] 7.1 Configurar rota `/dashboard/pacientes/novo` para PatientFormPage
+- [x] 7.2 Substituir placeholder PatientsPage por PatientListPage na rota `/dashboard/pacientes`
+- [x] 7.3 Configurar rota `/dashboard/pacientes/:id` para PatientProfilePage
+- [x] 7.4 Integrar seção de convite pendente e botão de reenvio na PatientProfilePage
 
 
