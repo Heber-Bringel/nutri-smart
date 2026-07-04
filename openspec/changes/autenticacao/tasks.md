@@ -14,8 +14,8 @@
 
 ## 3. Camada de Infraestrutura (`src/infra/`)
 
-- [ ] 3.1 Implementar `UserMapper.ts` em `src/infra/auth/mappers/UserMapper.ts` para mapear os dados do Supabase Auth para a entidade `User` do domínio
-- [ ] 3.2 Implementar o adaptador `SupabaseAuthService.ts` em `src/infra/auth/SupabaseAuthService.ts` que satisfaz a interface `IAuthService`
+- [x] 3.1 Implementar `UserMapper.ts` em `src/infra/auth/mappers/UserMapper.ts` para mapear os dados do Supabase Auth para a entidade `User` do domínio
+- [x] 3.2 Implementar o adaptador `SupabaseAuthService.ts` em `src/infra/auth/SupabaseAuthService.ts` que satisfaz a interface `IAuthService`
 
 ## 4. Camada de Casos de Uso (`src/usecase/`)
 
