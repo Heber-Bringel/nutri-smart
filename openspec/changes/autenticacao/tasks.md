@@ -19,9 +19,9 @@
 
 ## 4. Camada de Casos de Uso (`src/usecase/`)
 
-- [ ] 4.1 Implementar `LoginUseCase.ts` em `src/usecase/auth/LoginUseCase.ts`
-- [ ] 4.2 Implementar `RegisterUseCase.ts` em `src/usecase/auth/RegisterUseCase.ts`
-- [ ] 4.3 Implementar `GetCurrentUserUseCase.ts` em `src/usecase/auth/GetCurrentUserUseCase.ts`
+- [x] 4.1 Implementar `LoginUseCase.ts` em `src/usecase/auth/LoginUseCase.ts`
+- [x] 4.2 Implementar `RegisterUseCase.ts` em `src/usecase/auth/RegisterUseCase.ts`
+- [x] 4.3 Implementar `GetCurrentUserUseCase.ts` em `src/usecase/auth/GetCurrentUserUseCase.ts`
 
 ## 5. Camada de Apresentação & Injeção de Dependências (ViewModel & React)
 
