@@ -1,6 +1,6 @@
 import { IPacienteService, CreatePacienteData } from '../../model/services/IPacienteService';
 import { Paciente } from '../../model/entities/Paciente';
-import { calcularIdade } from '../../model/calculations/nutricionalCalculations';
+import { calcularIdade, calculateIMC, calculateTMB, calculateGET } from '../../model/calculations/nutricionalCalculations';
 import { PacienteError } from '../../model/errors/PacienteError';
 
 export class CreatePacienteUseCase {
@@ -11,6 +11,11 @@ export class CreatePacienteUseCase {
       throw new PacienteError('Nome, e-mail e data de nascimento são obrigatórios.');
     }
 
-    return this.pacienteService.create(data);
+    const idade = calcularIdade(data.dataNascimento);
+    const imc = calculateIMC(data.pesoInicial, data.altura);
+    const tmb = calculateTMB(data.pesoInicial, data.altura, idade, data.sexoBiologico);
+    const get = calculateGET(tmb, data.nivelAtividadeFisica);
+
+    return this.pacienteService.create({ ...data, imc, tmb, get });
   }
 }

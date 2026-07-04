@@ -8,6 +8,9 @@ export interface CreatePacienteData {
   pesoInicial: number;
   altura: number;
   nivelAtividadeFisica: NivelAtividadeFisica;
+  imc?: number;
+  tmb?: number;
+  get?: number;
 }
 
 export interface PacienteFilters {

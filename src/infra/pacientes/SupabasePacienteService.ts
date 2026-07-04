@@ -20,6 +20,9 @@ export class SupabasePacienteService implements IPacienteService {
         peso_inicial: data.pesoInicial,
         altura: data.altura,
         nivel_atividade_fisica: data.nivelAtividadeFisica,
+        imc: data.imc,
+        tmb: data.tmb,
+        get: data.get,
       })
       .select()
       .single();
