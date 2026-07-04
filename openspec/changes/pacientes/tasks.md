@@ -28,8 +28,8 @@
 
 ## 5. Adapters (Infraestrutura)
 
-- [ ] 5.1 Implementar `SupabasePatientRepository` (adapter de PatientRepository): create() com insert no Supabase, findAll() com range/ilike, findById(), softDelete() com updated_at + deleted_at
-- [ ] 5.2 Implementar `SupabaseAuthAdapter` (adapter de InviteService): sendInvite() usando `auth.invite_user_by_email` do Supabase com opção de reenvio
+- [x] 5.1 Implementar `SupabasePacienteService`: create(), findAll() com range/ilike, findById(), softDelete() com deleted_at
+- [x] 5.2 Implementar `PacienteMapper` e atualizar `Container.ts` com novos serviços e casos de uso
 
 ## 6. Componentes React
 
