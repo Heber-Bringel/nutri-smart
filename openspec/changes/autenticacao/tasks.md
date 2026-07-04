@@ -9,8 +9,8 @@
 
 ## 2. Camada de Domínio (`src/model/`)
 
-- [ ] 2.1 Criar a entidade de usuário `User.ts` e o enum/type `UserRole` em `src/model/entities/User.ts`
-- [ ] 2.2 Definir a interface `IAuthService` em `src/model/services/IAuthService.ts` contendo os contratos de `login`, `register`, `logout` e `getCurrentUser`
+- [x] 2.1 Criar a entidade de usuário `User.ts` e o enum/type `UserRole` em `src/model/entities/User.ts`
+- [x] 2.2 Definir a interface `IAuthService` em `src/model/services/IAuthService.ts` contendo os contratos de `login`, `register`, `logout` e `getCurrentUser`
 
 ## 3. Camada de Infraestrutura (`src/infra/`)
 
