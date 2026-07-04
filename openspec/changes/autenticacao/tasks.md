@@ -25,8 +25,8 @@
 
 ## 5. Camada de Apresentação & Injeção de Dependências (ViewModel & React)
 
-- [ ] 5.1 Registrar o `SupabaseAuthService`, Casos de Uso e ViewModels no container DI (`src/di/container.ts`)
-- [ ] 5.2 Implementar `AuthViewModel.ts` em `src/viewmodel/auth/AuthViewModel.ts` gerenciando o estado reativo da sessão do usuário
-- [ ] 5.3 Criar o componente `ProtectedRoute.tsx` em `src/app/components/ProtectedRoute.tsx` para interceptação e controle de acesso a rotas
-- [ ] 5.4 Criar a página de login `LoginPage.tsx` em `src/app/pages/auth/LoginPage.tsx` com validação de campos e mensagens genéricas de erro
-- [ ] 5.5 Configurar rotas e redirecionamento automático por perfil (`role === 'nutricionista'` $\rightarrow$ `/dashboard/pacientes`, `role === 'paciente'` $\rightarrow$ `/dieta`)
+- [x] 5.1 Registrar o `SupabaseAuthService`, Casos de Uso e ViewModels no container DI (`src/di/container.ts`)
+- [x] 5.2 Implementar `AuthViewModel.ts` em `src/viewmodel/auth/AuthViewModel.ts` gerenciando o estado reativo da sessão do usuário
+- [x] 5.3 Criar o componente `ProtectedRoute.tsx` em `src/app/components/ProtectedRoute.tsx` para interceptação e controle de acesso a rotas
+- [x] 5.4 Criar a página de login `LoginPage.tsx` em `src/app/pages/auth/LoginPage.tsx` com validação de campos e mensagens genéricas de erro
+- [x] 5.5 Configurar rotas e redirecionamento automático por perfil (`role === 'nutricionista'` $\rightarrow$ `/dashboard/pacientes`, `role === 'paciente'` $\rightarrow$ `/dieta`)
