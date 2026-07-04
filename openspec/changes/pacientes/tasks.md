@@ -1,9 +1,9 @@
 ## 1. Database & RLS
 
-- [ ] 1.1 Criar migration da tabela `patients` com colunas: id (uuid PK), nutritionist_id (FK → profiles.id), name, email (unique), date_of_birth, biological_sex, weight_kg, height_cm, activity_level, imc, tmb, get, created_at, updated_at, deleted_at
-- [ ] 1.2 Criar políticas RLS na tabela `patients`: SELECT (nutritionist_id = auth.uid()), INSERT (nutritionist_id = auth.uid()), UPDATE (nutritionist_id = auth.uid()), soft DELETE (UPDATE com nutritionist_id = auth.uid())
-- [ ] 1.3 Criar trigger `after_insert` em `auth.users` para espelhar perfil na tabela `patients` quando paciente confirma e-mail
-- [ ] 1.4 Criar edge function ou cron de purge diário para deletar fisicamente registros com `deleted_at > 90 dias`
+- [x] 1.1 Criar migration para adicionar colunas faltantes (email, imc, tmb, get, deleted_at) na tabela `pacientes`
+- [x] 1.2 Atualizar políticas RLS na tabela `pacientes` com suporte a soft delete
+- [x] 1.3 Criar trigger `on_auth_user_created_paciente` para vincular `usuario_id` quando paciente confirma e-mail
+- [x] 1.4 Criar função `purge_pacientes_excluidos()` para purge de registros com `deleted_at > 90 dias`
 
 ## 2. Domínio — Entidades e Interfaces
 
