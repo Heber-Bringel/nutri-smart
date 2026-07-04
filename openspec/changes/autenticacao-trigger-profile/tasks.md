@@ -11,5 +11,5 @@
 
 ## 3. Validação e Qualidade
 
-- [ ] 3.1 Testar fluxo de cadastro e login sem violações de RLS
-- [ ] 3.2 Executar build e validação técnica da aplicação
+- [x] 3.1 Testar fluxo de cadastro e login sem violações de RLS
+- [x] 3.2 Executar build e validação técnica da aplicação
