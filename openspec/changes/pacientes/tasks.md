@@ -7,10 +7,10 @@
 
 ## 2. Domínio — Entidades e Interfaces
 
-- [ ] 2.1 Criar entidade `Patient` com campos de domínio (id, nutritionistId, name, email, dateOfBirth, biologicalSex, weightKg, heightCm, activityLevel, imc, tmb, get, createdAt, updatedAt, deletedAt)
-- [ ] 2.2 Criar value objects: `BiologicalSex` (male/female), `ActivityLevel` (sedentary/light/moderate/active/very_active), `Email`
-- [ ] 2.3 Criar interface `PatientRepository` com métodos: create, findAll, findById, softDelete
-- [ ] 2.4 Criar interface `InviteService` com método: sendInvite(email)
+- [x] 2.1 Criar entidade `Paciente` com campos de domínio (id, nutricionistaId, usuarioId, nomeCompleto, email, dataNascimento, sexoBiologico, pesoInicial, altura, nivelAtividadeFisica, imc, tmb, get, createdAt, updatedAt, deletedAt)
+- [x] 2.2 Criar types: `SexoBiologico` (masculino/feminino), `NivelAtividadeFisica` (sedentario/levemente_ativo/moderadamente_ativo/muito_ativo/extremamente_ativo)
+- [x] 2.3 Criar interface `IPacienteService` com métodos: create, findAll, findById, softDelete, resendInvite
+- [x] 2.4 Criar classe `PacienteError`
 
 ## 3. Módulo de Cálculos Nutricionais
 
