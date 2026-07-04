@@ -14,9 +14,9 @@
 
 ## 3. Módulo de Cálculos Nutricionais
 
-- [ ] 3.1 Implementar `calculateIMC(weightKg, heightCm): number`
-- [ ] 3.2 Implementar `calculateTMB(weightKg, heightCm, age, sex): number` (Mifflin-St Jeor)
-- [ ] 3.3 Implementar `calculateGET(tmb, activityLevel): number` com fatores de atividade
+- [x] 3.1 Implementar `calculateIMC(pesoKg, alturaCm): number`
+- [x] 3.2 Implementar `calculateTMB(pesoKg, alturaCm, idade, sexo): number` (Mifflin-St Jeor)
+- [x] 3.3 Implementar `calculateGET(tmb, nivelAtividade): number` com fatores de atividade
 
 
 ## 4. Casos de Uso
