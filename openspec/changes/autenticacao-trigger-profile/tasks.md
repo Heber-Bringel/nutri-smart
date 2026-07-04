@@ -6,8 +6,8 @@
 
 ## 2. Refatoração da Camada de Infra (Adapter)
 
-- [ ] 2.1 Refatorar `src/infra/auth/SupabaseAuthService.ts` removendo o comando manual `supabase.from('profiles').insert()`
-- [ ] 2.2 Garantir a transmissão de metadados (`nome_completo` e `role`) no parâmetro `options.data` do método `signUp()`
+- [x] 2.1 Refatorar `src/infra/auth/SupabaseAuthService.ts` removendo o comando manual `supabase.from('profiles').insert()`
+- [x] 2.2 Garantir a transmissão de metadados (`nome_completo` e `role`) no parâmetro `options.data` do método `signUp()`
 
 ## 3. Validação e Qualidade
 
