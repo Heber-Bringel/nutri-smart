@@ -5,7 +5,7 @@
 ## 1. Banco de Dados & Políticas RLS (Supabase)
 
 - [x] 1.1 Atualizar a documentação do banco em `docs/database.md` com a coluna `usuario_id` na tabela `pacientes` e corrigir referências em `adesao_refeicoes`
-- [ ] 1.2 Executar script DDL SQL no Supabase para habilitar RLS e aplicar as políticas de segurança corrigidas para `profiles`, `pacientes`, `planos_alimentares`, `refeicoes`, `alimentos`, `adesao_refeicoes`, `medidas_corporais`, `historico_peso`, `anotacoes_clinicas` e `consultas`
+- [x] 1.2 Executar script DDL SQL no Supabase para habilitar RLS e aplicar as políticas de segurança corrigidas para `profiles`, `pacientes`, `planos_alimentares`, `refeicoes`, `alimentos`, `adesao_refeicoes`, `medidas_corporais`, `historico_peso`, `anotacoes_clinicas` e `consultas`
 
 ## 2. Camada de Domínio (`src/model/`)
 
