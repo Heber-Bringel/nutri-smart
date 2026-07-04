@@ -188,6 +188,7 @@ Cadastros de pacientes associados ao nutricionista responsável.
 - `nutricionista_id` (`uuid`, NOT NULL, FK → `profiles.id` ON DELETE CASCADE)
 - `usuario_id` (`uuid`, NULL, FK → `profiles.id` ON DELETE SET NULL) -- Vinculo com o perfil de login do paciente
 - `nome_completo` (`text`, NOT NULL)
+- `email` (`varchar(255)`, NULL) -- E-mail do paciente para vinculação/convite
 - `data_nascimento` (`date`, NOT NULL)
 - `sexo_biologico` (`text`, NOT NULL, CHECK: `'masculino'`, `'feminino'`)
 - `peso_inicial` (`numeric(5,2)`, NOT NULL, CHECK > 0)
@@ -308,6 +309,7 @@ CREATE TABLE public.pacientes (
     nutricionista_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     usuario_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     nome_completo TEXT NOT NULL,
+    email VARCHAR(255),
     data_nascimento DATE NOT NULL,
     sexo_biologico TEXT NOT NULL CONSTRAINT chk_pacientes_sexo CHECK (sexo_biologico IN ('masculino', 'feminino')),
     peso_inicial NUMERIC(5,2) NOT NULL CONSTRAINT chk_pacientes_peso CHECK (peso_inicial > 0),
@@ -452,6 +454,25 @@ ALTER TABLE public.consultas ENABLE ROW LEVEL SECURITY;
 -- POLÍTICAS: profiles
 CREATE POLICY "profiles_select_self" ON public.profiles FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "profiles_update_self" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+-- TRIGGER AUTOMÁTICO: Geração de Perfil no Registro do Supabase Auth
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, nome_completo, role)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'nome_completo', 'Usuário'),
+    COALESCE(NEW.raw_user_meta_data->>'role', 'paciente')
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- POLÍTICAS: pacientes
 CREATE POLICY "pacientes_nutricionista_all" ON public.pacientes 

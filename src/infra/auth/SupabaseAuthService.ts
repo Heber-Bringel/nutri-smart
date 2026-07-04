@@ -49,13 +49,7 @@ export class SupabaseAuthService implements IAuthService {
       throw new AuthError(error?.message || 'Erro ao realizar cadastro.');
     }
 
-    // Cria o perfil na tabela pública profiles
-    await supabase.from('profiles').insert({
-      id: authData.user.id,
-      email: data.email,
-      nome_completo: data.nomeCompleto,
-      role: data.role,
-    });
+    // O perfil na tabela pública profiles é gerado automaticamente pelo Trigger SQL handle_new_user()
 
     return UserMapper.toDomain(authData.user, {
       nome_completo: data.nomeCompleto,

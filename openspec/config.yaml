@@ -28,8 +28,8 @@ context: |
 
 rules:
   proposal:
-    - Referenciar o(s) RF e HU correspondente(s) da Atividade Prática v1.2 (ex: "Implementa RF020, HU-11")
-    - Conferir a lista "Fora de escopo" do PRD antes de propor — se a ideia cair nela, marcar como candidata a v2 e parar (mitigação do risco R1)
+    - 'Referenciar o(s) RF e HU correspondente(s) da Atividade Prática v1.2 (ex: "Implementa RF020, HU-11")'
+    - 'Conferir a lista "Fora de escopo" do PRD antes de propor — se a ideia cair nela, marcar como candidata a v2 e parar (mitigação do risco R1)'
     - Se a ideia não corresponder a nenhum RF existente, marcar explicitamente como candidata a v2 e parar — não expandir escopo
   specs:
     - Usar Given/When/Then nos cenários
