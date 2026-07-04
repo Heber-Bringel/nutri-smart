@@ -1,8 +1,8 @@
 ## 1. Migração de Banco de Dados
 
-- [ ] 1.1 Criar a função SQL `handle_new_user()` e o Trigger `on_auth_user_created` no esquema `public`
-- [ ] 1.2 Adicionar a coluna `email` na tabela `public.pacientes`
-- [ ] 1.3 Atualizar o documento `docs/database.md` com o esquema físico revisado e o script SQL do Trigger
+- [x] 1.1 Criar a função SQL `handle_new_user()` e o Trigger `on_auth_user_created` no esquema `public`
+- [x] 1.2 Adicionar a coluna `email` na tabela `public.pacientes`
+- [x] 1.3 Atualizar o documento `docs/database.md` com o esquema físico revisado e o script SQL do Trigger
 
 ## 2. Refatoração da Camada de Infra (Adapter)
 
