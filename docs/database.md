@@ -186,6 +186,7 @@ Espelho público dos usuários cadastrados no `auth.users` do Supabase.
 Cadastros de pacientes associados ao nutricionista responsável.
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `nutricionista_id` (`uuid`, NOT NULL, FK → `profiles.id` ON DELETE CASCADE)
+- `usuario_id` (`uuid`, NULL, FK → `profiles.id` ON DELETE SET NULL) -- Vinculo com o perfil de login do paciente
 - `nome_completo` (`text`, NOT NULL)
 - `data_nascimento` (`date`, NOT NULL)
 - `sexo_biologico` (`text`, NOT NULL, CHECK: `'masculino'`, `'feminino'`)
@@ -230,7 +231,7 @@ Itens alimentares pertencentes a cada refeição.
 Registros diários efetuados pelo paciente sobre o cumprimento das refeições.
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `refeicao_id` (`uuid`, NOT NULL, FK → `refeicoes.id` ON DELETE CASCADE)
-- `paciente_id` (`uuid`, NOT NULL, FK → `profiles.id` ON DELETE CASCADE)
+- `paciente_id` (`uuid`, NOT NULL, FK → `pacientes.id` ON DELETE CASCADE)
 - `data` (`date`, NOT NULL DEFAULT `CURRENT_DATE`)
 - `concluida` (`boolean`, NOT NULL DEFAULT false)
 - `created_at` (`timestamptz`, DEFAULT `now()`)
@@ -305,6 +306,7 @@ CREATE TABLE public.profiles (
 CREATE TABLE public.pacientes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nutricionista_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    usuario_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     nome_completo TEXT NOT NULL,
     data_nascimento DATE NOT NULL,
     sexo_biologico TEXT NOT NULL CONSTRAINT chk_pacientes_sexo CHECK (sexo_biologico IN ('masculino', 'feminino')),
@@ -361,7 +363,7 @@ CREATE TABLE public.alimentos (
 CREATE TABLE public.adesao_refeicoes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     refeicao_id UUID NOT NULL REFERENCES public.refeicoes(id) ON DELETE CASCADE,
-    paciente_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    paciente_id UUID NOT NULL REFERENCES public.pacientes(id) ON DELETE CASCADE,
     data DATE NOT NULL DEFAULT CURRENT_DATE,
     concluida BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -454,13 +456,15 @@ CREATE POLICY "profiles_update_self" ON public.profiles FOR UPDATE USING (auth.u
 -- POLÍTICAS: pacientes
 CREATE POLICY "pacientes_nutricionista_all" ON public.pacientes 
     FOR ALL USING (auth.uid() = nutricionista_id);
+CREATE POLICY "pacientes_self_select" ON public.pacientes 
+    FOR SELECT USING (auth.uid() = usuario_id);
 
 -- POLÍTICAS: planos_alimentares
 CREATE POLICY "planos_nutricionista_all" ON public.planos_alimentares 
     FOR ALL USING (auth.uid() = nutricionista_id);
 CREATE POLICY "planos_paciente_select" ON public.planos_alimentares 
     FOR SELECT USING (
-        paciente_id IN (SELECT id FROM public.pacientes WHERE nutricionista_id IS NOT NULL)
+        paciente_id IN (SELECT id FROM public.pacientes WHERE usuario_id = auth.uid())
     );
 
 -- POLÍTICAS: refeicoes e alimentos
@@ -468,6 +472,15 @@ CREATE POLICY "refeicoes_nutricionista_all" ON public.refeicoes
     FOR ALL USING (
         plano_alimentar_id IN (SELECT id FROM public.planos_alimentares WHERE nutricionista_id = auth.uid())
     );
+CREATE POLICY "refeicoes_paciente_select" ON public.refeicoes 
+    FOR SELECT USING (
+        plano_alimentar_id IN (
+            SELECT p.id FROM public.planos_alimentares p
+            JOIN public.pacientes pac ON p.paciente_id = pac.id
+            WHERE pac.usuario_id = auth.uid()
+        )
+    );
+
 CREATE POLICY "alimentos_nutricionista_all" ON public.alimentos 
     FOR ALL USING (
         refeicao_id IN (
@@ -476,10 +489,21 @@ CREATE POLICY "alimentos_nutricionista_all" ON public.alimentos
             WHERE p.nutricionista_id = auth.uid()
         )
     );
+CREATE POLICY "alimentos_paciente_select" ON public.alimentos 
+    FOR SELECT USING (
+        refeicao_id IN (
+            SELECT r.id FROM public.refeicoes r
+            JOIN public.planos_alimentares p ON r.plano_alimentar_id = p.id
+            JOIN public.pacientes pac ON p.paciente_id = pac.id
+            WHERE pac.usuario_id = auth.uid()
+        )
+    );
 
 -- POLÍTICAS: adesao_refeicoes
 CREATE POLICY "adesao_paciente_all" ON public.adesao_refeicoes 
-    FOR ALL USING (auth.uid() = paciente_id);
+    FOR ALL USING (
+        paciente_id IN (SELECT id FROM public.pacientes WHERE usuario_id = auth.uid())
+    );
 CREATE POLICY "adesao_nutricionista_select" ON public.adesao_refeicoes 
     FOR SELECT USING (
         refeicao_id IN (
@@ -492,9 +516,18 @@ CREATE POLICY "adesao_nutricionista_select" ON public.adesao_refeicoes
 -- POLÍTICAS: medidas_corporais e historico_peso
 CREATE POLICY "medidas_nutricionista_all" ON public.medidas_corporais 
     FOR ALL USING (auth.uid() = nutricionista_id);
+CREATE POLICY "medidas_paciente_select" ON public.medidas_corporais 
+    FOR SELECT USING (
+        paciente_id IN (SELECT id FROM public.pacientes WHERE usuario_id = auth.uid())
+    );
+
 CREATE POLICY "historico_peso_nutricionista_all" ON public.historico_peso 
     FOR ALL USING (
         paciente_id IN (SELECT id FROM public.pacientes WHERE nutricionista_id = auth.uid())
+    );
+CREATE POLICY "historico_peso_paciente_select" ON public.historico_peso 
+    FOR SELECT USING (
+        paciente_id IN (SELECT id FROM public.pacientes WHERE usuario_id = auth.uid())
     );
 
 -- POLÍTICAS: anotacoes_clinicas (SIGILO ABSOLUTO LGPD ART. 11 - Apenas o Nutricionista acessa)
@@ -505,6 +538,10 @@ CREATE POLICY "anotacoes_nutricionista_only" ON public.anotacoes_clinicas
 -- POLÍTICAS: consultas
 CREATE POLICY "consultas_nutricionista_all" ON public.consultas 
     FOR ALL USING (auth.uid() = nutricionista_id);
+CREATE POLICY "consultas_paciente_select" ON public.consultas 
+    FOR SELECT USING (
+        paciente_id IN (SELECT id FROM public.pacientes WHERE usuario_id = auth.uid())
+    );
 ```
 
 ---
