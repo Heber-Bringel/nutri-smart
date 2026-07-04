@@ -21,10 +21,10 @@
 
 ## 4. Casos de Uso
 
-- [ ] 4.1 Implementar `RegisterPatientUseCase`: validar input, calcular IMC/TMB/GET, chamar PatientRepository.create(), chamar InviteService.send()
-- [ ] 4.2 Implementar `ListPatientsUseCase`: receber filters (search, page), chamar PatientRepository.findAll() com paginação
-- [ ] 4.3 Implementar `GetPatientUseCase`: receber patientId, chamar PatientRepository.findById(), verificar ownership
-- [ ] 4.4 Implementar `DeletePatientUseCase`: receber patientId, chamar PatientRepository.softDelete() com cascade lógico
+- [x] 4.1 Implementar `CreatePacienteUseCase`: validar input, chamar IPacienteService.create()
+- [x] 4.2 Implementar `ListPacientesUseCase`: receber filters (search, page), chamar IPacienteService.findAll()
+- [x] 4.3 Implementar `GetPacienteUseCase`: receber patientId, chamar IPacienteService.findById()
+- [x] 4.4 Implementar `DeletePacienteUseCase`: receber patientId, chamar IPacienteService.softDelete()
 
 ## 5. Adapters (Infraestrutura)
 
