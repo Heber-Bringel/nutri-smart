@@ -33,14 +33,14 @@
 
 ## 6. Componentes React
 
-- [ ] 6.1 Criar `PatientForm` com campos validados (name, email, dateOfBirth, biologicalSex, weightKg, heightCm, activityLevel) e exibição dos cálculos (IMC/TMB/GET)
-- [ ] 6.2 Criar `PatientFormPage` na rota `/patients/new` integrando PatientForm + RegisterPatientUseCase
-- [ ] 6.3 Criar `PatientSearchBar` com input de busca e debounce de 300ms
-- [ ] 6.4 Criar `PatientTable` com colunas (nome, último atendimento, status do plano) e paginação (20/página)
-- [ ] 6.5 Criar `PatientListPage` na rota `/patients` integrando PatientSearchBar + PatientTable + ListPatientsUseCase
-- [ ] 6.6 Criar `PatientInfoCard` exibindo dados cadastrais e indicadores clínicos
-- [ ] 6.7 Criar `PatientProfilePage` na rota `/patients/:id` integrando PatientInfoCard + GetPatientUseCase
-- [ ] 6.8 Criar `DeletePatientDialog` com modal de confirmação em 2 etapas (digitar "EXCLUIR") + DeletePatientUseCase
+- [x] 6.1 Criar `PatientForm` com campos validados (nomeCompleto, email, dataNascimento, sexoBiologico, pesoInicial, altura, nivelAtividadeFisica)
+- [x] 6.2 Criar `PatientFormPage` na rota `/dashboard/pacientes/novo` integrando PatientForm + CreatePacienteUseCase
+- [x] 6.3 Criar `PatientSearchBar` com input de busca e debounce de 300ms
+- [x] 6.4 Criar `PatientTable` com colunas (nome, e-mail) e paginação (20/página)
+- [x] 6.5 Criar `PatientListPage` na rota `/dashboard/pacientes` integrando PatientSearchBar + PatientTable + ListPacientesUseCase
+- [x] 6.6 Criar `PatientInfoCard` exibindo dados cadastrais e indicadores clínicos (IMC, TMB, GET)
+- [x] 6.7 Criar `PatientProfilePage` na rota `/dashboard/pacientes/:id` integrando PatientInfoCard + GetPacienteUseCase + DeletePatientDialog
+- [x] 6.8 Criar `DeletePatientDialog` com modal de confirmação em 2 etapas (digitar "EXCLUIR") + DeletePacienteUseCase
 
 ## 7. Roteamento e Integração
 

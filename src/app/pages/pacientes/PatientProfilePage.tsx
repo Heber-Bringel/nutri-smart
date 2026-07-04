@@ -1,0 +1,92 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Paciente } from '../../../model/entities/Paciente';
+import { Container } from '../../../di/container';
+import { PatientInfoCard } from '../../components/pacientes/PatientInfoCard';
+import { DeletePatientDialog } from '../../components/pacientes/DeletePatientDialog';
+
+export function PatientProfilePage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [paciente, setPaciente] = useState<Paciente | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    Container.getPacienteUseCase.execute(id)
+      .then(setPaciente)
+      .catch(err => setError(err?.message || 'Erro ao carregar paciente.'))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  async function handleDelete() {
+    if (!id) return;
+    setDeleting(true);
+    try {
+      await Container.deletePacienteUseCase.execute(id);
+      navigate('/dashboard/pacientes');
+    } catch (err: any) {
+      setError(err?.message || 'Erro ao excluir paciente.');
+      setDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  }
+
+  if (loading) {
+    return <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>Carregando paciente...</div>;
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ padding: '0.75rem', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '4px' }}>{error}</div>
+        <button onClick={() => navigate('/dashboard/pacientes')} style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer' }}>
+          Voltar
+        </button>
+      </div>
+    );
+  }
+
+  if (!paciente) return null;
+
+  return (
+    <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ marginBottom: '1rem' }}>
+        <button onClick={() => navigate('/dashboard/pacientes')} style={{ padding: '0.5rem 1rem', cursor: 'pointer', borderRadius: '4px', border: '1px solid #ccc' }}>
+          ← Voltar
+        </button>
+      </div>
+
+      <PatientInfoCard paciente={paciente} />
+
+      <div style={{ marginTop: '1.5rem' }}>
+        <button
+          onClick={() => setShowDeleteDialog(true)}
+          style={{
+            padding: '0.5rem 1rem',
+            backgroundColor: '#dc2626',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Excluir Paciente
+        </button>
+      </div>
+
+      {showDeleteDialog && (
+        <DeletePatientDialog
+          pacienteNome={paciente.nomeCompleto}
+          onConfirm={handleDelete}
+          onCancel={() => { setShowDeleteDialog(false); setError(null); }}
+          loading={deleting}
+        />
+      )}
+    </div>
+  );
+}
