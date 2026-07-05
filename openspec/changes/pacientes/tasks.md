@@ -49,4 +49,14 @@
 - [x] 7.3 Configurar rota `/dashboard/pacientes/:id` para PatientProfilePage
 - [x] 7.4 Integrar seção de convite pendente e botão de reenvio na PatientProfilePage
 
+## 8. Invite por E-mail (convite de primeiro acesso)
+
+- [x] 8.1 Criar interface `IInviteService` com métodos `sendInvite(email)` e `resendInvite(email)`
+- [x] 8.2 Criar Edge Function `supabase/functions/invite/index.ts` (Deno + service_role) para chamar `auth.admin.inviteUserByEmail()`
+- [x] 8.3 Criar `SupabaseInviteService` implementando `IInviteService` via `supabase.functions.invoke()`
+- [x] 8.4 Atualizar `CreatePacienteUseCase` para disparar `sendInvite` após criar paciente (falha não crítica)
+- [x] 8.5 Remover `resendInvite` do `IPacienteService` e mover para `IInviteService`
+- [x] 8.6 Atualizar `PatientProfilePage` para usar `Container.inviteService.resendInvite()`
+- [x] 8.7 Registrar `SupabaseInviteService` no `Container` e injetar no `CreatePacienteUseCase`
+
 

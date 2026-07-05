@@ -29,5 +29,4 @@ export interface IPacienteService {
   findAll(filters: PacienteFilters): Promise<PaginatedResult<Paciente>>;
   findById(id: string): Promise<Paciente>;
   softDelete(id: string): Promise<void>;
-  resendInvite(email: string): Promise<void>;
 }

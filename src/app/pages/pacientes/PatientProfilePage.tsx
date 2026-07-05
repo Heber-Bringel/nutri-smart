@@ -41,7 +41,7 @@ export function PatientProfilePage() {
     if (!paciente) return;
     setInviteMessage(null);
     try {
-      await Container.pacienteService.resendInvite(paciente.email);
+      await Container.inviteService.resendInvite(paciente.email);
       setInviteMessage('Link de convite reenviado com sucesso!');
     } catch (err: any) {
       setInviteMessage(err?.message || 'Erro ao reenviar convite.');

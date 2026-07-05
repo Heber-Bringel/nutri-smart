@@ -92,10 +92,4 @@ export class SupabasePacienteService implements IPacienteService {
     if (error) throw new PacienteError('Erro ao excluir paciente.');
   }
 
-  async resendInvite(email: string): Promise<void> {
-    // O trigger on_auth_user_created_paciente vincula automaticamente
-    // o paciente ao usuário quando ele confirmar o e-mail.
-    // Para reenvio, seria necessário uma Edge Function com service_role.
-    throw new PacienteError('Funcionalidade de reenvio disponível em breve.');
-  }
 }

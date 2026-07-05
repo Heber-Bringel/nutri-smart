@@ -1,4 +1,5 @@
 import { SupabaseAuthService } from '../infra/auth/SupabaseAuthService';
+import { SupabaseInviteService } from '../infra/auth/SupabaseInviteService';
 import { LoginUseCase } from '../usecase/auth/LoginUseCase';
 import { RegisterUseCase } from '../usecase/auth/RegisterUseCase';
 import { GetCurrentUserUseCase } from '../usecase/auth/GetCurrentUserUseCase';
@@ -11,6 +12,7 @@ import { DeletePacienteUseCase } from '../usecase/pacientes/DeletePacienteUseCas
 class Container {
   private static _authService = new SupabaseAuthService();
   private static _pacienteService = new SupabasePacienteService();
+  private static _inviteService = new SupabaseInviteService();
 
   static get authService() {
     return this._authService;
@@ -18,6 +20,10 @@ class Container {
 
   static get pacienteService() {
     return this._pacienteService;
+  }
+
+  static get inviteService() {
+    return this._inviteService;
   }
 
   static get loginUseCase() {
@@ -33,7 +39,7 @@ class Container {
   }
 
   static get createPacienteUseCase() {
-    return new CreatePacienteUseCase(this._pacienteService);
+    return new CreatePacienteUseCase(this._pacienteService, this._inviteService);
   }
 
   static get listPacientesUseCase() {

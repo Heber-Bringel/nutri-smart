@@ -7,7 +7,7 @@ interface PatientSearchBarProps {
 
 export function PatientSearchBar({ value, onChange }: PatientSearchBarProps) {
   const [localValue, setLocalValue] = useState(value);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
