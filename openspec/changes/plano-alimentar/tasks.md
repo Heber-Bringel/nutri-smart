@@ -1,64 +1,92 @@
-## 1. Database & RLS
+## 1. Domínio — Entidades e Interfaces
 
-- [x] 1.1 Garantir que as migrations das tabelas `planos_alimentares`, `refeicoes`, `alimentos`, `adesao_refeicoes`, `medidas_corporais` e `anotacoes_clinicas` estejam aplicadas com DDL conforme `docs/database.md`
-- [x] 1.2 Aplicar políticas RLS em todas as tabelas: nutricionista ALL + paciente SELECT (exceto `anotacoes_clinicas` — nutricionista ONLY)
-- [x] 1.3 Aplicar índices de desempenho: `idx_planos_paciente`, `idx_planos_ativo`, `idx_refeicoes_plano`, `idx_alimentos_refeicao`, `idx_adesao_paciente_data`, `idx_medidas_paciente_data`, `idx_anotacoes_paciente_data`
+- [ ] 1.1 Criar entidade `MealPlan` (id, pacienteId, nutricionistaId, dataCriacao, dataAtualizacao)
+- [ ] 1.2 Criar entidade `Refeicao` (id, planoAlimentarId, nome, totalCalorias)
+- [ ] 1.3 Criar entidade `Alimento` (id, refeicaoId, nome, quantidade, calorias, proteinas, carboidratos, gorduras)
+- [ ] 1.4 Criar entidade `AlimentoBase` (id, nome, porcao, calorias, proteinas, carboidratos, gorduras, nutricionistaId)
+- [ ] 1.5 Criar entidade `BodyMeasurement` (id, pacienteId, nutricionistaId, data, cintura, quadril, braco, coxa, gordura, dobras)
+- [ ] 1.6 Criar entidade `ClinicalNote` (id, pacienteId, nutricionistaId, data, conteudo, createdAt, updatedAt)
+- [ ] 1.7 Criar entidade `Adesao` (id, refeicaoId, pacienteId, data, concluida)
+- [ ] 1.8 Criar interface `IMealPlanService` (create, update, findByPatient, findById)
+- [ ] 1.9 Criar interface `IFoodBaseService` (search, createCustom)
+- [ ] 1.10 Criar interface `IBodyMeasurementService` (create, findByPatient, update, delete)
+- [ ] 1.11 Criar interface `IClinicalNoteService` (create, findByPatient, update, delete)
+- [ ] 1.12 Criar interface `IAdesaoService` (upsert, getDailyProgress)
 
-## 2. Domínio — Meal Plan CRUD (RF007, RF008, HU-06)
+## 2. Casos de Uso — Plano Alimentar
 
-- [x] 2.1 Criar entidades de domínio: `MealPlan`, `Refeicao`, `Alimento` com tipagens e validações
-- [x] 2.2 Criar interface `IMealPlanRepository` com métodos: create, update, findByPatientId, findById
-- [x] 2.3 Criar casos de uso: `CreateMealPlanUseCase` (validar refeições não vazias, calcular totais calóricos, persistir), `UpdateMealPlanUseCase` (carregar plano, aplicar alterações, recalcular, salvar), `GetMealPlanUseCase`
-- [x] 2.4 Implementar `SupabaseMealPlanRepository` com batch insert de refeições/alimentos e transação
+- [ ] 2.1 Implementar `CreateMealPlanUseCase` — valida refeições não vazias, calcula totais calóricos
+- [ ] 2.2 Implementar `UpdateMealPlanUseCase` — substitui refeições/alimentos, recalcula totais
+- [ ] 2.3 Implementar `GetMealPlanUseCase` — retorna plano ativo do paciente com refeições e alimentos
+- [ ] 2.4 Implementar `SearchFoodBaseUseCase` — busca textual em alimentos_base por nome
+- [ ] 2.5 Implementar `CreateCustomFoodUseCase` — persiste alimento customizado para o nutricionista
 
-## 3. Adapters — Meal Plan (Infraestrutura)
+## 3. Casos de Uso — Medidas Corporais
 
-- [x] 3.1 Implementar `SupabaseMealPlanRepository.create()` com insert do plano + refeições + alimentos em sequência
-- [x] 3.2 Implementar `SupabaseMealPlanRepository.update()` com replace de refeições e alimentos (delete + insert)
-- [x] 3.3 Implementar `SupabaseMealPlanRepository.findByPatientId()` com joins para carregar plano + refeições + alimentos
-- [x] 3.4 Criar mappers: `MealPlanMapper`, `RefeicaoMapper`, `AlimentoMapper`
-- [x] 3.5 Registrar repositório e casos de uso no Container
+- [ ] 3.1 Implementar `RegisterMeasurementUseCase` — valida data e valores positivos
+- [ ] 3.2 Implementar `ListMeasurementsUseCase` — lista medidas por paciente ordenadas por data
+- [ ] 3.3 Implementar `UpdateMeasurementUseCase` — atualiza registro existente
+- [ ] 3.4 Implementar `DeleteMeasurementUseCase` — remove registro
 
-## 4. Componentes React — Meal Plan
+## 4. Casos de Uso — Anotações Clínicas
 
-- [x] 4.1 Criar `MealPlanForm` com acordeão por refeição, adição/remoção de alimentos, cálculo automático de calorias
-- [x] 4.2 Criar `FoodItemRow` com campos nome, quantidade (g/ml) e calorias
-- [x] 4.3 Criar `MealPlanPage` na rota `/dashboard/pacientes/:id/plano-alimentar` integrando form + casos de uso
-- [x] 4.4 Exibir indicadores clínicos (IMC, TMB, GET) como base para prescrição na página do plano
+- [ ] 4.1 Implementar `CreateClinicalNoteUseCase` — valida conteúdo não vazio
+- [ ] 4.2 Implementar `ListClinicalNotesUseCase` — lista anotações por paciente
+- [ ] 4.3 Implementar `UpdateClinicalNoteUseCase` — atualiza conteúdo da anotação
+- [ ] 4.4 Implementar `DeleteClinicalNoteUseCase` — remove anotação
 
-## 5. Gráfico de Evolução (RF010, HU-07)
+## 5. Casos de Uso — Adesão e Evolução
 
-- [x] 5.1 Criar caso de uso `GetEvolutionChartDataUseCase` (peso dos últimos 30 dias + percentual de adesão)
-- [x] 5.2 Criar `EvolutionChartPage` na rota `/dashboard/pacientes/:id/evolucao` com gráfico SVG de linha dupla (peso + % adesão)
-- [x] 5.3 Implementar empty state quando não houver dados
+- [ ] 5.1 Implementar `MarkMealAsCompletedUseCase` — upsert em adesao_refeicoes
+- [ ] 5.2 Implementar `GetDailyProgressUseCase` — calcula razão concluídas/total do dia
+- [ ] 5.3 Implementar `GetEvolutionChartDataUseCase` — agrega peso e % adesão nos últimos 30 dias
 
-## 6. Medidas Corporais (RF020–RF022, HU-11–HU-12)
+## 6. Adapters — Supabase Services
 
-- [x] 6.1 Criar entidade `MedidaCorporal` com campos de domínio
-- [x] 6.2 Criar interface `IBodyMeasurementRepository` e implementação `SupabaseBodyMeasurementRepository`
-- [x] 6.3 Criar casos de uso: `RegisterMeasurementUseCase`, `ListMeasurementsUseCase`, `UpdateMeasurementUseCase`, `DeleteMeasurementUseCase`
-- [x] 6.4 Criar `BodyMeasurementFormPage` na rota `/dashboard/pacientes/:id/medidas` com formulário de circunferências, percentual de gordura e dobras cutâneas
-- [x] 6.5 Criar `MeasurementHistoryTable` e `MeasurementChart` (tabela de histórico com dados)
-- [x] 6.6 Suporte a edição e exclusão de registros de medida
+- [ ] 6.1 Implementar `SupabaseMealPlanService` com mappers para planos_alimentares, refeicoes, alimentos
+- [ ] 6.2 Implementar `SupabaseFoodBaseService` com mapper para alimentos_base e busca ilike
+- [ ] 6.3 Implementar `SupabaseBodyMeasurementService` com mapper para medidas_corporais
+- [ ] 6.4 Implementar `SupabaseClinicalNoteService` com mapper para anotacoes_clinicas
+- [ ] 6.5 Implementar `SupabaseAdesaoService` com mapper para adesao_refeicoes e cálculo de progresso
 
-## 7. Anotações Clínicas (RF023–RF025, HU-13–HU-14)
+## 7. UI — Plano Alimentar
 
-- [x] 7.1 Criar entidade `AnotacaoClinica` com campos paciente, data, conteúdo
-- [x] 7.2 Criar interface `IClinicalNoteRepository` e implementação `SupabaseClinicalNoteRepository` (apenas nutricionista — paciente sem acesso)
-- [x] 7.3 Criar casos de uso: `CreateClinicalNoteUseCase`, `ListClinicalNotesUseCase`, `UpdateClinicalNoteUseCase`, `DeleteClinicalNoteUseCase`
-- [x] 7.4 Criar `ClinicalNotesPage` na rota `/dashboard/pacientes/:id/anotacoes` com formulário de texto livre + listagem com edição e exclusão
+- [ ] 7.1 Criar `MealPlanForm` — formulário de criação/edição com acordeão por refeição
+- [ ] 7.2 Criar `FoodItemRow` — linha de alimento com nome, quantidade, calorias e botão remover
+- [ ] 7.3 Criar `FoodBaseSelector` — autocomplete com busca na base e opção "Criar novo alimento"
+- [ ] 7.4 Criar `MealPlanPage` — página integrando formulário, voltada ao nutricionista
 
-## 8. Área do Paciente (RF011–RF013, HU-08–HU-10)
+## 8. UI — Medidas Corporais
 
-- [x] 8.1 Criar `PatientMealPlanPage` na rota `/paciente/meu-plano` exibindo refeições do dia com alimentos, quantidades e calorias totais
-- [x] 8.2 Criar `AdherenceToggle` (botão até 2 toques) com optimistic UI para marcar refeição como concluída
-- [x] 8.3 Criar `ProgressBar` com percentual de refeições concluídas vs. total do dia, atualizando em tempo real
-- [x] 8.4 Criar caso de uso `MarkMealAsCompletedUseCase` e `GetDailyProgressUseCase`
-- [x] 8.5 Criar `SupabaseAdesaoRepository` com upsert e tratamento de conflito unique (refeicao_id, data)
+- [ ] 8.1 Criar `BodyMeasurementForm` — formulário com campos de circunferências, gordura e dobras
+- [ ] 8.2 Criar `MeasurementHistoryTable` — tabela com histórico ordenado por data
+- [ ] 8.3 Criar `MeasurementChart` — gráfico SVG de linha por tipo de medida
+- [ ] 8.4 Criar `BodyMeasurementFormPage` — página combinando formulário + histórico + gráfico
 
-## 9. Roteamento e Integração
+## 9. UI — Anotações Clínicas
 
-- [x] 9.1 Registrar rotas do nutricionista: `/dashboard/pacientes/:id/plano-alimentar`, `/dashboard/pacientes/:id/evolucao`, `/dashboard/pacientes/:id/medidas`, `/dashboard/pacientes/:id/anotacoes`
-- [x] 9.2 Registrar rota do paciente: `/paciente/meu-plano`
-- [x] 9.3 Adicionar links de navegação na ficha do paciente (tabs ou menu lateral) para plano alimentar, evolução, medidas e anotações
-- [x] 9.4 Adicionar link na área do paciente para acesso ao plano alimentar diário
+- [ ] 9.1 Criar `ClinicalNoteForm` — formulário com data e texto livre
+- [ ] 9.2 Criar `ClinicalNoteList` — listagem com preview e ações editar/excluir
+- [ ] 9.3 Criar `ClinicalNotesPage` — página combinando lista + formulário
+
+## 10. UI — Área do Paciente
+
+- [ ] 10.1 Criar `PatientMealPlanView` — visualização do plano diário com refeições e alimentos
+- [ ] 10.2 Criar `AdherenceToggle` — toggle button com optimistic UI para marcar refeição
+- [ ] 10.3 Criar `ProgressBar` — barra de progresso com contador N/M concluídas
+- [ ] 10.4 Criar `EvolutionChart` — gráfico SVG de linha dupla (peso + adesão)
+- [ ] 10.5 Criar `PatientMealPlanPage` — página do paciente com plano, adesão e progresso
+- [ ] 10.6 Criar `EvolutionChartPage` — página do nutricionista com gráfico de evolução
+
+## 11. Rotas e DI
+
+- [ ] 11.1 Registrar rotas do nutricionista em App.tsx (/pacientes/:id/plano-alimentar, /evolucao, /medidas, /anotacoes)
+- [ ] 11.2 Registrar rota do paciente em App.tsx (/meu-plano)
+- [ ] 11.3 Atualizar container DI com todos os serviços e casos de uso
+- [ ] 11.4 Adicionar verificação de sessão expirada com redirect para /login
+
+## 12. Banco de Dados
+
+- [ ] 12.1 Criar migration com DDL das tabelas (planos_alimentares, refeicoes, alimentos, alimentos_base, medidas_corporais, anotacoes_clinicas, adesao_refeicoes)
+- [ ] 12.2 Aplicar RLS policies em todas as tabelas conforme design.md
+- [ ] 12.3 Inserir seed de alimentos_base (~50 alimentos comuns)
