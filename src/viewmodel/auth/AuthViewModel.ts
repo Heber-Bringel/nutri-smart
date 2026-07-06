@@ -3,6 +3,10 @@ import { User } from '../../model/entities/User';
 import { Container } from '../../di/container';
 import { LoginCredentials, RegisterData } from '../../model/services/IAuthService';
 
+interface ErrorWithCause extends Error {
+  cause: unknown;
+}
+
 interface AuthState {
   user: User | null;
   loading: boolean;
@@ -49,10 +53,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const loggedUser = await Container.loginUseCase.execute(credentials);
       setUser(loggedUser);
       return loggedUser;
-    } catch (err: any) {
-      const errorMessage = err?.message || 'E-mail ou senha inválidos.';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'E-mail ou senha inválidos.';
       setError(errorMessage);
-      throw new Error(errorMessage);
+      const newErr = new Error(errorMessage) as ErrorWithCause;
+      newErr.cause = err;
+      throw newErr;
     } finally {
       setLoading(false);
     }
@@ -65,10 +71,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const registeredUser = await Container.registerUseCase.execute(data);
       setUser(registeredUser);
       return registeredUser;
-    } catch (err: any) {
-      const errorMessage = err?.message || 'Erro ao realizar cadastro.';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao realizar cadastro.';
       setError(errorMessage);
-      throw new Error(errorMessage);
+      const newErr = new Error(errorMessage) as ErrorWithCause;
+      newErr.cause = err;
+      throw newErr;
     } finally {
       setLoading(false);
     }
