@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PatientForm } from '../../components/pacientes/PatientForm';
 import { Container } from '../../../di/container';
+import type { NivelAtividadeFisica } from '../../../model/entities/Paciente';
 
 export function PatientFormPage() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ export function PatientFormPage() {
     sexoBiologico: 'masculino' | 'feminino';
     pesoInicial: string;
     altura: string;
-    nivelAtividadeFisica: any;
+    nivelAtividadeFisica: NivelAtividadeFisica;
   }) {
     setLoading(true);
     setError(null);
@@ -30,8 +31,8 @@ export function PatientFormPage() {
         nivelAtividadeFisica: formData.nivelAtividadeFisica,
       });
       navigate('/dashboard/pacientes');
-    } catch (err: any) {
-      setError(err?.message || 'Erro ao cadastrar paciente.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao cadastrar paciente.');
     } finally {
       setLoading(false);
     }
