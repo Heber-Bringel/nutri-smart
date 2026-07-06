@@ -4,11 +4,6 @@ interface InvitePayload {
   email: string;
 }
 
-interface InviteResponse {
-  success: boolean;
-  message?: string;
-}
-
 Deno.serve(async (req: Request): Promise<Response> => {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ success: false, message: 'Método não permitido' }), {
@@ -39,7 +34,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email);
+    const { error } = await supabase.auth.admin.inviteUserByEmail(email);
 
     if (error) {
       return new Response(JSON.stringify({ success: false, message: error.message }), {
