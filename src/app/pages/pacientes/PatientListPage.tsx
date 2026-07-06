@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Paciente } from '../../../model/entities/Paciente';
 import { Container } from '../../../di/container';
@@ -14,23 +14,32 @@ export function PatientListPage() {
   const [loading, setLoading] = useState(true);
   const pageSize = 20;
 
-  const fetchPacientes = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await Container.listPacientesUseCase.execute({ search, page, pageSize });
-      setPacientes(result.data);
-      setTotal(result.total);
-    } catch {
-      setPacientes([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, page]);
-
   useEffect(() => {
+    let cancelled = false;
+
+    async function fetchPacientes() {
+      setLoading(true);
+      try {
+        const result = await Container.listPacientesUseCase.execute({ search, page, pageSize });
+        if (!cancelled) {
+          setPacientes(result.data);
+          setTotal(result.total);
+        }
+      } catch {
+        if (!cancelled) {
+          setPacientes([]);
+          setTotal(0);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
     fetchPacientes();
-  }, [fetchPacientes]);
+    return () => { cancelled = true; };
+  }, [search, page]);
 
   function handleSelectPaciente(paciente: Paciente) {
     navigate(`/dashboard/pacientes/${paciente.id}`);
