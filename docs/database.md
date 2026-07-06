@@ -348,10 +348,24 @@ CREATE TABLE public.refeicoes (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- 4.5 Tabela alimentos_base (Base de alimentos do sistema e customizados do nutricionista)
+CREATE TABLE public.alimentos_base (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nutricionista_id UUID REFERENCES auth.users(id) ON DELETE CASCADE, -- NULL indica alimento padrão do sistema
+    nome TEXT NOT NULL,
+    porcao_base NUMERIC(7,2) NOT NULL DEFAULT 100,
+    unidade_medida TEXT NOT NULL DEFAULT 'g',
+    calorias NUMERIC(7,2) NOT NULL DEFAULT 0,
+    carboidratos NUMERIC(6,2) DEFAULT 0,
+    proteinas NUMERIC(6,2) DEFAULT 0,
+    gorduras NUMERIC(6,2) DEFAULT 0
+);
+
 -- 5. Tabela alimentos
 CREATE TABLE public.alimentos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     refeicao_id UUID NOT NULL REFERENCES public.refeicoes(id) ON DELETE CASCADE,
+    base_id UUID REFERENCES public.alimentos_base(id) ON DELETE SET NULL,
     nome TEXT NOT NULL,
     quantidade NUMERIC(7,2) NOT NULL CONSTRAINT chk_alimentos_qtd CHECK (quantidade > 0),
     unidade_medida TEXT NOT NULL DEFAULT 'g',
@@ -487,6 +501,18 @@ CREATE POLICY "planos_paciente_select" ON public.planos_alimentares
     FOR SELECT USING (
         paciente_id IN (SELECT id FROM public.pacientes WHERE usuario_id = auth.uid())
     );
+
+-- POLÍTICAS: alimentos_base
+CREATE POLICY "alimentos_base_select_all" ON public.alimentos_base
+    FOR SELECT USING (
+        nutricionista_id IS NULL OR nutricionista_id = auth.uid()
+    );
+CREATE POLICY "alimentos_base_insert_nutri" ON public.alimentos_base
+    FOR INSERT WITH CHECK (auth.uid() = nutricionista_id);
+CREATE POLICY "alimentos_base_update_nutri" ON public.alimentos_base
+    FOR UPDATE USING (auth.uid() = nutricionista_id);
+CREATE POLICY "alimentos_base_delete_nutri" ON public.alimentos_base
+    FOR DELETE USING (auth.uid() = nutricionista_id);
 
 -- POLÍTICAS: refeicoes e alimentos
 CREATE POLICY "refeicoes_nutricionista_all" ON public.refeicoes 
