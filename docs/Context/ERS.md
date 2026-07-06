@@ -360,7 +360,7 @@ O sistema deve permitir que o nutricionista crie um plano alimentar para o pacie
 
 - Refeições (ex.: café da manhã, almoço, jantar, lanches);
 
-- Alimentos pertencentes a cada refeição;
+- Alimentos pertencentes a cada refeição (escolhidos de uma base cadastrada ou criados manualmente);
 
 - Quantidade de cada alimento (g/ml);
 
@@ -1023,6 +1023,15 @@ O sistema deve permitir que o paciente visualize, em sua área autenticada:
 - Data da próxima consulta;
 
 - Horário da próxima consulta agendada.
+
+---
+
+### RF034 — Base de Alimentos
+
+**Prioridade:** Alta
+
+O sistema deve permitir que o nutricionista selecione alimentos a partir de uma base cadastrada ou adicione alimentos manualmente (texto livre) durante a montagem de um plano alimentar.
+Para alimentos da base, o sistema deve carregar automaticamente a proporção de calorias e macros, se disponíveis.
 
 # 3. Requisitos Não Funcionais (RNF)
 
