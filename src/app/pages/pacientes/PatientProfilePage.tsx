@@ -9,20 +9,34 @@ export function PatientProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [paciente, setPaciente] = useState<Paciente | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [requestedId, setRequestedId] = useState<string | undefined>(undefined);
+
+  if (id && id !== requestedId) {
+    setRequestedId(id);
+    setLoading(true);
+    setError(null);
+  }
 
   useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    Container.getPacienteUseCase.execute(id)
-      .then(setPaciente)
-      .catch(err => setError(err?.message || 'Erro ao carregar paciente.'))
-      .finally(() => setLoading(false));
-  }, [id]);
+    if (!requestedId) return;
+    let cancelled = false;
+
+    Container.getPacienteUseCase.execute(requestedId)
+      .then(p => { if (!cancelled) { setPaciente(p); setLoading(false); } })
+      .catch(err => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Erro ao carregar paciente.');
+          setLoading(false);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [requestedId]);
 
   async function handleDelete() {
     if (!id) return;
@@ -30,8 +44,8 @@ export function PatientProfilePage() {
     try {
       await Container.deletePacienteUseCase.execute(id);
       navigate('/dashboard/pacientes');
-    } catch (err: any) {
-      setError(err?.message || 'Erro ao excluir paciente.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao excluir paciente.');
       setDeleting(false);
       setShowDeleteDialog(false);
     }
@@ -43,8 +57,8 @@ export function PatientProfilePage() {
     try {
       await Container.inviteService.resendInvite(paciente.email);
       setInviteMessage('Link de convite reenviado com sucesso!');
-    } catch (err: any) {
-      setInviteMessage(err?.message || 'Erro ao reenviar convite.');
+    } catch (err: unknown) {
+      setInviteMessage(err instanceof Error ? err.message : 'Erro ao reenviar convite.');
     }
   }
 
