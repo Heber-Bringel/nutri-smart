@@ -6,6 +6,11 @@ import { ProtectedRoute } from './app/components/ProtectedRoute';
 import { PatientListPage } from './app/pages/pacientes/PatientListPage';
 import { PatientFormPage } from './app/pages/pacientes/PatientFormPage';
 import { PatientProfilePage } from './app/pages/pacientes/PatientProfilePage';
+import { MealPlanPage } from './app/pages/plano-alimentar/MealPlanPage';
+import { EvolutionChartPage } from './app/pages/evolucao/EvolutionChartPage';
+import { BodyMeasurementFormPage } from './app/pages/medidas/BodyMeasurementFormPage';
+import { ClinicalNotesPage } from './app/pages/anotacoes/ClinicalNotesPage';
+import { PatientMealPlanPage } from './app/pages/paciente/PatientMealPlanPage';
 
 export function App() {
   return (
@@ -38,10 +43,50 @@ export function App() {
             }
           />
           <Route
+            path="/dashboard/pacientes/:id/plano-alimentar"
+            element={
+              <ProtectedRoute allowedRole="nutricionista">
+                <MealPlanPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/pacientes/:id/evolucao"
+            element={
+              <ProtectedRoute allowedRole="nutricionista">
+                <EvolutionChartPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/pacientes/:id/medidas"
+            element={
+              <ProtectedRoute allowedRole="nutricionista">
+                <BodyMeasurementFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/pacientes/:id/anotacoes"
+            element={
+              <ProtectedRoute allowedRole="nutricionista">
+                <ClinicalNotesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/dieta"
             element={
               <ProtectedRoute allowedRole="paciente">
                 <PatientDietPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/paciente/meu-plano"
+            element={
+              <ProtectedRoute allowedRole="paciente">
+                <PatientMealPlanPage />
               </ProtectedRoute>
             }
           />

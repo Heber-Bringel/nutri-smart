@@ -5,6 +5,17 @@ import { Container } from '../../../di/container';
 import { PatientInfoCard } from '../../components/pacientes/PatientInfoCard';
 import { DeletePatientDialog } from '../../components/pacientes/DeletePatientDialog';
 
+const tabButtonStyle: React.CSSProperties = {
+  padding: '0.5rem 1rem',
+  cursor: 'pointer',
+  borderRadius: '4px',
+  border: '1px solid #d1d5db',
+  backgroundColor: '#fff',
+  color: '#374151',
+  fontSize: '0.9rem',
+  transition: 'all 0.2s',
+};
+
 export function PatientProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -88,6 +99,21 @@ export function PatientProfilePage() {
       </div>
 
       <PatientInfoCard paciente={paciente} />
+
+      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <button onClick={() => navigate(`/dashboard/pacientes/${id}/plano-alimentar`)} style={tabButtonStyle}>
+          Plano Alimentar
+        </button>
+        <button onClick={() => navigate(`/dashboard/pacientes/${id}/evolucao`)} style={tabButtonStyle}>
+          Evolução
+        </button>
+        <button onClick={() => navigate(`/dashboard/pacientes/${id}/medidas`)} style={tabButtonStyle}>
+          Medidas Corporais
+        </button>
+        <button onClick={() => navigate(`/dashboard/pacientes/${id}/anotacoes`)} style={tabButtonStyle}>
+          Anotações Clínicas
+        </button>
+      </div>
 
       {!paciente.usuarioId && (
         <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: '#fffbeb', border: '1px solid #fcd34d', borderRadius: '6px' }}>
