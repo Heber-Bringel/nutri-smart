@@ -177,7 +177,7 @@ export function PatientListPage() {
               </div>
               <div style={{ display: 'flex', gap: 12, flexShrink: 0, alignItems: 'center' }}>
                 <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: '#6B7280' }}>
-                  atend. {formatDate(p.ultimoAtendimento?.toISOString())}
+                  atend. {formatDate(p.ultimoAtendimento)}
                 </span>
               </div>
             </div>
@@ -213,8 +213,8 @@ export function PatientListPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
               <DetailStat label="Telefone" value={pacienteSelecionado.telefone} />
-              <DetailStat label="Nasc." value={formatDate(pacienteSelecionado.dataNascimento?.toISOString())} mono />
-              <DetailStat label="Último atend." value={formatDate(pacienteSelecionado.ultimoAtendimento?.toISOString())} mono />
+              <DetailStat label="Nasc." value={formatDate(pacienteSelecionado.dataNascimento)} mono />
+              <DetailStat label="Último atend." value={formatDate(pacienteSelecionado.ultimoAtendimento)} mono />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
