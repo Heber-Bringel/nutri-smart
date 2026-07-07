@@ -11,6 +11,8 @@ import { EvolutionChartPage } from './app/pages/evolucao/EvolutionChartPage';
 import { BodyMeasurementFormPage } from './app/pages/medidas/BodyMeasurementFormPage';
 import { ClinicalNotesPage } from './app/pages/anotacoes/ClinicalNotesPage';
 import { PatientMealPlanPage } from './app/pages/paciente/PatientMealPlanPage';
+import { NutritionistLayout } from './app/components/layouts/NutritionistLayout';
+import { PatientProfileLayout } from './app/components/layouts/PatientProfileLayout';
 
 export function App() {
   return (
@@ -19,61 +21,27 @@ export function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route
-            path="/dashboard/pacientes"
+            path="/dashboard"
             element={
               <ProtectedRoute allowedRole="nutricionista">
-                <PatientListPage />
+                <NutritionistLayout />
               </ProtectedRoute>
             }
-          />
-          <Route
-            path="/dashboard/pacientes/novo"
-            element={
-              <ProtectedRoute allowedRole="nutricionista">
-                <PatientFormPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/pacientes/:id"
-            element={
-              <ProtectedRoute allowedRole="nutricionista">
-                <PatientProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/pacientes/:id/plano-alimentar"
-            element={
-              <ProtectedRoute allowedRole="nutricionista">
-                <MealPlanPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/pacientes/:id/evolucao"
-            element={
-              <ProtectedRoute allowedRole="nutricionista">
-                <EvolutionChartPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/pacientes/:id/medidas"
-            element={
-              <ProtectedRoute allowedRole="nutricionista">
-                <BodyMeasurementFormPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/pacientes/:id/anotacoes"
-            element={
-              <ProtectedRoute allowedRole="nutricionista">
-                <ClinicalNotesPage />
-              </ProtectedRoute>
-            }
-          />
+          >
+            {/* O redirect padrao pro dashboard */}
+            <Route index element={<Navigate to="/dashboard/pacientes" replace />} />
+            <Route path="pacientes" element={<PatientListPage />} />
+            <Route path="pacientes/novo" element={<PatientFormPage />} />
+            
+            <Route path="pacientes/:id" element={<PatientProfileLayout />}>
+              <Route index element={<PatientProfilePage />} />
+              <Route path="plano-alimentar" element={<MealPlanPage />} />
+              <Route path="evolucao" element={<EvolutionChartPage />} />
+              <Route path="medidas" element={<BodyMeasurementFormPage />} />
+              <Route path="anotacoes" element={<ClinicalNotesPage />} />
+            </Route>
+          </Route>
+
           <Route
             path="/dieta"
             element={
@@ -82,8 +50,7 @@ export function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/paciente/meu-plano"
+          <Route path="/paciente/meu-plano"
             element={
               <ProtectedRoute allowedRole="paciente">
                 <PatientMealPlanPage />
