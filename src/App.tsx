@@ -10,6 +10,7 @@ import { MealPlanPage } from './app/pages/plano-alimentar/MealPlanPage';
 import { EvolutionChartPage } from './app/pages/evolucao/EvolutionChartPage';
 import { BodyMeasurementFormPage } from './app/pages/medidas/BodyMeasurementFormPage';
 import { ClinicalNotesPage } from './app/pages/anotacoes/ClinicalNotesPage';
+import { SchedulePage } from './app/pages/agenda/SchedulePage';
 import { PatientMealPlanPage } from './app/pages/paciente/PatientMealPlanPage';
 import { NutritionistLayout } from './app/components/layouts/NutritionistLayout';
 import { PatientProfileLayout } from './app/components/layouts/PatientProfileLayout';
@@ -32,6 +33,7 @@ export function App() {
             <Route index element={<Navigate to="/dashboard/pacientes" replace />} />
             <Route path="pacientes" element={<PatientListPage />} />
             <Route path="pacientes/novo" element={<PatientFormPage />} />
+            <Route path="agenda" element={<SchedulePage />} />
             
             <Route path="pacientes/:id" element={<PatientProfileLayout />}>
               <Route index element={<PatientProfilePage />} />
