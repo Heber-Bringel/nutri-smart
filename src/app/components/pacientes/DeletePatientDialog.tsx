@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface DeletePatientDialogProps {
   pacienteNome: string;
@@ -11,6 +11,15 @@ export function DeletePatientDialog({ pacienteNome, onConfirm, loading, onCancel
   const [inputValue, setInputValue] = useState('');
   const confirmed = inputValue === 'EXCLUIR';
 
+  useEffect(() => {
+    // Esc para fechar
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !loading) onCancel();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [loading, onCancel]);
+
   async function handleConfirm() {
     if (!confirmed) return;
     await onConfirm();
@@ -19,40 +28,51 @@ export function DeletePatientDialog({ pacienteNome, onConfirm, loading, onCancel
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)',
       display: 'flex', justifyContent: 'center', alignItems: 'center',
       zIndex: 1000,
     }}>
       <div style={{
-        backgroundColor: '#fff', padding: '2rem', borderRadius: '8px',
-        maxWidth: '450px', width: '90%',
-        fontFamily: 'system-ui, sans-serif',
+        backgroundColor: '#fff', padding: '32px', borderRadius: '8px',
+        border: '1px solid #E5E5E5', maxWidth: '440px', width: '90%',
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+        fontFamily: 'Inter, system-ui, sans-serif',
       }}>
-        <h2 style={{ margin: '0 0 0.5rem', color: '#dc2626' }}>Excluir paciente</h2>
-        <p>
-          Tem certeza que deseja excluir <strong>{pacienteNome}</strong>?
-          Esta ação removerá todos os dados clínicos e planos alimentares vinculados.
+        <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 600, color: '#111827' }}>Excluir paciente</h2>
+        
+        <p style={{ margin: '0 0 24px', fontSize: 14, color: '#4B5563', lineHeight: 1.5 }}>
+          Esta ação apagará permanentemente os dados de <span style={{ fontWeight: 600, color: '#111827' }}>{pacienteNome}</span>, 
+          incluindo planos alimentares, avaliações corporais e histórico.
         </p>
-        <p style={{ fontSize: '0.9rem', color: '#6b7280' }}>
-          Digite <strong>EXCLUIR</strong> para confirmar:
-        </p>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={e => setInputValue(e.target.value)}
-          placeholder="EXCLUIR"
-          style={{
-            width: '100%', padding: '0.5rem', borderRadius: '4px',
-            border: '1px solid #ccc', marginBottom: '1rem',
-          }}
-        />
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+        
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: 'block', marginBottom: 8, fontSize: 12, fontWeight: 500, color: '#6B7280' }}>
+            Digite <span style={{ color: '#DC2626' }}>EXCLUIR</span> para confirmar
+          </label>
+          <input
+            type="text"
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
+            placeholder=""
+            autoFocus
+            style={{
+              width: '100%', padding: '10px 12px', borderRadius: '6px',
+              border: '1px solid #E5E5E5', fontSize: 14, fontFamily: 'inherit',
+              outline: 'none', transition: 'border-color 0.15s',
+              boxSizing: 'border-box'
+            }}
+            onFocus={e => e.target.style.borderColor = '#9CA3AF'}
+            onBlur={e => e.target.style.borderColor = '#E5E5E5'}
+          />
+        </div>
+        
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button
             onClick={onCancel}
             disabled={loading}
             style={{
-              padding: '0.5rem 1rem', borderRadius: '4px',
-              border: '1px solid #ccc', cursor: 'pointer', backgroundColor: '#fff',
+              padding: '8px 16px', borderRadius: '6px', fontSize: 13, fontWeight: 500,
+              border: '1px solid #E5E5E5', cursor: 'pointer', backgroundColor: '#fff', color: '#374151'
             }}
           >
             Cancelar
@@ -61,13 +81,13 @@ export function DeletePatientDialog({ pacienteNome, onConfirm, loading, onCancel
             onClick={handleConfirm}
             disabled={!confirmed || loading}
             style={{
-              padding: '0.5rem 1rem', borderRadius: '4px',
+              padding: '8px 16px', borderRadius: '6px', fontSize: 13, fontWeight: 500,
               border: 'none', cursor: confirmed ? 'pointer' : 'not-allowed',
-              backgroundColor: confirmed ? '#dc2626' : '#e5e7eb',
-              color: confirmed ? '#fff' : '#9ca3af',
+              backgroundColor: confirmed ? '#DC2626' : '#F3F4F6',
+              color: confirmed ? '#fff' : '#9CA3AF', transition: 'background-color 0.15s'
             }}
           >
-            {loading ? 'Excluindo...' : 'Confirmar Exclusão'}
+            {loading ? 'Excluindo...' : 'Confirmar exclusão'}
           </button>
         </div>
       </div>

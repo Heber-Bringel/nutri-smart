@@ -52,107 +52,143 @@ export function PatientForm({ onSubmit, loading }: PatientFormProps) {
     setErrors(prev => ({ ...prev, [key]: undefined }));
   }
 
+  const inputStyle = {
+    width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E5E5E5',
+    fontSize: 14, fontFamily: 'inherit', outline: 'none', transition: 'border-color 0.15s',
+    boxSizing: 'border-box' as const, background: '#fff'
+  };
+
+  const labelStyle = { display: 'block', marginBottom: 8, fontSize: 11, fontWeight: 500, color: '#6B7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em' };
+  const errorStyle = { color: '#DC2626', fontSize: 12, marginTop: 4, display: 'block' };
+
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '500px' }}>
-      <div>
-        <label><strong>Nome completo *</strong></label>
-        <input
-          type="text"
-          value={formData.nomeCompleto}
-          onChange={e => updateField('nomeCompleto', e.target.value)}
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-        />
-        {errors.nomeCompleto && <span style={{ color: 'red', fontSize: '0.85rem' }}>{errors.nomeCompleto}</span>}
+    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+        <div>
+          <label style={labelStyle}>Nome completo</label>
+          <input
+            type="text"
+            value={formData.nomeCompleto}
+            onChange={e => updateField('nomeCompleto', e.target.value)}
+            style={{ ...inputStyle, borderColor: errors.nomeCompleto ? '#FCA5A5' : '#E5E5E5' }}
+            onFocus={e => e.target.style.borderColor = '#10B981'}
+            onBlur={e => e.target.style.borderColor = errors.nomeCompleto ? '#FCA5A5' : '#E5E5E5'}
+          />
+          {errors.nomeCompleto && <span style={errorStyle}>{errors.nomeCompleto}</span>}
+        </div>
+
+        <div>
+          <label style={labelStyle}>E-mail</label>
+          <input
+            type="email"
+            value={formData.email}
+            onChange={e => updateField('email', e.target.value)}
+            style={{ ...inputStyle, borderColor: errors.email ? '#FCA5A5' : '#E5E5E5' }}
+            onFocus={e => e.target.style.borderColor = '#10B981'}
+            onBlur={e => e.target.style.borderColor = errors.email ? '#FCA5A5' : '#E5E5E5'}
+          />
+          {errors.email && <span style={errorStyle}>{errors.email}</span>}
+        </div>
       </div>
 
-      <div>
-        <label><strong>E-mail *</strong></label>
-        <input
-          type="email"
-          value={formData.email}
-          onChange={e => updateField('email', e.target.value)}
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-        />
-        {errors.email && <span style={{ color: 'red', fontSize: '0.85rem' }}>{errors.email}</span>}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
+        <div>
+          <label style={labelStyle}>Data de nascimento</label>
+          <input
+            type="date"
+            value={formData.dataNascimento}
+            onChange={e => updateField('dataNascimento', e.target.value)}
+            style={{ ...inputStyle, borderColor: errors.dataNascimento ? '#FCA5A5' : '#E5E5E5', fontFamily: 'JetBrains Mono, monospace' }}
+            onFocus={e => e.target.style.borderColor = '#10B981'}
+            onBlur={e => e.target.style.borderColor = errors.dataNascimento ? '#FCA5A5' : '#E5E5E5'}
+          />
+          {errors.dataNascimento && <span style={errorStyle}>{errors.dataNascimento}</span>}
+        </div>
+
+        <div>
+          <label style={labelStyle}>Sexo biológico</label>
+          <select
+            value={formData.sexoBiologico}
+            onChange={e => updateField('sexoBiologico', e.target.value as SexoBiologico)}
+            style={inputStyle}
+            onFocus={e => e.target.style.borderColor = '#10B981'}
+            onBlur={e => e.target.style.borderColor = '#E5E5E5'}
+          >
+            <option value="masculino">Masculino</option>
+            <option value="feminino">Feminino</option>
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label><strong>Data de nascimento *</strong></label>
-        <input
-          type="date"
-          value={formData.dataNascimento}
-          onChange={e => updateField('dataNascimento', e.target.value)}
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-        />
-        {errors.dataNascimento && <span style={{ color: 'red', fontSize: '0.85rem' }}>{errors.dataNascimento}</span>}
+      <div style={{ height: 1, background: '#F5F5F5', margin: '8px 0' }} />
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
+        <div>
+          <label style={labelStyle}>Peso inicial (kg)</label>
+          <input
+            type="number"
+            step="0.01"
+            value={formData.pesoInicial}
+            onChange={e => updateField('pesoInicial', e.target.value)}
+            style={{ ...inputStyle, borderColor: errors.pesoInicial ? '#FCA5A5' : '#E5E5E5', fontFamily: 'JetBrains Mono, monospace' }}
+            onFocus={e => e.target.style.borderColor = '#10B981'}
+            onBlur={e => e.target.style.borderColor = errors.pesoInicial ? '#FCA5A5' : '#E5E5E5'}
+          />
+          {errors.pesoInicial && <span style={errorStyle}>{errors.pesoInicial}</span>}
+        </div>
+
+        <div>
+          <label style={labelStyle}>Altura (cm)</label>
+          <input
+            type="number"
+            step="0.01"
+            value={formData.altura}
+            onChange={e => updateField('altura', e.target.value)}
+            style={{ ...inputStyle, borderColor: errors.altura ? '#FCA5A5' : '#E5E5E5', fontFamily: 'JetBrains Mono, monospace' }}
+            onFocus={e => e.target.style.borderColor = '#10B981'}
+            onBlur={e => e.target.style.borderColor = errors.altura ? '#FCA5A5' : '#E5E5E5'}
+          />
+          {errors.altura && <span style={errorStyle}>{errors.altura}</span>}
+        </div>
+        
+        <div>
+          <label style={labelStyle}>Nível de atividade física</label>
+          <select
+            value={formData.nivelAtividadeFisica}
+            onChange={e => updateField('nivelAtividadeFisica', e.target.value as NivelAtividadeFisica)}
+            style={inputStyle}
+            onFocus={e => e.target.style.borderColor = '#10B981'}
+            onBlur={e => e.target.style.borderColor = '#E5E5E5'}
+          >
+            <option value="sedentario">Sedentário</option>
+            <option value="levemente_ativo">Levemente ativo</option>
+            <option value="moderadamente_ativo">Moderadamente ativo</option>
+            <option value="muito_ativo">Muito ativo</option>
+            <option value="extremamente_ativo">Extremamente ativo</option>
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label><strong>Sexo biológico *</strong></label>
-        <select
-          value={formData.sexoBiologico}
-          onChange={e => updateField('sexoBiologico', e.target.value as SexoBiologico)}
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+      <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            padding: '10px 24px',
+            backgroundColor: loading ? '#6EE7B7' : '#10B981',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: 500,
+            fontSize: 14,
+            transition: 'background-color 0.15s'
+          }}
         >
-          <option value="masculino">Masculino</option>
-          <option value="feminino">Feminino</option>
-        </select>
+          {loading ? 'Cadastrando...' : 'Cadastrar paciente'}
+        </button>
       </div>
-
-      <div>
-        <label><strong>Peso (kg) *</strong></label>
-        <input
-          type="number"
-          step="0.01"
-          value={formData.pesoInicial}
-          onChange={e => updateField('pesoInicial', e.target.value)}
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-        />
-        {errors.pesoInicial && <span style={{ color: 'red', fontSize: '0.85rem' }}>{errors.pesoInicial}</span>}
-      </div>
-
-      <div>
-        <label><strong>Altura (cm) *</strong></label>
-        <input
-          type="number"
-          step="0.01"
-          value={formData.altura}
-          onChange={e => updateField('altura', e.target.value)}
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-        />
-        {errors.altura && <span style={{ color: 'red', fontSize: '0.85rem' }}>{errors.altura}</span>}
-      </div>
-
-      <div>
-        <label><strong>Nível de atividade física *</strong></label>
-        <select
-          value={formData.nivelAtividadeFisica}
-          onChange={e => updateField('nivelAtividadeFisica', e.target.value as NivelAtividadeFisica)}
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-        >
-          <option value="sedentario">Sedentário</option>
-          <option value="levemente_ativo">Levemente ativo</option>
-          <option value="moderadamente_ativo">Moderadamente ativo</option>
-          <option value="muito_ativo">Muito ativo</option>
-          <option value="extremamente_ativo">Extremamente ativo</option>
-        </select>
-      </div>
-
-      <button
-        type="submit"
-        disabled={loading}
-        style={{
-          padding: '0.75rem',
-          backgroundColor: '#2563eb',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          fontWeight: 'bold',
-        }}
-      >
-        {loading ? 'Salvando...' : 'Cadastrar Paciente'}
-      </button>
     </form>
   );
 }

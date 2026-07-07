@@ -12,34 +12,46 @@ const NIVEL_ATIVIDADE_LABEL: Record<string, string> = {
   extremamente_ativo: 'Extremamente ativo',
 };
 
+function StatItem({ label, value, mono = false }: { label: string; value: React.ReactNode; mono?: boolean }) {
+  return (
+    <div>
+      <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 14, color: '#111827', fontWeight: 500, fontFamily: mono ? 'JetBrains Mono, monospace' : 'inherit' }}>{value}</div>
+    </div>
+  );
+}
+
 export function PatientInfoCard({ paciente }: PatientInfoCardProps) {
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', padding: '1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', maxWidth: '600px' }}>
-      <h2 style={{ margin: '0 0 1rem' }}>{paciente.nomeCompleto}</h2>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-        <div><strong>E-mail:</strong> {paciente.email}</div>
-        <div><strong>Data de nascimento:</strong> {new Date(paciente.dataNascimento).toLocaleDateString('pt-BR')}</div>
-        <div><strong>Sexo biológico:</strong> {paciente.sexoBiologico === 'masculino' ? 'Masculino' : 'Feminino'}</div>
-        <div><strong>Peso inicial:</strong> {paciente.pesoInicial} kg</div>
-        <div><strong>Altura:</strong> {paciente.altura} cm</div>
-        <div><strong>Nível de atividade:</strong> {NIVEL_ATIVIDADE_LABEL[paciente.nivelAtividadeFisica]}</div>
+    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 8, padding: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
+        <StatItem label="E-mail" value={paciente.email} />
+        <StatItem label="Data de Nasc." value={new Date(paciente.dataNascimento).toLocaleDateString('pt-BR')} mono />
+        <StatItem label="Sexo Biológico" value={paciente.sexoBiologico === 'masculino' ? 'Masculino' : 'Feminino'} />
+        <StatItem label="Nível de Atividade" value={NIVEL_ATIVIDADE_LABEL[paciente.nivelAtividadeFisica]} />
+        <StatItem label="Peso Inicial" value={`${paciente.pesoInicial} kg`} mono />
+        <StatItem label="Altura" value={`${paciente.altura} cm`} mono />
       </div>
 
       {paciente.imc !== undefined && (
-        <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: '#f3f4f6', borderRadius: '6px' }}>
-          <h3 style={{ margin: '0 0 0.5rem' }}>Indicadores Clínicos</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem' }}>
-            <div><strong>IMC:</strong> {paciente.imc}</div>
-            <div><strong>TMB:</strong> {paciente.tmb} kcal/dia</div>
-            <div><strong>GET:</strong> {paciente.get} kcal/dia</div>
+        <>
+          <div style={{ height: 1, background: '#F5F5F5', margin: '24px 0' }} />
+          <div>
+            <h3 style={{ margin: '0 0 16px', fontSize: 13, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Indicadores Clínicos Calculados
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
+              <StatItem label="IMC" value={paciente.imc} mono />
+              <StatItem label="TMB" value={`${paciente.tmb} kcal/dia`} mono />
+              <StatItem label="GET" value={`${paciente.get} kcal/dia`} mono />
+            </div>
           </div>
-        </div>
+        </>
       )}
-
-      <div style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#6b7280' }}>
-        <span>Cadastrado em: {new Date(paciente.createdAt).toLocaleDateString('pt-BR')}</span>
-        <span style={{ marginLeft: '1rem' }}>Atualizado em: {new Date(paciente.updatedAt).toLocaleDateString('pt-BR')}</span>
+      
+      <div style={{ marginTop: 24, fontSize: 11, color: '#9CA3AF', fontFamily: 'JetBrains Mono, monospace' }}>
+        Cadastrado em: {new Date(paciente.createdAt).toLocaleDateString('pt-BR')} · 
+        Atualizado em: {new Date(paciente.updatedAt).toLocaleDateString('pt-BR')}
       </div>
     </div>
   );
