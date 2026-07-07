@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import { Container } from '../../../di/container';
 import { Paciente } from '../../../model/entities/Paciente';
 import { MealPlanForm } from '../../components/plano-alimentar/MealPlanForm';
@@ -12,9 +12,7 @@ interface RefeicaoForm {
 }
 
 export function MealPlanPage() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [paciente, setPaciente] = useState<Paciente | null>(null);
+  const { paciente } = useOutletContext<{ paciente: Paciente }>();
   const [observacoes, setObservacoes] = useState('');
   const [refeicoes, setRefeicoes] = useState<RefeicaoForm[]>([]);
   const [saving, setSaving] = useState(false);
@@ -22,24 +20,32 @@ export function MealPlanPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
     let cancelled = false;
+    setLoading(true);
 
-    Container.getPacienteUseCase.execute(id)
-      .then(p => { if (!cancelled) setPaciente(p); })
-      .catch(() => { if (!cancelled) setError('Erro ao carregar paciente.'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+    Container.getMealPlanUseCase.execute(paciente.id)
+      .then(existingPlan => {
+        if (!cancelled && existingPlan) {
+          setObservacoes(existingPlan.observacoes || '');
+          setRefeicoes(existingPlan.refeicoes || []);
+        }
+      })
+      .catch(err => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Erro ao carregar plano alimentar.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
     return () => { cancelled = true; };
-  }, [id]);
+  }, [paciente.id]);
 
   async function handleSave() {
-    if (!id || !paciente) return;
     setSaving(true);
     setError(null);
 
     try {
-      const existingPlan = await Container.getMealPlanUseCase.execute(id);
+      const existingPlan = await Container.getMealPlanUseCase.execute(paciente.id);
 
       const refeicoesData = refeicoes.map(r => ({
         nome: r.nome,
@@ -60,13 +66,13 @@ export function MealPlanPage() {
         });
       } else {
         await Container.createMealPlanUseCase.execute({
-          pacienteId: id,
+          pacienteId: paciente.id,
           observacoes,
           refeicoes: refeicoesData,
         });
       }
-
-      navigate(`/dashboard/pacientes/${id}`);
+      // Aqui poderíamos exibir um toast de sucesso.
+      alert('Plano alimentar salvo com sucesso!');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar plano alimentar.');
     } finally {
@@ -75,37 +81,28 @@ export function MealPlanPage() {
   }
 
   if (loading) {
-    return <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>Carregando...</div>;
-  }
-
-  if (!paciente) {
-    return (
-      <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
-        <div style={{ padding: '0.75rem', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '4px' }}>
-          {error || 'Paciente não encontrado.'}
-        </div>
-      </div>
-    );
+    return <div style={{ color: '#9CA3AF', fontSize: 13 }}>Carregando plano alimentar...</div>;
   }
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif', maxWidth: '900px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <button onClick={() => navigate(`/dashboard/pacientes/${id}`)} style={{ padding: '0.5rem 1rem', cursor: 'pointer', borderRadius: '4px', border: '1px solid #ccc' }}>
-          ← Voltar
-        </button>
-      </div>
-
-      <h1 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>Plano Alimentar</h1>
-      <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
-        Paciente: {paciente.nomeCompleto}
-      </p>
-
-      {paciente.imc && (
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', padding: '0.75rem', backgroundColor: '#f0fdf4', borderRadius: '6px', fontSize: '0.9rem' }}>
-          <span><strong>IMC:</strong> {paciente.imc}</span>
-          <span><strong>TMB:</strong> {paciente.tmb} kcal</span>
-          <span><strong>GET:</strong> {paciente.get} kcal</span>
+    <div style={{ paddingBottom: 64 }}>
+      {paciente.imc !== undefined && (
+        <div style={{ 
+          display: 'flex', gap: 24, marginBottom: 32, padding: '16px 20px', 
+          backgroundColor: '#F9FAFB', borderRadius: 8, border: '1px solid #E5E5E5' 
+        }}>
+          <div>
+            <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>IMC</div>
+            <div style={{ fontSize: 14, fontWeight: 500, fontFamily: 'JetBrains Mono, monospace', color: '#111827' }}>{paciente.imc}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TMB</div>
+            <div style={{ fontSize: 14, fontWeight: 500, fontFamily: 'JetBrains Mono, monospace', color: '#111827' }}>{paciente.tmb} kcal</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>GET</div>
+            <div style={{ fontSize: 14, fontWeight: 500, fontFamily: 'JetBrains Mono, monospace', color: '#111827' }}>{paciente.get} kcal</div>
+          </div>
         </div>
       )}
 

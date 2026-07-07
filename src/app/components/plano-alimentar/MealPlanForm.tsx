@@ -34,185 +34,223 @@ const defaultRefeicoes = [
 
 export function MealPlanForm({ observacoes, refeicoes, onObservacoesChange, onRefeicoesChange, onSave, saving, erro }: MealPlanFormProps) {
   const [expandedRefeicao, setExpandedRefeicao] = useState<number | null>(0);
+  
+  const currentRefeicoes = refeicoes.length === 0 ? defaultRefeicoes : refeicoes;
 
   function addRefeicao() {
     const nova: RefeicaoForm = {
       nome: '',
-      ordem: refeicoes.length + 1,
+      ordem: currentRefeicoes.length + 1,
       horarioSugerido: '',
       alimentos: [],
     };
-    onRefeicoesChange([...refeicoes, nova]);
+    onRefeicoesChange([...currentRefeicoes, nova]);
+    setExpandedRefeicao(currentRefeicoes.length);
   }
 
   function removeRefeicao(index: number) {
-    onRefeicoesChange(refeicoes.filter((_, i) => i !== index).map((r, i) => ({ ...r, ordem: i + 1 })));
+    onRefeicoesChange(currentRefeicoes.filter((_, i) => i !== index).map((r, i) => ({ ...r, ordem: i + 1 })));
   }
 
   function updateRefeicao(index: number, ref: RefeicaoForm) {
-    const updated = [...refeicoes];
+    const updated = [...currentRefeicoes];
     updated[index] = ref;
     onRefeicoesChange(updated);
   }
 
   function addAlimento(refIndex: number) {
-    const ref = { ...refeicoes[refIndex] };
+    const ref = { ...currentRefeicoes[refIndex] };
     ref.alimentos = [...ref.alimentos, { nome: '', quantidade: 0, unidadeMedida: 'g', calorias: 0 }];
     updateRefeicao(refIndex, ref);
   }
 
   function updateAlimento(refIndex: number, alimIndex: number, alimento: AlimentoForm) {
-    const ref = { ...refeicoes[refIndex] };
+    const ref = { ...currentRefeicoes[refIndex] };
     ref.alimentos = [...ref.alimentos];
     ref.alimentos[alimIndex] = alimento;
     updateRefeicao(refIndex, ref);
   }
 
   function removeAlimento(refIndex: number, alimIndex: number) {
-    const ref = { ...refeicoes[refIndex] };
+    const ref = { ...currentRefeicoes[refIndex] };
     ref.alimentos = ref.alimentos.filter((_, i) => i !== alimIndex);
     updateRefeicao(refIndex, ref);
   }
 
   function calcularTotalCalorias(refIndex: number): number {
-    return refeicoes[refIndex].alimentos.reduce((sum, a) => sum + (a.calorias || 0), 0);
+    return currentRefeicoes[refIndex].alimentos.reduce((sum, a) => sum + (a.calorias || 0), 0);
   }
 
   return (
     <div>
       {erro && (
-        <div style={{ padding: '0.75rem', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '4px', marginBottom: '1rem' }}>
+        <div style={{ padding: '12px 16px', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626', borderRadius: 6, fontSize: 13, marginBottom: 24 }}>
           {erro}
         </div>
       )}
 
-      <div style={{ marginBottom: '1rem' }}>
-        <label style={{ display: 'block', marginBottom: '0.25rem', fontWeight: 600 }}>Observações</label>
-        <textarea
-          value={observacoes}
-          onChange={e => onObservacoesChange(e.target.value)}
-          style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', minHeight: '60px' }}
-          placeholder="Observações gerais sobre o plano alimentar..."
-        />
-      </div>
-
-      {(refeicoes.length === 0 ? defaultRefeicoes : refeicoes).map((ref, i) => (
-        <div key={i} style={{ marginBottom: '1rem', border: '1px solid #e5e7eb', borderRadius: '6px', overflow: 'hidden' }}>
-          <div
-            onClick={() => setExpandedRefeicao(expandedRefeicao === i ? null : i)}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '0.75rem',
-              backgroundColor: '#f9fafb',
-              cursor: 'pointer',
-              borderBottom: expandedRefeicao === i ? '1px solid #e5e7eb' : 'none',
-            }}
-          >
-            <span style={{ fontWeight: 600 }}>
-              {ref.nome || `Refeição ${i + 1}`}
-              <span style={{ marginLeft: '0.75rem', fontSize: '0.85rem', color: '#6b7280' }}>
-                ~ {calcularTotalCalorias(i)} kcal
-              </span>
-            </span>
-            <div>
-              <button
-                onClick={(e) => { e.stopPropagation(); removeRefeicao(i); }}
-                style={{ padding: '0.2rem 0.5rem', backgroundColor: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
-              >
-                Remover
-              </button>
-              <span style={{ marginLeft: '0.5rem', color: '#9ca3af' }}>{expandedRefeicao === i ? '▲' : '▼'}</span>
-            </div>
-          </div>
-
-          {expandedRefeicao === i && (
-            <div style={{ padding: '0.75rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                <input
-                  type="text"
-                  placeholder="Nome da refeição"
-                  value={ref.nome}
-                  onChange={e => updateRefeicao(i, { ...ref, nome: e.target.value })}
-                  style={{ flex: 2, padding: '0.4rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                />
-                <input
-                  type="time"
-                  value={ref.horarioSugerido}
-                  onChange={e => updateRefeicao(i, { ...ref, horarioSugerido: e.target.value })}
-                  style={{ flex: 1, padding: '0.4rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                />
+      {/* Accordions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
+        {currentRefeicoes.map((ref, i) => (
+          <div key={i} style={{ border: '1px solid #E5E5E5', borderRadius: 8, overflow: 'hidden', background: '#fff' }}>
+            <div
+              onClick={() => setExpandedRefeicao(expandedRefeicao === i ? null : i)}
+              style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: '16px 20px', cursor: 'pointer',
+                borderBottom: expandedRefeicao === i ? '1px solid #E5E5E5' : 'none',
+                background: expandedRefeicao === i ? '#FAFAFA' : '#fff',
+                transition: 'background-color 0.2s',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>
+                  {ref.nome || `Refeição ${i + 1}`}
+                </span>
+                <span style={{ fontSize: 12, color: '#10B981', fontFamily: 'JetBrains Mono, monospace', background: '#ECFDF5', padding: '2px 8px', borderRadius: 12, fontWeight: 500 }}>
+                  {calcularTotalCalorias(i)} kcal
+                </span>
+                {ref.horarioSugerido && (
+                  <span style={{ fontSize: 12, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    🕒 {ref.horarioSugerido}
+                  </span>
+                )}
               </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); removeRefeicao(i); }}
+                  style={{
+                    padding: '4px 8px', backgroundColor: 'transparent', color: '#9CA3AF',
+                    border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 500
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#DC2626'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#9CA3AF'}
+                >
+                  Excluir
+                </button>
+                <span style={{ color: '#9CA3AF', fontSize: 12 }}>{expandedRefeicao === i ? '▲' : '▼'}</span>
+              </div>
+            </div>
 
-              <div style={{ marginBottom: '0.5rem' }}>
-                <div style={{ display: 'flex', gap: '0.5rem', fontWeight: 600, fontSize: '0.85rem', color: '#6b7280', padding: '0.25rem 0' }}>
-                  <span style={{ flex: 2 }}>Alimento</span>
-                  <span style={{ flex: 1, maxWidth: '80px' }}>Qtd</span>
-                  <span style={{ flex: 1, maxWidth: '70px' }}>Un</span>
-                  <span style={{ flex: 1, maxWidth: '90px' }}>Cal</span>
-                  <span style={{ width: '40px' }}></span>
+            {expandedRefeicao === i && (
+              <div style={{ padding: '20px' }}>
+                <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+                  <div style={{ flex: 2 }}>
+                    <label style={{ display: 'block', fontSize: 11, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 }}>Nome da Refeição</label>
+                    <input
+                      type="text"
+                      value={ref.nome}
+                      onChange={e => updateRefeicao(i, { ...ref, nome: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: 4, border: '1px solid #E5E5E5', fontSize: 13, outline: 'none' }}
+                      onFocus={e => e.target.style.borderColor = '#10B981'}
+                      onBlur={e => e.target.style.borderColor = '#E5E5E5'}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: 11, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 }}>Horário Sugerido</label>
+                    <input
+                      type="time"
+                      value={ref.horarioSugerido}
+                      onChange={e => updateRefeicao(i, { ...ref, horarioSugerido: e.target.value })}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: 4, border: '1px solid #E5E5E5', fontSize: 13, outline: 'none', fontFamily: 'JetBrains Mono, monospace' }}
+                      onFocus={e => e.target.style.borderColor = '#10B981'}
+                      onBlur={e => e.target.style.borderColor = '#E5E5E5'}
+                    />
+                  </div>
                 </div>
-                {ref.alimentos.map((ali, j) => (
-                  <FoodItemRow
-                    key={j}
-                    item={ali}
-                    index={j}
-                    onChange={(_, item) => updateAlimento(i, j, item)}
-                    onRemove={() => removeAlimento(i, j)}
-                  />
-                ))}
-              </div>
 
-              <button
-                onClick={() => addAlimento(i)}
-                style={{
-                  padding: '0.3rem 0.8rem',
-                  backgroundColor: '#e0f2fe',
-                  color: '#0369a1',
-                  border: '1px solid #bae6fd',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '0.85rem',
-                }}
-              >
-                + Adicionar Alimento
-              </button>
-            </div>
-          )}
-        </div>
-      ))}
+                <div>
+                  <div style={{ display: 'flex', gap: 8, fontSize: 11, fontWeight: 500, color: '#9CA3AF', textTransform: 'uppercase', paddingBottom: 8, marginBottom: 8, borderBottom: '1px solid #F5F5F5' }}>
+                    <span style={{ flex: 2, minWidth: 120 }}>Alimento</span>
+                    <span style={{ width: 70 }}>Qtd</span>
+                    <span style={{ width: 80 }}>Unidade</span>
+                    <span style={{ width: 90 }}>Calorias</span>
+                    <span style={{ width: 28 }}></span>
+                  </div>
+                  
+                  {ref.alimentos.map((ali, j) => (
+                    <FoodItemRow
+                      key={j}
+                      item={ali}
+                      index={j}
+                      onChange={(_, item) => updateAlimento(i, j, item)}
+                      onRemove={() => removeAlimento(i, j)}
+                    />
+                  ))}
+                  
+                  {ref.alimentos.length === 0 && (
+                    <div style={{ padding: '24px 0', textAlign: 'center', color: '#9CA3AF', fontSize: 13 }}>
+                      Nenhum alimento cadastrado nesta refeição.
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ marginTop: 16 }}>
+                  <button
+                    type="button"
+                    onClick={() => addAlimento(i)}
+                    style={{
+                      padding: '6px 12px', backgroundColor: '#fff', color: '#111827',
+                      border: '1px solid #E5E5E5', borderRadius: 4, cursor: 'pointer', fontSize: 12, fontWeight: 500,
+                      display: 'flex', alignItems: 'center', gap: 6
+                    }}
+                  >
+                    + Novo Alimento
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
 
       <button
         onClick={addRefeicao}
         style={{
-          padding: '0.5rem 1rem',
-          backgroundColor: '#f0fdf4',
-          color: '#16a34a',
-          border: '1px solid #bbf7d0',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          marginBottom: '1rem',
+          padding: '8px 16px', backgroundColor: '#fff', color: '#111827',
+          border: '1px dashed #D1D5DB', borderRadius: 6, cursor: 'pointer',
+          marginBottom: 32, fontSize: 13, fontWeight: 500, width: '100%',
+          textAlign: 'center'
         }}
       >
         + Adicionar Refeição
       </button>
 
-      <div>
+      <div style={{ marginBottom: 32 }}>
+        <label style={{ display: 'block', fontSize: 11, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8, fontWeight: 500 }}>
+          Observações Gerais
+        </label>
+        <textarea
+          value={observacoes}
+          onChange={e => onObservacoesChange(e.target.value)}
+          style={{ 
+            width: '100%', padding: '12px', borderRadius: 6, border: '1px solid #E5E5E5', 
+            minHeight: '100px', fontSize: 14, fontFamily: 'inherit', outline: 'none', resize: 'vertical'
+          }}
+          placeholder="Ex: Beber 2L de água por dia, evitar frituras..."
+          onFocus={e => e.target.style.borderColor = '#10B981'}
+          onBlur={e => e.target.style.borderColor = '#E5E5E5'}
+        />
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #E5E5E5', paddingTop: 24 }}>
         <button
           onClick={onSave}
           disabled={saving}
           style={{
-            padding: '0.75rem 2rem',
-            backgroundColor: saving ? '#9ca3af' : '#2563eb',
+            padding: '10px 24px',
+            backgroundColor: saving ? '#6EE7B7' : '#10B981',
             color: '#fff',
             border: 'none',
-            borderRadius: '6px',
+            borderRadius: 6,
             cursor: saving ? 'not-allowed' : 'pointer',
-            fontSize: '1rem',
+            fontSize: 14,
+            fontWeight: 500,
+            transition: 'background-color 0.15s'
           }}
         >
-          {saving ? 'Salvando...' : 'Salvar Plano Alimentar'}
+          {saving ? 'Salvando plano...' : 'Salvar plano alimentar'}
         </button>
       </div>
     </div>
