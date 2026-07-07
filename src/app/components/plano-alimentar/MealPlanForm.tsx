@@ -174,12 +174,13 @@ export function MealPlanForm({ observacoes, refeicoes, onObservacoesChange, onRe
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', gap: 8, fontSize: 11, fontWeight: 500, color: '#9CA3AF', textTransform: 'uppercase', paddingBottom: 8, marginBottom: 8, borderBottom: '1px solid #F5F5F5' }}>
-                    <span style={{ flex: 2, minWidth: 120 }}>Alimento</span>
-                    <span style={{ width: 70 }}>Qtd</span>
-                    <span style={{ width: 80 }}>Unidade</span>
-                    <span style={{ width: 90 }}>Calorias</span>
-                    <span style={{ width: 80 }}></span>
+                  <div style={{ display: 'flex', gap: 10, fontSize: 11, fontWeight: 500, color: '#9CA3AF', textTransform: 'uppercase', padding: '0 14px 8px', marginBottom: 8, borderBottom: '1px solid #F5F5F5' }}>
+                    <span style={{ flex: 2 }}>Alimento</span>
+                    <span style={{ width: 65, textAlign: 'center' }}>Qtd</span>
+                    <span style={{ width: 80, textAlign: 'center' }}>Unidade</span>
+                    <span style={{ width: 100, textAlign: 'center' }}>Calorias</span>
+                    <span style={{ width: 1, margin: '0 0 0 11px' }}></span>
+                    <span style={{ width: 82, textAlign: 'center' }}>Ação</span>
                   </div>
                   
                   {ref.alimentos.map((ali, j) => (
