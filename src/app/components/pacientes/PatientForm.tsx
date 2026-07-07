@@ -14,17 +14,19 @@ interface PatientFormData {
 interface PatientFormProps {
   onSubmit: (data: PatientFormData) => Promise<void>;
   loading: boolean;
+  initialData?: Partial<PatientFormData>;
+  editMode?: boolean;
 }
 
-export function PatientForm({ onSubmit, loading }: PatientFormProps) {
+export function PatientForm({ onSubmit, loading, initialData, editMode }: PatientFormProps) {
   const [formData, setFormData] = useState<PatientFormData>({
-    nomeCompleto: '',
-    email: '',
-    dataNascimento: '',
-    sexoBiologico: 'masculino',
-    pesoInicial: '',
-    altura: '',
-    nivelAtividadeFisica: 'sedentario',
+    nomeCompleto: initialData?.nomeCompleto || '',
+    email: initialData?.email || '',
+    dataNascimento: initialData?.dataNascimento || '',
+    sexoBiologico: initialData?.sexoBiologico || 'masculino',
+    pesoInicial: initialData?.pesoInicial || '',
+    altura: initialData?.altura || '',
+    nivelAtividadeFisica: initialData?.nivelAtividadeFisica || 'sedentario',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof PatientFormData, string>>>({});
 
@@ -186,7 +188,7 @@ export function PatientForm({ onSubmit, loading }: PatientFormProps) {
             transition: 'background-color 0.15s'
           }}
         >
-          {loading ? 'Cadastrando...' : 'Cadastrar paciente'}
+          {loading ? 'Salvando...' : editMode ? 'Salvar alterações' : 'Cadastrar paciente'}
         </button>
       </div>
     </form>
