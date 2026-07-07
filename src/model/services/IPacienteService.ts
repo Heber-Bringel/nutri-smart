@@ -26,6 +26,7 @@ export interface PaginatedResult<T> {
 
 export interface IPacienteService {
   create(data: CreatePacienteData): Promise<Paciente>;
+  update(id: string, data: Partial<CreatePacienteData>): Promise<Paciente>;
   findAll(filters: PacienteFilters): Promise<PaginatedResult<Paciente>>;
   findById(id: string): Promise<Paciente>;
   softDelete(id: string): Promise<void>;

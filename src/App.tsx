@@ -33,6 +33,7 @@ export function App() {
             <Route index element={<Navigate to="/dashboard/pacientes" replace />} />
             <Route path="pacientes" element={<PatientListPage />} />
             <Route path="pacientes/novo" element={<PatientFormPage />} />
+            <Route path="pacientes/:id/editar" element={<PatientFormPage />} />
             <Route path="agenda" element={<SchedulePage />} />
             
             <Route path="pacientes/:id" element={<PatientProfileLayout />}>

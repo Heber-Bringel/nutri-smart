@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { FoodItemRow } from './FoodItemRow';
+import { FoodBaseSelector } from './FoodBaseSelector';
+import { AlimentoBase } from '../../../model/entities/AlimentoBase';
 
 interface AlimentoForm {
   nome: string;
@@ -34,7 +36,8 @@ const defaultRefeicoes = [
 
 export function MealPlanForm({ observacoes, refeicoes, onObservacoesChange, onRefeicoesChange, onSave, saving, erro }: MealPlanFormProps) {
   const [expandedRefeicao, setExpandedRefeicao] = useState<number | null>(0);
-  
+  const [addingFoodRef, setAddingFoodRef] = useState<number | null>(null);
+
   const currentRefeicoes = refeicoes.length === 0 ? defaultRefeicoes : refeicoes;
 
   function addRefeicao() {
@@ -58,10 +61,20 @@ export function MealPlanForm({ observacoes, refeicoes, onObservacoesChange, onRe
     onRefeicoesChange(updated);
   }
 
-  function addAlimento(refIndex: number) {
+  function handleSelectFood(refIndex: number, food: AlimentoBase) {
     const ref = { ...currentRefeicoes[refIndex] };
-    ref.alimentos = [...ref.alimentos, { nome: '', quantidade: 0, unidadeMedida: 'g', calorias: 0 }];
+    ref.alimentos = [...ref.alimentos, {
+      nome: food.nome,
+      quantidade: food.porcao,
+      unidadeMedida: food.unidadeMedida || 'g',
+      calorias: food.calorias,
+    }];
     updateRefeicao(refIndex, ref);
+    setAddingFoodRef(null);
+  }
+
+  function handleCancelFoodSearch() {
+    setAddingFoodRef(null);
   }
 
   function updateAlimento(refIndex: number, alimIndex: number, alimento: AlimentoForm) {
@@ -161,12 +174,13 @@ export function MealPlanForm({ observacoes, refeicoes, onObservacoesChange, onRe
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', gap: 8, fontSize: 11, fontWeight: 500, color: '#9CA3AF', textTransform: 'uppercase', paddingBottom: 8, marginBottom: 8, borderBottom: '1px solid #F5F5F5' }}>
-                    <span style={{ flex: 2, minWidth: 120 }}>Alimento</span>
-                    <span style={{ width: 70 }}>Qtd</span>
-                    <span style={{ width: 80 }}>Unidade</span>
-                    <span style={{ width: 90 }}>Calorias</span>
-                    <span style={{ width: 28 }}></span>
+                  <div style={{ display: 'flex', gap: 10, fontSize: 11, fontWeight: 500, color: '#9CA3AF', textTransform: 'uppercase', padding: '0 14px 8px', marginBottom: 8, borderBottom: '1px solid #F5F5F5' }}>
+                    <span style={{ flex: 2 }}>Alimento</span>
+                    <span style={{ width: 65, textAlign: 'center' }}>Qtd</span>
+                    <span style={{ width: 80, textAlign: 'center' }}>Unidade</span>
+                    <span style={{ width: 100, textAlign: 'center' }}>Calorias</span>
+                    <span style={{ width: 1, margin: '0 0 0 11px' }}></span>
+                    <span style={{ width: 82, textAlign: 'center' }}>Ação</span>
                   </div>
                   
                   {ref.alimentos.map((ali, j) => (
@@ -187,17 +201,24 @@ export function MealPlanForm({ observacoes, refeicoes, onObservacoesChange, onRe
                 </div>
 
                 <div style={{ marginTop: 16 }}>
-                  <button
-                    type="button"
-                    onClick={() => addAlimento(i)}
-                    style={{
-                      padding: '6px 12px', backgroundColor: '#fff', color: '#111827',
-                      border: '1px solid #E5E5E5', borderRadius: 4, cursor: 'pointer', fontSize: 12, fontWeight: 500,
-                      display: 'flex', alignItems: 'center', gap: 6
-                    }}
-                  >
-                    + Novo Alimento
-                  </button>
+                  {addingFoodRef === i ? (
+                    <FoodBaseSelector
+                      onSelect={(food) => handleSelectFood(i, food)}
+                      onCancel={handleCancelFoodSearch}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setAddingFoodRef(i)}
+                      style={{
+                        padding: '6px 12px', backgroundColor: '#fff', color: '#111827',
+                        border: '1px solid #E5E5E5', borderRadius: 4, cursor: 'pointer', fontSize: 12, fontWeight: 500,
+                        display: 'flex', alignItems: 'center', gap: 6
+                      }}
+                    >
+                      + Novo Alimento
+                    </button>
+                  )}
                 </div>
               </div>
             )}

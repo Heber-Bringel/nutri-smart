@@ -18,6 +18,7 @@ export function MealPlanPage() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,8 +72,8 @@ export function MealPlanPage() {
           refeicoes: refeicoesData,
         });
       }
-      // Aqui poderíamos exibir um toast de sucesso.
-      alert('Plano alimentar salvo com sucesso!');
+      setSuccessMsg('Plano alimentar salvo com sucesso!');
+      setTimeout(() => setSuccessMsg(null), 4000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar plano alimentar.');
     } finally {
@@ -103,6 +104,12 @@ export function MealPlanPage() {
             <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>GET</div>
             <div style={{ fontSize: 14, fontWeight: 500, fontFamily: 'JetBrains Mono, monospace', color: '#111827' }}>{paciente.get} kcal</div>
           </div>
+        </div>
+      )}
+
+      {successMsg && (
+        <div style={{ padding: '12px 16px', backgroundColor: '#ECFDF5', border: '1px solid #6EE7B7', color: '#065F46', borderRadius: 6, fontSize: 13, marginBottom: 24 }}>
+          {successMsg}
         </div>
       )}
 

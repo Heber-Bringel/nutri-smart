@@ -8,11 +8,15 @@ import { CreatePacienteUseCase } from '../usecase/pacientes/CreatePacienteUseCas
 import { ListPacientesUseCase } from '../usecase/pacientes/ListPacientesUseCase';
 import { GetPacienteUseCase } from '../usecase/pacientes/GetPacienteUseCase';
 import { DeletePacienteUseCase } from '../usecase/pacientes/DeletePacienteUseCase';
+import { UpdatePacienteUseCase } from '../usecase/pacientes/UpdatePacienteUseCase';
 import { SupabaseMealPlanService } from '../infra/plano-alimentar/SupabaseMealPlanService';
+import { SupabaseFoodBaseService } from '../infra/plano-alimentar/SupabaseFoodBaseService';
 import { CreateMealPlanUseCase } from '../usecase/plano-alimentar/CreateMealPlanUseCase';
 import { UpdateMealPlanUseCase } from '../usecase/plano-alimentar/UpdateMealPlanUseCase';
 import { GetMealPlanUseCase } from '../usecase/plano-alimentar/GetMealPlanUseCase';
 import { GetEvolutionChartDataUseCase } from '../usecase/plano-alimentar/GetEvolutionChartDataUseCase';
+import { SearchFoodBaseUseCase } from '../usecase/plano-alimentar/SearchFoodBaseUseCase';
+import { CreateCustomFoodUseCase } from '../usecase/plano-alimentar/CreateCustomFoodUseCase';
 import { SupabaseBodyMeasurementService } from '../infra/medidas/SupabaseBodyMeasurementService';
 import { RegisterMeasurementUseCase } from '../usecase/medidas/RegisterMeasurementUseCase';
 import { ListMeasurementsUseCase } from '../usecase/medidas/ListMeasurementsUseCase';
@@ -32,6 +36,7 @@ class Container {
   private static _pacienteService = new SupabasePacienteService();
   private static _inviteService = new SupabaseInviteService();
   private static _mealPlanService = new SupabaseMealPlanService();
+  private static _foodBaseService = new SupabaseFoodBaseService();
   private static _measurementService = new SupabaseBodyMeasurementService();
   private static _clinicalNoteService = new SupabaseClinicalNoteService();
   private static _adesaoService = new SupabaseAdesaoService();
@@ -50,6 +55,10 @@ class Container {
 
   static get mealPlanService() {
     return this._mealPlanService;
+  }
+
+  static get foodBaseService() {
+    return this._foodBaseService;
   }
 
   static get measurementService() {
@@ -92,6 +101,10 @@ class Container {
     return new DeletePacienteUseCase(this._pacienteService);
   }
 
+  static get updatePacienteUseCase() {
+    return new UpdatePacienteUseCase(this._pacienteService);
+  }
+
   static get createMealPlanUseCase() {
     return new CreateMealPlanUseCase(this._mealPlanService);
   }
@@ -106,6 +119,14 @@ class Container {
 
   static get getEvolutionChartDataUseCase() {
     return new GetEvolutionChartDataUseCase(this._adesaoService);
+  }
+
+  static get searchFoodBaseUseCase() {
+    return new SearchFoodBaseUseCase(this._foodBaseService);
+  }
+
+  static get createCustomFoodUseCase() {
+    return new CreateCustomFoodUseCase(this._foodBaseService);
   }
 
   static get registerMeasurementUseCase() {

@@ -242,14 +242,14 @@ export function PatientListPage() {
   );
 }
 
-function DetailStat({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+function DetailStat({ label, value, mono = false }: { label: string; value?: string | null; mono?: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <span style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
       <span style={{
         fontSize: 12, fontWeight: 500, color: '#111827',
         fontFamily: mono ? 'JetBrains Mono, monospace' : 'inherit',
-      }}>{value}</span>
+      }}>{value || '--'}</span>
     </div>
   );
 }
