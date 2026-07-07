@@ -75,14 +75,14 @@ export function FoodItemRow({ item, index, onChange, onRemove }: FoodItemRowProp
         onClick={() => onRemove(index)}
         title="Remover alimento"
         style={{
-          width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: '#fff', color: '#9CA3AF', border: '1px solid #E5E5E5',
-          borderRadius: 4, cursor: 'pointer', transition: 'all 0.1s'
+          display: 'flex', alignItems: 'center', gap: 4,
+          padding: '4px 8px', backgroundColor: '#fff', color: '#9CA3AF', border: '1px solid #E5E5E5',
+          borderRadius: 4, cursor: 'pointer', fontSize: 12, fontWeight: 500, transition: 'all 0.1s', whiteSpace: 'nowrap'
         }}
         onMouseEnter={e => { e.currentTarget.style.color = '#DC2626'; e.currentTarget.style.borderColor = '#FCA5A5'; }}
         onMouseLeave={e => { e.currentTarget.style.color = '#9CA3AF'; e.currentTarget.style.borderColor = '#E5E5E5'; }}
       >
-        ✕
+        ✕ Excluir
       </button>
     </div>
   );
