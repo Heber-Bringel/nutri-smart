@@ -3,10 +3,11 @@ import { AdesaoRefeicao, DailyProgress } from '../../model/entities/Adesao';
 import { AdesaoError } from '../../model/errors/AdesaoError';
 import { supabase } from '../supabase/client';
 import { AdesaoMapper } from './mappers/AdesaoMapper';
+import { getTodayLocal, toLocalDateString } from '../../shared/utils/date';
 
 export class SupabaseAdesaoService implements IAdesaoService {
-  async markAsCompleted(refeicaoId: string, pacienteId: string, concluida: boolean): Promise<AdesaoRefeicao> {
-    const hoje = new Date().toISOString().split('T')[0];
+  async markAsCompleted(refeicaoId: string, pacienteId: string, concluida: boolean, data?: string): Promise<AdesaoRefeicao> {
+    const hoje = data || getTodayLocal();
 
     const { data: existing } = await supabase
       .from('adesao_refeicoes')
@@ -56,6 +57,17 @@ export class SupabaseAdesaoService implements IAdesaoService {
     return AdesaoMapper.toDomain(row);
   }
 
+  async getAdesaoByData(pacienteId: string, data: string): Promise<AdesaoRefeicao[]> {
+    const { data: rows, error } = await supabase
+      .from('adesao_refeicoes')
+      .select('*')
+      .eq('paciente_id', pacienteId)
+      .eq('data', data);
+
+    if (error) throw new AdesaoError(error.message);
+    return (rows || []).map(AdesaoMapper.toDomain);
+  }
+
   async getDailyProgress(pacienteId: string, data: string): Promise<DailyProgress> {
     const { count: total, error: totalError } = await supabase
       .from('refeicoes')
@@ -87,7 +99,7 @@ export class SupabaseAdesaoService implements IAdesaoService {
   async getEvolutionChartData(pacienteId: string, dias: number): Promise<EvolutionChartData[]> {
     const dataInicio = new Date();
     dataInicio.setDate(dataInicio.getDate() - dias);
-    const inicio = dataInicio.toISOString().split('T')[0];
+    const inicio = toLocalDateString(dataInicio);
 
     const { data: historicoPeso } = await supabase
       .from('historico_peso')
@@ -120,7 +132,7 @@ export class SupabaseAdesaoService implements IAdesaoService {
     for (let i = dias; i >= 0; i--) {
       const d = new Date(hoje);
       d.setDate(d.getDate() - i);
-      const dataStr = d.toISOString().split('T')[0];
+      const dataStr = toLocalDateString(d);
 
       const adEntry = adesaoPorData.get(dataStr);
       chartData.push({

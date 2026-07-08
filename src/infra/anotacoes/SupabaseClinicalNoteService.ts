@@ -3,6 +3,7 @@ import { ClinicalNote } from '../../model/entities/ClinicalNote';
 import { ClinicalNoteError } from '../../model/errors/ClinicalNoteError';
 import { supabase } from '../supabase/client';
 import { ClinicalNoteMapper } from './mappers/ClinicalNoteMapper';
+import { getTodayLocal } from '../../shared/utils/date';
 
 export class SupabaseClinicalNoteService implements IClinicalNoteService {
   async create(data: CreateClinicalNoteData): Promise<ClinicalNote> {
@@ -14,7 +15,7 @@ export class SupabaseClinicalNoteService implements IClinicalNoteService {
       .insert({
         paciente_id: data.pacienteId,
         nutricionista_id: user.id,
-        data_atendimento: data.dataAtendimento ?? new Date().toISOString().split('T')[0],
+        data_atendimento: data.dataAtendimento ?? getTodayLocal(),
         conteudo: data.conteudo,
       })
       .select()

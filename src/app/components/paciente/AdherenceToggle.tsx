@@ -29,15 +29,15 @@ export function AdherenceToggle({ refeicaoId, concluida: initial, onToggle }: Ad
       onClick={handleClick}
       disabled={loading}
       style={{
-        padding: '0.4rem 0.8rem',
-        borderRadius: '20px',
-        border: `2px solid ${isConcluida ? '#16a34a' : '#d1d5db'}`,
-        backgroundColor: isConcluida ? '#dcfce7' : '#fff',
-        color: isConcluida ? '#16a34a' : '#6b7280',
+        padding: '6px 14px',
+        borderRadius: 20,
+        border: `2px solid ${isConcluida ? 'var(--color-primary)' : 'var(--color-border)'}`,
+        background: isConcluida ? 'var(--color-primary-subtle)' : 'var(--color-surface)',
+        color: isConcluida ? 'var(--color-primary-text)' : 'var(--color-ink-secondary)',
         cursor: loading ? 'wait' : 'pointer',
         fontWeight: 600,
-        fontSize: '0.85rem',
-        transition: 'all 0.2s',
+        fontSize: 13,
+        transition: 'all 150ms ease-out',
       }}
     >
       {isConcluida ? '✓ Concluída' : 'Marcar'}

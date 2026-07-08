@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Container } from '../../../di/container';
-import { Paciente } from '../../../model/entities/Paciente';
+import type { Paciente } from '../../../model/entities/Paciente';
 import { MealPlanForm } from '../../components/plano-alimentar/MealPlanForm';
 
 interface RefeicaoForm {
@@ -75,40 +75,76 @@ export function MealPlanPage() {
       setSuccessMsg('Plano alimentar salvo com sucesso!');
       setTimeout(() => setSuccessMsg(null), 4000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar plano alimentar.');
+      setError(err instanceof Error ? err.message : 'Não foi possível salvar o plano. Verifique sua conexão e tente novamente.');
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return <div style={{ color: '#9CA3AF', fontSize: 13 }}>Carregando plano alimentar...</div>;
+    return <div style={{ color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando plano alimentar...</div>;
   }
 
   return (
     <div style={{ paddingBottom: 64 }}>
       {paciente.imc !== undefined && (
-        <div style={{ 
-          display: 'flex', gap: 24, marginBottom: 32, padding: '16px 20px', 
-          backgroundColor: '#F9FAFB', borderRadius: 8, border: '1px solid #E5E5E5' 
+        <div style={{
+          display: 'flex', gap: 24, marginBottom: 32, padding: '16px 20px',
+          background: 'var(--color-subtle)', borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--color-border)',
         }}>
           <div>
-            <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>IMC</div>
-            <div style={{ fontSize: 14, fontWeight: 500, fontFamily: 'JetBrains Mono, monospace', color: '#111827' }}>{paciente.imc}</div>
+            <div style={{
+              fontSize: 11, color: 'var(--color-ink-secondary)',
+              textTransform: 'uppercase', letterSpacing: '0.05em',
+            }}>
+              IMC
+            </div>
+            <div style={{
+              fontSize: 14, fontWeight: 500, fontFamily: 'var(--font-mono)',
+              color: 'var(--color-ink-primary)',
+            }}>
+              {paciente.imc}
+            </div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TMB</div>
-            <div style={{ fontSize: 14, fontWeight: 500, fontFamily: 'JetBrains Mono, monospace', color: '#111827' }}>{paciente.tmb} kcal</div>
+            <div style={{
+              fontSize: 11, color: 'var(--color-ink-secondary)',
+              textTransform: 'uppercase', letterSpacing: '0.05em',
+            }}>
+              TMB
+            </div>
+            <div style={{
+              fontSize: 14, fontWeight: 500, fontFamily: 'var(--font-mono)',
+              color: 'var(--color-ink-primary)',
+            }}>
+              {paciente.tmb} kcal
+            </div>
           </div>
           <div>
-            <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>GET</div>
-            <div style={{ fontSize: 14, fontWeight: 500, fontFamily: 'JetBrains Mono, monospace', color: '#111827' }}>{paciente.get} kcal</div>
+            <div style={{
+              fontSize: 11, color: 'var(--color-ink-secondary)',
+              textTransform: 'uppercase', letterSpacing: '0.05em',
+            }}>
+              GET
+            </div>
+            <div style={{
+              fontSize: 14, fontWeight: 500, fontFamily: 'var(--font-mono)',
+              color: 'var(--color-ink-primary)',
+            }}>
+              {paciente.get} kcal
+            </div>
           </div>
         </div>
       )}
 
       {successMsg && (
-        <div style={{ padding: '12px 16px', backgroundColor: '#ECFDF5', border: '1px solid #6EE7B7', color: '#065F46', borderRadius: 6, fontSize: 13, marginBottom: 24 }}>
+        <div style={{
+          padding: '10px 14px', background: 'var(--color-success-subtle)',
+          border: '1px solid var(--color-success-border)',
+          color: 'var(--color-primary-text)', borderRadius: 'var(--radius-md)',
+          fontSize: 13, marginBottom: 24,
+        }}>
           {successMsg}
         </div>
       )}

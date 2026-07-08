@@ -1,13 +1,21 @@
-import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, FormEvent, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [validationError, setValidationError] = useState('');
+  const [sessionExpiredMsg, setSessionExpiredMsg] = useState('');
   const { login, loading, error, clearError } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('sessionExpired') === 'true') {
+      setSessionExpiredMsg('Sua sessão expirou. Faça login novamente.');
+    }
+  }, [searchParams]);
 
   const validateEmail = (emailStr: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -37,8 +45,20 @@ export function LoginPage() {
         navigate('/dieta');
       }
     } catch {
-      // O erro é tratado no AuthViewModel e exibido na UI
     }
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '10px 12px',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--color-border)',
+    fontSize: 14,
+    color: 'var(--color-ink-primary)',
+    background: 'var(--color-surface)',
+    outline: 'none',
+    boxSizing: 'border-box',
+    transition: 'border-color 150ms ease-out',
   };
 
   return (
@@ -47,37 +67,51 @@ export function LoginPage() {
       justifyContent: 'center',
       alignItems: 'center',
       minHeight: '100vh',
-      backgroundColor: '#f4f6f8',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      background: 'var(--color-bg)',
     }}>
       <div style={{
         width: '100%',
-        maxWidth: '400px',
-        padding: '2.5rem',
-        borderRadius: '12px',
-        backgroundColor: '#ffffff',
-        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
+        maxWidth: 380,
+        padding: '40px 36px',
+        borderRadius: 'var(--radius-lg)',
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-border)',
       }}>
-        <h1 style={{ textAlign: 'center', color: '#1a202c', marginBottom: '0.5rem' }}>NutriSmart</h1>
-        <p style={{ textAlign: 'center', color: '#718096', marginBottom: '2rem' }}>Acesse sua conta para continuar</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 4 }}>
+          <div style={{ width: 20, height: 20, background: 'var(--color-primary)', borderRadius: 5 }} />
+          <h1 style={{ fontSize: 20, fontWeight: 600, color: 'var(--color-ink-primary)', margin: 0 }}>
+            NutriSmart
+          </h1>
+        </div>
+        <p style={{ textAlign: 'center', color: 'var(--color-ink-secondary)', fontSize: 13, marginBottom: 28, marginTop: 8 }}>
+          Acesse sua conta
+        </p>
 
-        {(validationError || error) && (
+        {(validationError || error || sessionExpiredMsg) && (
           <div style={{
-            padding: '0.75rem 1rem',
-            marginBottom: '1.5rem',
-            borderRadius: '6px',
-            backgroundColor: '#fff5f5',
-            borderLeft: '4px solid #e53e3e',
-            color: '#c53030',
-            fontSize: '0.9rem'
+            padding: '10px 14px',
+            marginBottom: 20,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-danger-subtle)',
+            border: '1px solid var(--color-danger-border)',
+            color: 'var(--color-danger)',
+            fontSize: 12,
           }}>
-            {validationError || error}
+            {sessionExpiredMsg || validationError || error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{
+              display: 'block',
+              fontSize: 11,
+              fontWeight: 500,
+              color: 'var(--color-ink-secondary)',
+              marginBottom: 6,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}>
               E-mail
             </label>
             <input
@@ -85,20 +119,23 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="seuemail@exemplo.com"
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e0',
-                fontSize: '1rem',
-                boxSizing: 'border-box'
-              }}
+              style={inputStyle}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--color-primary)'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'var(--color-border)'; }}
               required
             />
           </div>
 
-          <div style={{ marginBottom: '1.75rem' }}>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#4a5568', marginBottom: '0.5rem' }}>
+          <div style={{ marginBottom: 24 }}>
+            <label style={{
+              display: 'block',
+              fontSize: 11,
+              fontWeight: 500,
+              color: 'var(--color-ink-secondary)',
+              marginBottom: 6,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+            }}>
               Senha
             </label>
             <input
@@ -106,14 +143,9 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e0',
-                fontSize: '1rem',
-                boxSizing: 'border-box'
-              }}
+              style={inputStyle}
+              onFocus={(e) => { e.target.style.borderColor = 'var(--color-primary)'; }}
+              onBlur={(e) => { e.target.style.borderColor = 'var(--color-border)'; }}
               required
             />
           </div>
@@ -123,17 +155,20 @@ export function LoginPage() {
             disabled={loading}
             style={{
               width: '100%',
-              padding: '0.875rem',
-              borderRadius: '6px',
+              padding: '10px 24px',
+              borderRadius: 'var(--radius-md)',
               border: 'none',
-              backgroundColor: '#2b6cb0',
-              color: '#ffffff',
-              fontSize: '1rem',
+              background: loading ? 'var(--color-ink-tertiary)' : 'var(--color-primary)',
+              color: '#fff',
+              fontSize: 12,
               fontWeight: 600,
               cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-              transition: 'background-color 0.2s'
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              transition: 'background 150ms ease-out',
             }}
+            onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'var(--color-primary-hover)'; }}
+            onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = 'var(--color-primary)'; }}
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>

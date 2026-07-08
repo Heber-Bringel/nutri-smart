@@ -30,6 +30,7 @@ import { DeleteClinicalNoteUseCase } from '../usecase/anotacoes/DeleteClinicalNo
 import { SupabaseAdesaoService } from '../infra/adesao/SupabaseAdesaoService';
 import { MarkMealAsCompletedUseCase } from '../usecase/adesao/MarkMealAsCompletedUseCase';
 import { GetDailyProgressUseCase } from '../usecase/adesao/GetDailyProgressUseCase';
+import { GetDailyAdesaoStatesUseCase } from '../usecase/adesao/GetDailyAdesaoStatesUseCase';
 
 class Container {
   private static _authService = new SupabaseAuthService();
@@ -167,6 +168,10 @@ class Container {
 
   static get getDailyProgressUseCase() {
     return new GetDailyProgressUseCase(this._adesaoService);
+  }
+
+  static get getDailyAdesaoStatesUseCase() {
+    return new GetDailyAdesaoStatesUseCase(this._adesaoService);
   }
 }
 

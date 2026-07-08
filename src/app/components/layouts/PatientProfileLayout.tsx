@@ -11,10 +11,11 @@ function TabItem({ label, to, active }: { label: string; to: string; active: boo
         textDecoration: 'none',
         fontSize: 13,
         fontWeight: active ? 500 : 400,
-        color: active ? '#111827' : '#6B7280',
+        color: active ? 'var(--color-ink-primary)' : 'var(--color-ink-secondary)',
         padding: '8px 12px',
-        borderBottom: active ? '2px solid #10B981' : '2px solid transparent',
-        transition: 'all 0.15s',
+        borderBottom: active ? '2px solid var(--color-primary)' : '2px solid transparent',
+        transition: 'color 150ms ease-out, border-color 150ms ease-out',
+        whiteSpace: 'nowrap',
       }}
     >
       {label}
@@ -48,20 +49,28 @@ export function PatientProfileLayout() {
   }, [id]);
 
   if (loading) {
-    return <div style={{ padding: '48px 40px', color: '#9CA3AF', fontSize: 13 }}>Carregando dados do paciente...</div>;
+    return <div style={{ padding: '48px 40px', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando dados do paciente...</div>;
   }
 
   if (error || !paciente) {
     return (
       <div style={{ padding: '48px 40px' }}>
-        <div style={{ padding: '12px 16px', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626', borderRadius: 6, fontSize: 13 }}>
+        <div style={{
+          padding: '10px 14px',
+          background: 'var(--color-danger-subtle)',
+          border: '1px solid var(--color-danger-border)',
+          color: 'var(--color-danger)',
+          borderRadius: 'var(--radius-md)',
+          fontSize: 13,
+        }}>
           {error || 'Paciente não encontrado.'}
         </div>
-        <button 
-          onClick={() => navigate('/dashboard/pacientes')} 
-          style={{ 
-            marginTop: 16, padding: '6px 12px', cursor: 'pointer', background: '#fff', 
-            border: '1px solid #E5E5E5', borderRadius: 4, fontSize: 13, color: '#111827'
+        <button
+          onClick={() => navigate('/dashboard/pacientes')}
+          style={{
+            marginTop: 16, padding: '8px 14px', cursor: 'pointer', background: 'var(--color-surface)',
+            border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', fontSize: 12, color: 'var(--color-ink-primary)',
+            fontWeight: 500,
           }}
         >
           Voltar para lista
@@ -74,29 +83,31 @@ export function PatientProfileLayout() {
 
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '48px 40px' }}>
-      {/* Breadcrumb / Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Link to="/dashboard/pacientes" style={{ textDecoration: 'none', color: '#9CA3AF', fontSize: 13, display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span>←</span> Pacientes
+          <Link to="/dashboard/pacientes" style={{
+            textDecoration: 'none', color: 'var(--color-ink-tertiary)', fontSize: 13,
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            <span style={{ fontSize: 12 }}>←</span> Pacientes
           </Link>
-          <span style={{ color: '#E5E5E5' }}>/</span>
-          <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>{paciente.nomeCompleto}</span>
+          <span style={{ color: 'var(--color-border)' }}>/</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-ink-primary)' }}>{paciente.nomeCompleto}</span>
         </div>
-        
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{
-            fontSize: 11, padding: '2px 8px', borderRadius: 4, fontWeight: 500,
-            background: paciente.planoAtivo ? '#ECFDF5' : '#F5F5F5',
-            color: paciente.planoAtivo ? '#065F46' : '#9CA3AF',
+            fontSize: 11, padding: '2px 8px', borderRadius: 'var(--radius-sm)', fontWeight: 500,
+            background: paciente.planoAtivo ? 'var(--color-primary-subtle)' : 'var(--color-subtle)',
+            color: paciente.planoAtivo ? 'var(--color-primary-text)' : 'var(--color-ink-tertiary)',
           }}>
             {paciente.planoAtivo ? 'Plano ativo' : 'Sem plano'}
           </span>
-          <button 
+          <button
             onClick={() => navigate(`/dashboard/pacientes/${id}/editar`)}
             style={{
-              background: '#fff', color: '#111827', border: '1px solid #E5E5E5',
-              padding: '5px 12px', borderRadius: 5, fontSize: 12, fontWeight: 500, cursor: 'pointer',
+              background: 'var(--color-surface)', color: 'var(--color-ink-primary)', border: '1px solid var(--color-border)',
+              padding: '5px 12px', borderRadius: 'var(--radius-md)', fontSize: 12, fontWeight: 500, cursor: 'pointer',
             }}
           >
             Editar perfil
@@ -104,8 +115,10 @@ export function PatientProfileLayout() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #E5E5E5', marginBottom: 32, gap: 8 }}>
+      <div style={{
+        display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: 32, gap: 8,
+        overflowX: 'auto',
+      }}>
         <TabItem label="Visão Geral" to={`/dashboard/pacientes/${id}`} active={isExactProfile} />
         <TabItem label="Plano Alimentar" to={`/dashboard/pacientes/${id}/plano-alimentar`} active={location.pathname.includes('/plano-alimentar')} />
         <TabItem label="Evolução" to={`/dashboard/pacientes/${id}/evolucao`} active={location.pathname.includes('/evolucao')} />
@@ -113,7 +126,6 @@ export function PatientProfileLayout() {
         <TabItem label="Anotações" to={`/dashboard/pacientes/${id}/anotacoes`} active={location.pathname.includes('/anotacoes')} />
       </div>
 
-      {/* Main Content of the Tab */}
       <Outlet context={{ paciente }} />
     </div>
   );

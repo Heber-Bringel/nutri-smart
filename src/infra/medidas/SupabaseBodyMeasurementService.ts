@@ -3,6 +3,7 @@ import { BodyMeasurement } from '../../model/entities/BodyMeasurement';
 import { MeasurementError } from '../../model/errors/MeasurementError';
 import { supabase } from '../supabase/client';
 import { BodyMeasurementMapper } from './mappers/BodyMeasurementMapper';
+import { getTodayLocal } from '../../shared/utils/date';
 
 export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
   async create(data: CreateMeasurementData): Promise<BodyMeasurement> {
@@ -14,7 +15,7 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
       .insert({
         paciente_id: data.pacienteId,
         nutricionista_id: user.id,
-        data_atendimento: data.dataAtendimento ?? new Date().toISOString().split('T')[0],
+        data_atendimento: data.dataAtendimento ?? getTodayLocal(),
         circunferencia_cintura: data.circunferenciaCintura ?? null,
         circunferencia_quadril: data.circunferenciaQuadril ?? null,
         circunferencia_braco: data.circunferenciaBraco ?? null,
@@ -26,6 +27,14 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
       .single();
 
     if (error) throw new MeasurementError(error.message);
+
+    if (data.peso != null && data.peso > 0) {
+      await supabase.from('historico_peso').upsert({
+        paciente_id: data.pacienteId,
+        peso: data.peso,
+        data_registro: data.dataAtendimento ?? getTodayLocal(),
+      }, { onConflict: 'paciente_id, data_registro', ignoreDuplicates: false });
+    }
 
     return BodyMeasurementMapper.toDomain(row);
   }
