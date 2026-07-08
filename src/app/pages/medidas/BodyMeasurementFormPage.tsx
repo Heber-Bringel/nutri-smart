@@ -4,6 +4,7 @@ import { Container } from '../../../di/container';
 import type { BodyMeasurement } from '../../../model/entities/BodyMeasurement';
 import type { Paciente } from '../../../model/entities/Paciente';
 import { MeasurementChart } from '../../components/medidas/MeasurementChart';
+import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 
 export function BodyMeasurementFormPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -20,6 +21,7 @@ export function BodyMeasurementFormPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,13 +95,19 @@ export function BodyMeasurementFormPage() {
   }
 
   async function handleDelete(measurementId: string) {
-    if (!confirm('Excluir este registro de medida?')) return;
+    setDeleteTarget(measurementId);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
     try {
-      await Container.deleteMeasurementUseCase.execute(measurementId);
+      await Container.deleteMeasurementUseCase.execute(deleteTarget);
       const updated = await Container.listMeasurementsUseCase.execute(paciente.id);
       setMedidas(updated);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao excluir medida.');
+    } finally {
+      setDeleteTarget(null);
     }
   }
 
@@ -305,6 +313,14 @@ export function BodyMeasurementFormPage() {
           </table>
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Excluir Medida"
+        message="Tem certeza que deseja excluir este registro de medida? Esta ação não pode ser desfeita."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

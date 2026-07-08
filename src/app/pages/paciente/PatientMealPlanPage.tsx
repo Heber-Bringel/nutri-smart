@@ -6,6 +6,7 @@ import type { MealPlan } from '../../../model/entities/MealPlan';
 import type { DailyProgress } from '../../../model/entities/Adesao';
 import { AdherenceToggle } from '../../components/paciente/AdherenceToggle';
 import { ProgressBar } from '../../components/paciente/ProgressBar';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 
 export function PatientMealPlanPage() {
   const { user, logout } = useAuth();
@@ -67,7 +68,7 @@ export function PatientMealPlanPage() {
   }
 
   if (loading) {
-    return <div style={{ padding: 32, fontFamily: 'var(--font-body)', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando...</div>;
+    return <LoadingSkeleton lines={4} />;
   }
 
   const headerBtn = {

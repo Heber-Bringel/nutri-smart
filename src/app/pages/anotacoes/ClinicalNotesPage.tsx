@@ -3,6 +3,8 @@ import { useOutletContext } from 'react-router-dom';
 import { Container } from '../../../di/container';
 import type { ClinicalNote } from '../../../model/entities/ClinicalNote';
 import type { Paciente } from '../../../model/entities/Paciente';
+import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 
 export function ClinicalNotesPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -14,6 +16,7 @@ export function ClinicalNotesPage() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,16 +64,22 @@ export function ClinicalNotesPage() {
   }
 
   async function handleDelete(noteId: string) {
-    if (!confirm('Excluir esta anotação clínica?')) return;
+    setDeleteTarget(noteId);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
     try {
-      await Container.deleteClinicalNoteUseCase.execute(noteId);
-      setNotes(notes.filter(n => n.id !== noteId));
+      await Container.deleteClinicalNoteUseCase.execute(deleteTarget);
+      setNotes(notes.filter(n => n.id !== deleteTarget));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao excluir anotação.');
+    } finally {
+      setDeleteTarget(null);
     }
   }
 
-  if (loading) return <div style={{ color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando anotações...</div>;
+  if (loading) return <LoadingSkeleton lines={3} />;
 
   return (
     <div style={{ paddingBottom: 64 }}>
@@ -255,6 +264,14 @@ export function ClinicalNotesPage() {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Excluir Anotação"
+        message="Tem certeza que deseja excluir esta anotação clínica? Esta ação não pode ser desfeita."
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

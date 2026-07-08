@@ -4,6 +4,7 @@ import { Container } from '../../../di/container';
 import type { EvolutionChartData } from '../../../model/services/IAdesaoService';
 import { EvolutionChart } from '../../components/evolucao/EvolutionChart';
 import type { Paciente } from '../../../model/entities/Paciente';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 
 export function EvolutionChartPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -24,7 +25,7 @@ export function EvolutionChartPage() {
     return () => { cancelled = true; };
   }, [paciente.id]);
 
-  if (loading) return <div style={{ color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando dados de evolução...</div>;
+  if (loading) return <LoadingSkeleton lines={4} />;
 
   return (
     <div style={{ paddingBottom: 64 }}>
