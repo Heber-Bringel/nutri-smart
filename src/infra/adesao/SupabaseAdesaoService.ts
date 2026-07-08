@@ -5,8 +5,8 @@ import { supabase } from '../supabase/client';
 import { AdesaoMapper } from './mappers/AdesaoMapper';
 
 export class SupabaseAdesaoService implements IAdesaoService {
-  async markAsCompleted(refeicaoId: string, pacienteId: string, concluida: boolean): Promise<AdesaoRefeicao> {
-    const hoje = new Date().toISOString().split('T')[0];
+  async markAsCompleted(refeicaoId: string, pacienteId: string, concluida: boolean, data?: string): Promise<AdesaoRefeicao> {
+    const hoje = data || new Date().toISOString().split('T')[0];
 
     const { data: existing } = await supabase
       .from('adesao_refeicoes')

@@ -80,6 +80,10 @@ export function MealPlanForm({ observacoes, refeicoes, onObservacoesChange, onRe
   function updateAlimento(refIndex: number, alimIndex: number, alimento: AlimentoForm) {
     const ref = { ...currentRefeicoes[refIndex] };
     ref.alimentos = [...ref.alimentos];
+    const prev = ref.alimentos[alimIndex];
+    if (prev.quantidade !== alimento.quantidade && prev.calorias === alimento.calorias && prev.quantidade > 0) {
+      alimento.calorias = Math.round((alimento.quantidade / prev.quantidade) * prev.calorias);
+    }
     ref.alimentos[alimIndex] = alimento;
     updateRefeicao(refIndex, ref);
   }

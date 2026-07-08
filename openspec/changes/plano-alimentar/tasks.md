@@ -60,7 +60,7 @@
 
 - [x] 8.1 Criar `BodyMeasurementForm` — formulário com campos de circunferências, gordura e dobras
 - [x] 8.2 Criar `MeasurementHistoryTable` — tabela com histórico ordenado por data
-- [ ] 8.3 Criar `MeasurementChart` — gráfico SVG de linha por tipo de medida
+- [x] 8.3 Criar `MeasurementChart` — gráfico SVG de linha por tipo de medida
 - [x] 8.4 Criar `BodyMeasurementFormPage` — página combinando formulário + histórico + gráfico
 
 ## 9. UI — Anotações Clínicas

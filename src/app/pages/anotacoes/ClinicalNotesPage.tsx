@@ -10,6 +10,7 @@ export function ClinicalNotesPage() {
   const [conteudo, setConteudo] = useState('');
   const [dataAtendimento, setDataAtendimento] = useState(new Date().toISOString().split('T')[0]);
   const [editId, setEditId] = useState<string | null>(null);
+  const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -185,49 +186,73 @@ export function ClinicalNotesPage() {
           padding: '32px 0', textAlign: 'center', color: 'var(--color-ink-tertiary)',
           fontSize: 13, border: '1px dashed var(--color-border)', borderRadius: 'var(--radius-lg)',
         }}>
-          Nenhuma anotação clínica registrada.
+          Nenhuma anotação clínica registrada.{' '}
+          <button
+            onClick={() => { resetForm(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            style={{
+              background: 'none', border: 'none', color: 'var(--color-primary)',
+              cursor: 'pointer', textDecoration: 'underline', fontSize: 13,
+            }}
+          >
+            Criar primeira anotação
+          </button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {notes.map(note => (
-            <div key={note.id} style={{
-              border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)',
-              padding: 24, background: 'var(--color-surface)',
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-secondary)', fontFamily: 'var(--font-mono)' }}>
-                  {new Date(note.dataAtendimento + 'T00:00:00').toLocaleDateString('pt-BR')}
-                </span>
-                <div>
-                  <button
-                    onClick={() => editNote(note)}
-                    style={{
-                      padding: '4px 8px', marginRight: 8, background: 'transparent',
-                      border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 500,
-                      color: 'var(--color-primary)',
-                    }}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(note.id)}
-                    style={{
-                      padding: '4px 8px', background: 'transparent', border: 'none',
-                      cursor: 'pointer', fontSize: 12, fontWeight: 500, color: 'var(--color-danger)',
-                    }}
-                  >
-                    Excluir
-                  </button>
-                </div>
-              </div>
-              <p style={{
-                margin: 0, whiteSpace: 'pre-wrap', fontSize: 14,
-                color: 'var(--color-ink-primary)', lineHeight: 1.6,
+          {notes.map(note => {
+            const isExpanded = expandedNoteId === note.id;
+            const preview = note.conteudo.length > 100 ? note.conteudo.slice(0, 100) + '...' : note.conteudo;
+            return (
+              <div key={note.id} style={{
+                border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)',
+                padding: 24, background: 'var(--color-surface)',
               }}>
-                {note.conteudo}
-              </p>
-            </div>
-          ))}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-secondary)', fontFamily: 'var(--font-mono)' }}>
+                    {new Date(note.dataAtendimento + 'T00:00:00').toLocaleDateString('pt-BR')}
+                  </span>
+                  <div>
+                    <button
+                      onClick={() => editNote(note)}
+                      style={{
+                        padding: '4px 8px', marginRight: 8, background: 'transparent',
+                        border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+                        color: 'var(--color-primary)',
+                      }}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(note.id)}
+                      style={{
+                        padding: '4px 8px', background: 'transparent', border: 'none',
+                        cursor: 'pointer', fontSize: 12, fontWeight: 500, color: 'var(--color-danger)',
+                      }}
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+                <p style={{
+                  margin: 0, whiteSpace: 'pre-wrap', fontSize: 14,
+                  color: 'var(--color-ink-primary)', lineHeight: 1.6,
+                }}>
+                  {isExpanded ? note.conteudo : preview}
+                </p>
+                {note.conteudo.length > 100 && (
+                  <button
+                    onClick={() => setExpandedNoteId(isExpanded ? null : note.id)}
+                    style={{
+                      background: 'none', border: 'none', color: 'var(--color-primary)',
+                      cursor: 'pointer', fontSize: 12, fontWeight: 500, marginTop: 8, padding: 0,
+                    }}
+                  >
+                    {isExpanded ? 'Ver menos' : 'Ver mais'}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

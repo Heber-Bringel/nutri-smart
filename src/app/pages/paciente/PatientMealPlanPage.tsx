@@ -12,6 +12,7 @@ export function PatientMealPlanPage() {
   const navigate = useNavigate();
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [progress, setProgress] = useState<DailyProgress | null>(null);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [adesaoMap, setAdesaoMap] = useState<Map<string, boolean>>(new Map());
@@ -22,7 +23,7 @@ export function PatientMealPlanPage() {
 
     Promise.all([
       Container.getMealPlanUseCase.execute(user.pacienteId!),
-      Container.getDailyProgressUseCase.execute(user.pacienteId!),
+      Container.getDailyProgressUseCase.execute(user.pacienteId!, selectedDate),
     ])
       .then(([plan, prog]) => {
         if (!cancelled) {
@@ -34,14 +35,14 @@ export function PatientMealPlanPage() {
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [user?.pacienteId]);
+  }, [user?.pacienteId, selectedDate]);
 
   async function handleToggle(refeicaoId: string, concluida: boolean) {
     if (!user?.pacienteId) return;
 
-    await Container.markMealAsCompletedUseCase.execute(refeicaoId, user.pacienteId, concluida);
+    await Container.markMealAsCompletedUseCase.execute(refeicaoId, user.pacienteId, concluida, selectedDate);
 
-    const prog = await Container.getDailyProgressUseCase.execute(user.pacienteId);
+    const prog = await Container.getDailyProgressUseCase.execute(user.pacienteId, selectedDate);
     setProgress(prog);
   }
 
@@ -78,6 +79,29 @@ export function PatientMealPlanPage() {
           {error}
         </div>
       )}
+
+      <div style={{ marginBottom: 24 }}>
+        <label style={{
+          display: 'block', fontSize: 11, color: 'var(--color-ink-secondary)',
+          textTransform: 'uppercase', marginBottom: 6, fontWeight: 500, letterSpacing: '0.05em',
+        }}>
+          Data
+        </label>
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={e => setSelectedDate(e.target.value)}
+          style={{
+            padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--color-border)', fontSize: 13,
+            fontFamily: 'var(--font-mono)', outline: 'none',
+            color: 'var(--color-ink-primary)', background: 'var(--color-surface)',
+            transition: 'border-color 150ms ease-out',
+          }}
+          onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+          onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
+        />
+      </div>
 
       {progress && (
         <ProgressBar

@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { Container } from '../../../di/container';
 import type { BodyMeasurement } from '../../../model/entities/BodyMeasurement';
 import type { Paciente } from '../../../model/entities/Paciente';
+import { MeasurementChart } from '../../components/medidas/MeasurementChart';
 
 export function BodyMeasurementFormPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -216,6 +217,8 @@ export function BodyMeasurementFormPage() {
           </button>
         </div>
       </div>
+
+      <MeasurementChart data={medidas} />
 
       <h3 style={{
         margin: '0 0 16px', fontSize: 12, fontWeight: 600,
