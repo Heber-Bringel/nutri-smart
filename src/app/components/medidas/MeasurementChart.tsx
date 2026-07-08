@@ -30,26 +30,25 @@ export function MeasurementChart({ data }: MeasurementChartProps) {
 
   const chartHeight = 250;
   const chartWidth = 600;
-  const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+  const padding = { top: 24, right: 24, bottom: 40, left: 50 };
   const innerW = chartWidth - padding.left - padding.right;
   const innerH = chartHeight - padding.top - padding.bottom;
 
   const sorted = [...data].sort((a, b) => new Date(a.dataAtendimento).getTime() - new Date(b.dataAtendimento).getTime());
-  const points = sorted
-    .map(d => d[selectedMetric])
-    .filter((v): v is number => v != null);
+  const filtered = sorted.filter(d => d[selectedMetric] != null);
+  const points = filtered.map(d => d[selectedMetric]!);
 
   const maxVal = Math.max(...points, 0);
   const minVal = Math.min(...points, 0);
   const range = maxVal - minVal || 1;
 
-  const polylinePoints = sorted
-    .filter(d => d[selectedMetric] != null)
-    .map((d, i) => {
-      const x = padding.left + (i / Math.max(sorted.filter(s => s[selectedMetric] != null).length - 1, 1)) * innerW;
-      const y = padding.top + innerH - ((d[selectedMetric]! - minVal) / range) * innerH * 0.9;
-      return `${x},${y}`;
-    });
+  function getY(val: number) {
+    return padding.top + innerH - ((val - minVal) / range) * innerH * 0.9;
+  }
+
+  function getX(i: number) {
+    return padding.left + (i / Math.max(filtered.length - 1, 1)) * innerW;
+  }
 
   const dateLabels = sorted.filter((_, i) => i % Math.max(1, Math.floor(sorted.length / 5)) === 0 || i === sorted.length - 1);
 
@@ -111,28 +110,58 @@ export function MeasurementChart({ data }: MeasurementChartProps) {
       }}>
         <div style={{ overflowX: 'auto' }}>
           <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ width: '100%', maxWidth: `${chartWidth}px` }}>
-            {dateLabels.map((d, i) => {
+
+            {/* Grid horizontal */}
+            {Array.from({ length: 5 }, (_, i) => {
+              const val = minVal + (range * i) / 4;
+              const y = getY(val);
+              return (
+                <g key={i}>
+                  <line x1={padding.left} x2={chartWidth - padding.right} y1={y} y2={y} stroke="var(--color-border-light)" strokeWidth="1" />
+                  <text x={padding.left - 6} y={y + 3} textAnchor="end" fontSize="9" fill="var(--color-ink-tertiary)">
+                    {val.toFixed(1)}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* Linha */}
+            {filtered.length > 1 && (
+              <polyline
+                points={filtered.map((_, i) => `${getX(i)},${getY(filtered[i][selectedMetric]!)}`).join(' ')}
+                fill="none" stroke={color} strokeWidth="2" />
+            )}
+
+            {/* Pontos + valores */}
+            {filtered.map((d, i) => {
+              const x = getX(i);
+              const y = getY(d[selectedMetric]!);
+              return (
+                <g key={i}>
+                  <circle cx={x} cy={y} r="3" fill={color} stroke="#fff" strokeWidth="1.5">
+                    <title>{d[selectedMetric]} {MEASUREMENT_LABELS[selectedMetric]} em {new Date(d.dataAtendimento + 'T00:00:00').toLocaleDateString('pt-BR')}</title>
+                  </circle>
+                  {i % Math.max(1, Math.floor(filtered.length / 4)) === 0 && (
+                    <text x={x} y={y - 8} textAnchor="middle" fontSize="9" fill={color} fontFamily="var(--font-mono)">
+                      {d[selectedMetric]}
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+
+            {/* Rótulos do eixo X */}
+            {dateLabels.map((d) => {
               const idx = sorted.indexOf(d);
               const x = padding.left + (idx / Math.max(sorted.length - 1, 1)) * innerW;
               return (
-                <text key={i} x={x} y={chartHeight - 5} textAnchor="middle" fontSize="10" fill="var(--color-ink-tertiary)">
+                <text key={idx} x={x} y={chartHeight - 5} textAnchor="middle" fontSize="10" fill="var(--color-ink-tertiary)">
                   {new Date(d.dataAtendimento + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                 </text>
               );
             })}
 
-            {polylinePoints.length > 1 && (
-              <polyline points={polylinePoints.join(' ')} fill="none" stroke={color} strokeWidth="2" />
-            )}
-
-            {polylinePoints.length > 0 && sorted.filter(d => d[selectedMetric] != null).map((d, i) => {
-              const x = padding.left + (i / Math.max(sorted.filter(s => s[selectedMetric] != null).length - 1, 1)) * innerW;
-              const y = padding.top + innerH - ((d[selectedMetric]! - minVal) / range) * innerH * 0.9;
-              return (
-                <circle key={i} cx={x} cy={y} r="3" fill={color} stroke="#fff" strokeWidth="1.5" />
-              );
-            })}
-
+            {/* Eixo Y */}
             <text x={10} y={padding.top + innerH / 2} textAnchor="middle" fontSize="10" fill={color}
               transform={`rotate(-90, 10, ${padding.top + innerH / 2})`}>
               {MEASUREMENT_LABELS[selectedMetric]}
