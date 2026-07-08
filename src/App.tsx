@@ -47,11 +47,7 @@ export function App() {
 
           <Route
             path="/dieta"
-            element={
-              <ProtectedRoute allowedRole="paciente">
-                <PatientDietPage />
-              </ProtectedRoute>
-            }
+            element={<Navigate to="/paciente/meu-plano" replace />}
           />
           <Route path="/paciente/meu-plano"
             element={

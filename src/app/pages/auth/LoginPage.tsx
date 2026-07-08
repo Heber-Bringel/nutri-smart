@@ -42,7 +42,7 @@ export function LoginPage() {
       if (user.role === 'nutricionista') {
         navigate('/dashboard/pacientes');
       } else {
-        navigate('/dieta');
+        navigate('/paciente/meu-plano');
       }
     } catch {
     }
