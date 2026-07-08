@@ -1,6 +1,7 @@
 import { IBodyMeasurementService, CreateMeasurementData } from '../../model/services/IBodyMeasurementService';
 import { BodyMeasurement } from '../../model/entities/BodyMeasurement';
 import { MeasurementError } from '../../model/errors/MeasurementError';
+import { getTodayLocal } from '../../shared/utils/date';
 
 export class RegisterMeasurementUseCase {
   constructor(private measurementService: IBodyMeasurementService) {}
@@ -14,7 +15,7 @@ export class RegisterMeasurementUseCase {
       throw new MeasurementError('A data do atendimento é obrigatória.');
     }
 
-    if (data.dataAtendimento > new Date().toISOString().split('T')[0]) {
+    if (data.dataAtendimento > getTodayLocal()) {
       throw new MeasurementError('A data do atendimento não pode ser futura.');
     }
 

@@ -5,11 +5,12 @@ import type { BodyMeasurement } from '../../../model/entities/BodyMeasurement';
 import type { Paciente } from '../../../model/entities/Paciente';
 import { MeasurementChart } from '../../components/medidas/MeasurementChart';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
+import { getTodayLocal } from '../../../shared/utils/date';
 
 export function BodyMeasurementFormPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
   const [medidas, setMedidas] = useState<BodyMeasurement[]>([]);
-  const [dataAtendimento, setDataAtendimento] = useState(new Date().toISOString().split('T')[0]);
+  const [dataAtendimento, setDataAtendimento] = useState(getTodayLocal());
   const [peso, setPeso] = useState('');
   const [circunferenciaCintura, setCircunferenciaCintura] = useState('');
   const [circunferenciaQuadril, setCircunferenciaQuadril] = useState('');
@@ -37,7 +38,7 @@ export function BodyMeasurementFormPage() {
   }, [paciente.id]);
 
   function resetForm() {
-    setDataAtendimento(new Date().toISOString().split('T')[0]);
+    setDataAtendimento(getTodayLocal());
     setPeso('');
     setCircunferenciaCintura('');
     setCircunferenciaQuadril('');

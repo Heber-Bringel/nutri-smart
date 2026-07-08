@@ -4,13 +4,14 @@ import { Container } from '../../../di/container';
 import type { ClinicalNote } from '../../../model/entities/ClinicalNote';
 import type { Paciente } from '../../../model/entities/Paciente';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
+import { getTodayLocal } from '../../../shared/utils/date';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 
 export function ClinicalNotesPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
   const [notes, setNotes] = useState<ClinicalNote[]>([]);
   const [conteudo, setConteudo] = useState('');
-  const [dataAtendimento, setDataAtendimento] = useState(new Date().toISOString().split('T')[0]);
+  const [dataAtendimento, setDataAtendimento] = useState(getTodayLocal());
   const [editId, setEditId] = useState<string | null>(null);
   const [expandedNoteId, setExpandedNoteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -31,7 +32,7 @@ export function ClinicalNotesPage() {
 
   function resetForm() {
     setConteudo('');
-    setDataAtendimento(new Date().toISOString().split('T')[0]);
+    setDataAtendimento(getTodayLocal());
     setEditId(null);
   }
 

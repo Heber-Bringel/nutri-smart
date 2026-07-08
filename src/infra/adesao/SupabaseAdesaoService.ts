@@ -3,10 +3,11 @@ import { AdesaoRefeicao, DailyProgress } from '../../model/entities/Adesao';
 import { AdesaoError } from '../../model/errors/AdesaoError';
 import { supabase } from '../supabase/client';
 import { AdesaoMapper } from './mappers/AdesaoMapper';
+import { getTodayLocal, toLocalDateString } from '../../shared/utils/date';
 
 export class SupabaseAdesaoService implements IAdesaoService {
   async markAsCompleted(refeicaoId: string, pacienteId: string, concluida: boolean, data?: string): Promise<AdesaoRefeicao> {
-    const hoje = data || new Date().toISOString().split('T')[0];
+    const hoje = data || getTodayLocal();
 
     const { data: existing } = await supabase
       .from('adesao_refeicoes')
@@ -98,7 +99,7 @@ export class SupabaseAdesaoService implements IAdesaoService {
   async getEvolutionChartData(pacienteId: string, dias: number): Promise<EvolutionChartData[]> {
     const dataInicio = new Date();
     dataInicio.setDate(dataInicio.getDate() - dias);
-    const inicio = dataInicio.toISOString().split('T')[0];
+    const inicio = toLocalDateString(dataInicio);
 
     const { data: historicoPeso } = await supabase
       .from('historico_peso')
@@ -131,7 +132,7 @@ export class SupabaseAdesaoService implements IAdesaoService {
     for (let i = dias; i >= 0; i--) {
       const d = new Date(hoje);
       d.setDate(d.getDate() - i);
-      const dataStr = d.toISOString().split('T')[0];
+      const dataStr = toLocalDateString(d);
 
       const adEntry = adesaoPorData.get(dataStr);
       chartData.push({

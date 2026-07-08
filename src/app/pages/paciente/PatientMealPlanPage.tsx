@@ -5,6 +5,7 @@ import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
 import type { MealPlan } from '../../../model/entities/MealPlan';
 import type { DailyProgress } from '../../../model/entities/Adesao';
 import { AdherenceToggle } from '../../components/paciente/AdherenceToggle';
+import { getTodayLocal } from '../../../shared/utils/date';
 import { ProgressBar } from '../../components/paciente/ProgressBar';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 
@@ -13,7 +14,7 @@ export function PatientMealPlanPage() {
   const navigate = useNavigate();
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [progress, setProgress] = useState<DailyProgress | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getTodayLocal());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [adesaoMap, setAdesaoMap] = useState<Map<string, boolean>>(new Map());

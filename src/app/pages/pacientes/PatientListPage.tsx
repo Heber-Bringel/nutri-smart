@@ -8,8 +8,8 @@ function getInitials(name: string) {
 }
 
 function formatDate(isoString?: string) {
-  if (!isoString) return '--/--/----';
-  return new Date(isoString).toLocaleDateString('pt-BR');
+  if (!isoString) return '-';
+  return new Date(isoString + 'T00:00:00').toLocaleDateString('pt-BR');
 }
 
 export function PatientListPage() {

@@ -34,7 +34,7 @@ export function PatientInfoCard({ paciente }: { paciente: Paciente }) {
     <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 32 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
         <StatItem label="E-mail" value={paciente.email} />
-        <StatItem label="Data de Nasc." value={new Date(paciente.dataNascimento).toLocaleDateString('pt-BR')} mono />
+        <StatItem label="Data de Nasc." value={new Date(paciente.dataNascimento + 'T00:00:00').toLocaleDateString('pt-BR')} mono />
         <StatItem label="Sexo Biológico" value={paciente.sexoBiologico === 'masculino' ? 'Masculino' : 'Feminino'} />
         <StatItem label="Nível de Atividade" value={NIVEL_ATIVIDADE_LABEL[paciente.nivelAtividadeFisica]} />
         <StatItem label="Peso Inicial" value={`${paciente.pesoInicial} kg`} mono />
