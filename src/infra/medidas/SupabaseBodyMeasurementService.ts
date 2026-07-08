@@ -27,6 +27,14 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
 
     if (error) throw new MeasurementError(error.message);
 
+    if (data.peso != null && data.peso > 0) {
+      await supabase.from('historico_peso').upsert({
+        paciente_id: data.pacienteId,
+        peso: data.peso,
+        data_registro: data.dataAtendimento ?? new Date().toISOString().split('T')[0],
+      }, { onConflict: 'paciente_id, data_registro', ignoreDuplicates: false });
+    }
+
     return BodyMeasurementMapper.toDomain(row);
   }
 

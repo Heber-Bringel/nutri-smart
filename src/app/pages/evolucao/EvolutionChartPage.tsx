@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Container } from '../../../di/container';
 import type { EvolutionChartData } from '../../../model/services/IAdesaoService';
 import { EvolutionChart } from '../../components/evolucao/EvolutionChart';
@@ -7,6 +7,7 @@ import type { Paciente } from '../../../model/entities/Paciente';
 
 export function EvolutionChartPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
+  const navigate = useNavigate();
   const [data, setData] = useState<EvolutionChartData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +51,20 @@ export function EvolutionChartPage() {
             Evolução de Peso (Últimos 30 dias)
           </h3>
           <EvolutionChart data={data} />
+          {data.length > 0 && data.every(d => !d.peso && d.adesaoPercentual === 0) && (
+            <div style={{ textAlign: 'center', marginTop: 16 }}>
+              <button
+                onClick={() => navigate('../medidas', { relative: 'path' })}
+                style={{
+                  padding: '8px 16px', background: 'var(--color-primary)', color: '#fff',
+                  border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer',
+                  fontSize: 13, fontWeight: 500,
+                }}
+              >
+                Registrar medidas corporais
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

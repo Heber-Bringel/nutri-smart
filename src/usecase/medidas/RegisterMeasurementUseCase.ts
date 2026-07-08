@@ -19,6 +19,7 @@ export class RegisterMeasurementUseCase {
     }
 
     const fields = [
+      data.peso,
       data.circunferenciaCintura,
       data.circunferenciaQuadril,
       data.circunferenciaBraco,

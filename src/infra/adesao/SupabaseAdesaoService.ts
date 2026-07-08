@@ -56,6 +56,17 @@ export class SupabaseAdesaoService implements IAdesaoService {
     return AdesaoMapper.toDomain(row);
   }
 
+  async getAdesaoByData(pacienteId: string, data: string): Promise<AdesaoRefeicao[]> {
+    const { data: rows, error } = await supabase
+      .from('adesao_refeicoes')
+      .select('*')
+      .eq('paciente_id', pacienteId)
+      .eq('data', data);
+
+    if (error) throw new AdesaoError(error.message);
+    return (rows || []).map(AdesaoMapper.toDomain);
+  }
+
   async getDailyProgress(pacienteId: string, data: string): Promise<DailyProgress> {
     const { count: total, error: totalError } = await supabase
       .from('refeicoes')

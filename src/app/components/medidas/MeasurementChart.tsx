@@ -54,7 +54,26 @@ export function MeasurementChart({ data }: MeasurementChartProps) {
   const dateLabels = sorted.filter((_, i) => i % Math.max(1, Math.floor(sorted.length / 5)) === 0 || i === sorted.length - 1);
 
   if (points.length < 2) {
-    return null;
+    return (
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <h3 style={{
+            margin: 0, fontSize: 12, fontWeight: 600,
+            color: 'var(--color-ink-secondary)', textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}>
+            Gráfico de Medidas
+          </h3>
+        </div>
+        <div style={{
+          background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-lg)', padding: 20, textAlign: 'center',
+          color: 'var(--color-ink-tertiary)', fontSize: 13,
+        }}>
+          Registre ao menos duas medidas para exibir o gráfico.
+        </div>
+      </div>
+    );
   }
 
   const color = 'var(--color-primary)';

@@ -3,6 +3,7 @@ import { BodyMeasurement } from '../entities/BodyMeasurement';
 export interface CreateMeasurementData {
   pacienteId: string;
   dataAtendimento?: string;
+  peso?: number | null;
   circunferenciaCintura?: number | null;
   circunferenciaQuadril?: number | null;
   circunferenciaBraco?: number | null;
@@ -13,6 +14,7 @@ export interface CreateMeasurementData {
 
 export interface UpdateMeasurementData {
   dataAtendimento?: string;
+  peso?: number | null;
   circunferenciaCintura?: number | null;
   circunferenciaQuadril?: number | null;
   circunferenciaBraco?: number | null;

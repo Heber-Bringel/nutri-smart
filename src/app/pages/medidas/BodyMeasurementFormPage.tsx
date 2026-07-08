@@ -9,6 +9,7 @@ export function BodyMeasurementFormPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
   const [medidas, setMedidas] = useState<BodyMeasurement[]>([]);
   const [dataAtendimento, setDataAtendimento] = useState(new Date().toISOString().split('T')[0]);
+  const [peso, setPeso] = useState('');
   const [circunferenciaCintura, setCircunferenciaCintura] = useState('');
   const [circunferenciaQuadril, setCircunferenciaQuadril] = useState('');
   const [circunferenciaBraco, setCircunferenciaBraco] = useState('');
@@ -35,6 +36,7 @@ export function BodyMeasurementFormPage() {
 
   function resetForm() {
     setDataAtendimento(new Date().toISOString().split('T')[0]);
+    setPeso('');
     setCircunferenciaCintura('');
     setCircunferenciaQuadril('');
     setCircunferenciaBraco('');
@@ -47,6 +49,7 @@ export function BodyMeasurementFormPage() {
   function editMeasurement(m: BodyMeasurement) {
     setEditId(m.id);
     setDataAtendimento(m.dataAtendimento);
+    setPeso('');
     setCircunferenciaCintura(m.circunferenciaCintura?.toString() || '');
     setCircunferenciaQuadril(m.circunferenciaQuadril?.toString() || '');
     setCircunferenciaBraco(m.circunferenciaBraco?.toString() || '');
@@ -64,6 +67,7 @@ export function BodyMeasurementFormPage() {
       const data = {
         pacienteId: paciente.id,
         dataAtendimento,
+        peso: peso ? Number(peso) : null,
         circunferenciaCintura: circunferenciaCintura ? Number(circunferenciaCintura) : null,
         circunferenciaQuadril: circunferenciaQuadril ? Number(circunferenciaQuadril) : null,
         circunferenciaBraco: circunferenciaBraco ? Number(circunferenciaBraco) : null,
@@ -157,6 +161,12 @@ export function BodyMeasurementFormPage() {
               onBlur={e => e.target.style.borderColor = 'var(--color-border)'} />
           </div>
           <div>
+            <label style={labelStyle}>Peso (kg)</label>
+            <input type="number" step="0.1" value={peso} onChange={e => setPeso(e.target.value)} style={inputStyle}
+              onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+              onBlur={e => e.target.style.borderColor = 'var(--color-border)'} />
+          </div>
+          <div>
             <label style={labelStyle}>Cintura (cm)</label>
             <input type="number" step="0.1" value={circunferenciaCintura} onChange={e => setCircunferenciaCintura(e.target.value)} style={inputStyle}
               onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
@@ -232,7 +242,16 @@ export function BodyMeasurementFormPage() {
           padding: '32px 0', textAlign: 'center', color: 'var(--color-ink-tertiary)',
           fontSize: 13, border: '1px dashed var(--color-border)', borderRadius: 'var(--radius-lg)',
         }}>
-          Nenhuma medida corporal registrada para este paciente.
+          Nenhuma medida corporal registrada para este paciente.{' '}
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            style={{
+              background: 'none', border: 'none', color: 'var(--color-primary)',
+              cursor: 'pointer', textDecoration: 'underline', fontSize: 13,
+            }}
+          >
+            Registrar primeira medida
+          </button>
         </div>
       ) : (
         <div style={{

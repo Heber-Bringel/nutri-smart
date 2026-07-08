@@ -32,7 +32,7 @@ export function EvolutionChart({ data }: EvolutionChartProps) {
   if (data.length === 0 || data.every(d => !d.peso && d.adesaoPercentual === 0)) {
     return (
       <div style={{ textAlign: 'center', padding: '48px', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>
-        Nenhum dado disponível para o período selecionado.
+        Nenhum registro de evolução encontrado.
       </div>
     );
   }

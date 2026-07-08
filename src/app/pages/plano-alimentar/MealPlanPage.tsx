@@ -75,7 +75,7 @@ export function MealPlanPage() {
       setSuccessMsg('Plano alimentar salvo com sucesso!');
       setTimeout(() => setSuccessMsg(null), 4000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar plano alimentar.');
+      setError(err instanceof Error ? err.message : 'Não foi possível salvar o plano. Verifique sua conexão e tente novamente.');
     } finally {
       setSaving(false);
     }

@@ -24,11 +24,17 @@ export function PatientMealPlanPage() {
     Promise.all([
       Container.getMealPlanUseCase.execute(user.pacienteId!),
       Container.getDailyProgressUseCase.execute(user.pacienteId!, selectedDate),
+      Container.getDailyAdesaoStatesUseCase.execute(user.pacienteId!, selectedDate),
     ])
-      .then(([plan, prog]) => {
+      .then(([plan, prog, estados]) => {
         if (!cancelled) {
           setMealPlan(plan);
           setProgress(prog);
+          const map = new Map<string, boolean>();
+          for (const e of estados) {
+            map.set(e.refeicaoId, e.concluida);
+          }
+          setAdesaoMap(map);
         }
       })
       .catch(err => { if (!cancelled) setError(err instanceof Error ? err.message : 'Erro ao carregar plano.'); })
@@ -40,10 +46,24 @@ export function PatientMealPlanPage() {
   async function handleToggle(refeicaoId: string, concluida: boolean) {
     if (!user?.pacienteId) return;
 
-    await Container.markMealAsCompletedUseCase.execute(refeicaoId, user.pacienteId, concluida, selectedDate);
+    try {
+      await Container.markMealAsCompletedUseCase.execute(refeicaoId, user.pacienteId, concluida, selectedDate);
 
-    const prog = await Container.getDailyProgressUseCase.execute(user.pacienteId, selectedDate);
-    setProgress(prog);
+      setAdesaoMap(prev => new Map(prev).set(refeicaoId, concluida));
+
+      const [prog, estados] = await Promise.all([
+        Container.getDailyProgressUseCase.execute(user.pacienteId, selectedDate),
+        Container.getDailyAdesaoStatesUseCase.execute(user.pacienteId, selectedDate),
+      ]);
+      setProgress(prog);
+      const map = new Map<string, boolean>();
+      for (const e of estados) {
+        map.set(e.refeicaoId, e.concluida);
+      }
+      setAdesaoMap(map);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao salvar. Tente novamente.');
+    }
   }
 
   if (loading) {
