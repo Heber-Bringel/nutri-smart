@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container } from '../../../di/container';
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
-import { MealPlan, Refeicao } from '../../../model/entities/MealPlan';
-import { DailyProgress } from '../../../model/entities/Adesao';
+import type { MealPlan } from '../../../model/entities/MealPlan';
+import type { DailyProgress } from '../../../model/entities/Adesao';
 import { AdherenceToggle } from '../../components/paciente/AdherenceToggle';
 import { ProgressBar } from '../../components/paciente/ProgressBar';
 
@@ -46,25 +46,35 @@ export function PatientMealPlanPage() {
   }
 
   if (loading) {
-    return <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>Carregando...</div>;
+    return <div style={{ padding: 32, fontFamily: 'var(--font-body)', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando...</div>;
   }
 
+  const headerBtn = {
+    padding: '8px 16px', cursor: 'pointer', borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--color-border)', background: 'var(--color-surface)',
+    color: 'var(--color-ink-primary)', fontSize: 13, fontWeight: 500,
+  };
+
   return (
-    <div style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+    <div style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: '1.5rem', margin: 0 }}>Meu Plano Alimentar</h1>
-          <p style={{ color: '#6b7280', margin: '0.25rem 0 0' }}>
+          <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: 'var(--color-ink-primary)' }}>Meu Plano Alimentar</h1>
+          <p style={{ color: 'var(--color-ink-secondary)', margin: '4px 0 0', fontSize: 13 }}>
             Bem-vindo(a), {user?.nomeCompleto}
           </p>
         </div>
-        <button onClick={logout} style={{ padding: '0.5rem 1rem', cursor: 'pointer', borderRadius: '4px', border: '1px solid #ccc', backgroundColor: '#fff' }}>
+        <button onClick={logout} style={headerBtn}>
           Sair
         </button>
       </div>
 
       {error && (
-        <div style={{ padding: '0.75rem', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '4px', marginBottom: '1rem' }}>
+        <div style={{
+          padding: '10px 14px', background: 'var(--color-danger-subtle)',
+          border: '1px solid var(--color-danger-border)',
+          color: 'var(--color-danger)', borderRadius: 'var(--radius-md)', fontSize: 13, marginBottom: 16,
+        }}>
           {error}
         </div>
       )}
@@ -78,9 +88,12 @@ export function PatientMealPlanPage() {
       )}
 
       {!mealPlan ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af', border: '2px dashed #e5e7eb', borderRadius: '8px' }}>
-          <p style={{ fontSize: '1.1rem' }}>Nenhum plano alimentar disponível.</p>
-          <p style={{ fontSize: '0.9rem' }}>Seu nutricionista ainda não cadastrou um plano para você.</p>
+        <div style={{
+          textAlign: 'center', padding: 48, color: 'var(--color-ink-tertiary)',
+          border: '2px dashed var(--color-border)', borderRadius: 'var(--radius-lg)',
+        }}>
+          <p style={{ fontSize: 14 }}>Nenhum plano alimentar disponível.</p>
+          <p style={{ fontSize: 13 }}>Seu nutricionista ainda não cadastrou um plano para você.</p>
         </div>
       ) : (
         <div>
@@ -90,21 +103,28 @@ export function PatientMealPlanPage() {
               <div
                 key={refeicao.id}
                 style={{
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  padding: '1rem',
-                  marginBottom: '1rem',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 20,
+                  marginBottom: 16,
+                  background: 'var(--color-surface)',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{refeicao.nome}</h3>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: 'var(--color-ink-primary)' }}>
+                      {refeicao.nome}
+                    </h3>
                     {refeicao.horarioSugerido && (
-                      <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{refeicao.horarioSugerido}</span>
+                      <span style={{ fontSize: 12, color: 'var(--color-ink-secondary)', fontFamily: 'var(--font-mono)' }}>
+                        {refeicao.horarioSugerido}
+                      </span>
                     )}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ fontWeight: 600, color: '#2563eb' }}>{refeicao.totalCalorias ?? 0} kcal</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <span style={{ fontWeight: 600, color: 'var(--color-primary)', fontFamily: 'var(--font-mono)' }}>
+                      {refeicao.totalCalorias ?? 0} kcal
+                    </span>
                     <AdherenceToggle
                       refeicaoId={refeicao.id}
                       concluida={adesaoMap.get(refeicao.id) ?? false}
@@ -113,9 +133,9 @@ export function PatientMealPlanPage() {
                   </div>
                 </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
-                    <tr style={{ backgroundColor: '#f9fafb' }}>
+                    <tr style={{ background: 'var(--color-bg)' }}>
                       <th style={thStyle}>Alimento</th>
                       <th style={{ ...thStyle, textAlign: 'right' }}>Qtd</th>
                       <th style={{ ...thStyle, textAlign: 'right' }}>Cal</th>
@@ -123,10 +143,10 @@ export function PatientMealPlanPage() {
                   </thead>
                   <tbody>
                     {refeicao.alimentos.map(ali => (
-                      <tr key={ali.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                      <tr key={ali.id} style={{ borderBottom: '1px solid var(--color-border-light)' }}>
                         <td style={tdStyle}>{ali.nome}</td>
-                        <td style={{ ...tdStyle, textAlign: 'right' }}>{ali.quantidade}{ali.unidadeMedida}</td>
-                        <td style={{ ...tdStyle, textAlign: 'right' }}>{ali.calorias}</td>
+                        <td style={{ ...tdStyle, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{ali.quantidade}{ali.unidadeMedida}</td>
+                        <td style={{ ...tdStyle, textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{ali.calorias}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -139,5 +159,11 @@ export function PatientMealPlanPage() {
   );
 }
 
-const thStyle: React.CSSProperties = { textAlign: 'left', padding: '0.5rem', fontWeight: 600, borderBottom: '2px solid #e5e7eb' };
-const tdStyle: React.CSSProperties = { padding: '0.5rem' };
+const thStyle: React.CSSProperties = {
+  textAlign: 'left', padding: '8px 12px', fontWeight: 500,
+  fontSize: 11, color: 'var(--color-ink-secondary)', textTransform: 'uppercase',
+  letterSpacing: '0.05em', borderBottom: '2px solid var(--color-border)',
+};
+const tdStyle: React.CSSProperties = {
+  padding: '8px 12px', color: 'var(--color-ink-primary)', fontSize: 13,
+};
