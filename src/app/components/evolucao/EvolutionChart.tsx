@@ -1,4 +1,4 @@
-import { EvolutionChartData } from '../../../model/services/IAdesaoService';
+import type { EvolutionChartData } from '../../../model/services/IAdesaoService';
 
 interface EvolutionChartProps {
   data: EvolutionChartData[];
@@ -31,11 +31,14 @@ export function EvolutionChart({ data }: EvolutionChartProps) {
 
   if (data.length === 0 || data.every(d => !d.peso && d.adesaoPercentual === 0)) {
     return (
-      <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af' }}>
+      <div style={{ textAlign: 'center', padding: '48px', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>
         Nenhum dado disponível para o período selecionado.
       </div>
     );
   }
+
+  const pesoColor = '#10B981';
+  const adesaoColor = '#6B7280';
 
   return (
     <div style={{ overflowX: 'auto' }}>
@@ -44,30 +47,30 @@ export function EvolutionChart({ data }: EvolutionChartProps) {
           const idx = data.indexOf(d);
           const x = padding.left + (idx / Math.max(data.length - 1, 1)) * innerW;
           return (
-            <text key={i} x={x} y={chartHeight - 5} textAnchor="middle" fontSize="10" fill="#9ca3af">
+            <text key={i} x={x} y={chartHeight - 5} textAnchor="middle" fontSize="10" fill="var(--color-ink-tertiary, #9CA3AF)">
               {new Date(d.data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
             </text>
           );
         })}
 
         {pesoPoints.length > 1 && (
-          <polyline points={pesoPoints.join(' ')} fill="none" stroke="#2563eb" strokeWidth="2" />
+          <polyline points={pesoPoints.join(' ')} fill="none" stroke={pesoColor} strokeWidth="2" />
         )}
 
         {adesaoPoints.length > 1 && (
-          <polyline points={adesaoPoints.join(' ')} fill="none" stroke="#16a34a" strokeWidth="2" strokeDasharray="4" />
+          <polyline points={adesaoPoints.join(' ')} fill="none" stroke={adesaoColor} strokeWidth="2" strokeDasharray="4" />
         )}
 
-        <text x={10} y={padding.top + innerH / 2} textAnchor="middle" fontSize="10" fill="#2563eb" transform={`rotate(-90, 10, ${padding.top + innerH / 2})`}>
+        <text x={10} y={padding.top + innerH / 2} textAnchor="middle" fontSize="10" fill={pesoColor} transform={`rotate(-90, 10, ${padding.top + innerH / 2})`}>
           Peso (kg)
         </text>
 
-        <text x={chartWidth - 5} y={padding.top + innerH / 2} textAnchor="middle" fontSize="10" fill="#16a34a" transform={`rotate(90, ${chartWidth - 5}, ${padding.top + innerH / 2})`}>
+        <text x={chartWidth - 5} y={padding.top + innerH / 2} textAnchor="middle" fontSize="10" fill={adesaoColor} transform={`rotate(90, ${chartWidth - 5}, ${padding.top + innerH / 2})`}>
           Adesão (%)
         </text>
 
-        <text x={chartWidth - 100} y={15} fontSize="11" fill="#2563eb">— Peso</text>
-        <text x={chartWidth - 50} y={15} fontSize="11" fill="#16a34a">- - Adesão</text>
+        <text x={chartWidth - 100} y={15} fontSize="11" fill={pesoColor}>— Peso</text>
+        <text x={chartWidth - 50} y={15} fontSize="11" fill={adesaoColor}>- - Adesão</text>
       </svg>
     </div>
   );
