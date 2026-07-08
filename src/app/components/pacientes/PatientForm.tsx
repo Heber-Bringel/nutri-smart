@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { SexoBiologico, NivelAtividadeFisica } from '../../../model/entities/Paciente';
+import type { SexoBiologico, NivelAtividadeFisica } from '../../../model/entities/Paciente';
 
 interface PatientFormData {
   nomeCompleto: string;
@@ -18,7 +18,7 @@ interface PatientFormProps {
   editMode?: boolean;
 }
 
-export function PatientForm({ onSubmit, loading, initialData, editMode }: PatientFormProps) {
+function usePatientForm(initialData?: Partial<PatientFormData>) {
   const [formData, setFormData] = useState<PatientFormData>({
     nomeCompleto: initialData?.nomeCompleto || '',
     email: initialData?.email || '',
@@ -32,21 +32,13 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
 
   function validate(): boolean {
     const newErrors: Partial<Record<keyof PatientFormData, string>> = {};
-
     if (!formData.nomeCompleto.trim()) newErrors.nomeCompleto = 'Nome é obrigatório.';
     if (!formData.email.trim()) newErrors.email = 'E-mail é obrigatório.';
     if (!formData.dataNascimento) newErrors.dataNascimento = 'Data de nascimento é obrigatória.';
     if (!formData.pesoInicial || Number(formData.pesoInicial) <= 0) newErrors.pesoInicial = 'Peso deve ser maior que zero.';
     if (!formData.altura || Number(formData.altura) <= 0) newErrors.altura = 'Altura deve ser maior que zero.';
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validate()) return;
-    await onSubmit(formData);
   }
 
   function updateField<K extends keyof PatientFormData>(key: K, value: PatientFormData[K]) {
@@ -54,121 +46,166 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
     setErrors(prev => ({ ...prev, [key]: undefined }));
   }
 
-  const inputStyle = {
-    width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E5E5E5',
-    fontSize: 14, fontFamily: 'inherit', outline: 'none', transition: 'border-color 0.15s',
-    boxSizing: 'border-box' as const, background: '#fff'
-  };
+  return { formData, errors, validate, updateField };
+}
 
-  const labelStyle = { display: 'block', marginBottom: 8, fontSize: 11, fontWeight: 500, color: '#6B7280', textTransform: 'uppercase' as const, letterSpacing: '0.05em' };
-  const errorStyle = { color: '#DC2626', fontSize: 12, marginTop: 4, display: 'block' };
+function Input({ error, mono, ...props }: {
+  error?: string; mono?: boolean;
+} & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div>
+      <input
+        {...props}
+        style={{
+          width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+          border: '1px solid', borderColor: error ? 'var(--color-danger-border)' : 'var(--color-border)',
+          fontSize: 14, fontFamily: mono ? 'var(--font-mono)' : 'var(--font-body)',
+          outline: 'none', boxSizing: 'border-box', background: 'var(--color-surface)',
+          color: 'var(--color-ink-primary)',
+          transition: 'border-color 150ms ease-out',
+          ...props.style as React.CSSProperties,
+        }}
+        onFocus={(e) => {
+          e.target.style.borderColor = 'var(--color-primary)';
+          props.onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          e.target.style.borderColor = error ? 'var(--color-danger-border)' : 'var(--color-border)';
+          props.onBlur?.(e);
+        }}
+      />
+      {error && <span style={{ color: 'var(--color-danger)', fontSize: 12, marginTop: 4, display: 'block' }}>{error}</span>}
+    </div>
+  );
+}
+
+function Select({ error, label, options, value, onChange }: {
+  error?: string; label: string;
+  options: { value: string; label: string }[];
+  value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        style={{
+          width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+          border: '1px solid', borderColor: error ? 'var(--color-danger-border)' : 'var(--color-border)',
+          fontSize: 14, fontFamily: 'var(--font-body)', outline: 'none',
+          boxSizing: 'border-box', background: 'var(--color-surface)',
+          color: 'var(--color-ink-primary)',
+          transition: 'border-color 150ms ease-out',
+        }}
+        onFocus={(e) => { e.target.style.borderColor = 'var(--color-primary)'; }}
+        onBlur={(e) => { e.target.style.borderColor = error ? 'var(--color-danger-border)' : 'var(--color-border)'; }}
+      >
+        {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+      </select>
+      {error && <span style={{ color: 'var(--color-danger)', fontSize: 12, marginTop: 4, display: 'block' }}>{error}</span>}
+    </div>
+  );
+}
+
+export function PatientForm({ onSubmit, loading, initialData, editMode }: PatientFormProps) {
+  const { formData, errors, validate, updateField } = usePatientForm(initialData);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!validate()) return;
+    await onSubmit(formData);
+  }
+
+  const labelStyle: React.CSSProperties = {
+    display: 'block', marginBottom: 8, fontSize: 11, fontWeight: 500,
+    color: 'var(--color-ink-secondary)', textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  };
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
         <div>
           <label style={labelStyle}>Nome completo</label>
-          <input
+          <Input
             type="text"
             value={formData.nomeCompleto}
+            error={errors.nomeCompleto}
             onChange={e => updateField('nomeCompleto', e.target.value)}
-            style={{ ...inputStyle, borderColor: errors.nomeCompleto ? '#FCA5A5' : '#E5E5E5' }}
-            onFocus={e => e.target.style.borderColor = '#10B981'}
-            onBlur={e => e.target.style.borderColor = errors.nomeCompleto ? '#FCA5A5' : '#E5E5E5'}
           />
-          {errors.nomeCompleto && <span style={errorStyle}>{errors.nomeCompleto}</span>}
         </div>
-
         <div>
           <label style={labelStyle}>E-mail</label>
-          <input
+          <Input
             type="email"
             value={formData.email}
+            error={errors.email}
             onChange={e => updateField('email', e.target.value)}
-            style={{ ...inputStyle, borderColor: errors.email ? '#FCA5A5' : '#E5E5E5' }}
-            onFocus={e => e.target.style.borderColor = '#10B981'}
-            onBlur={e => e.target.style.borderColor = errors.email ? '#FCA5A5' : '#E5E5E5'}
           />
-          {errors.email && <span style={errorStyle}>{errors.email}</span>}
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
         <div>
           <label style={labelStyle}>Data de nascimento</label>
-          <input
+          <Input
             type="date"
             value={formData.dataNascimento}
+            error={errors.dataNascimento}
+            mono
             onChange={e => updateField('dataNascimento', e.target.value)}
-            style={{ ...inputStyle, borderColor: errors.dataNascimento ? '#FCA5A5' : '#E5E5E5', fontFamily: 'JetBrains Mono, monospace' }}
-            onFocus={e => e.target.style.borderColor = '#10B981'}
-            onBlur={e => e.target.style.borderColor = errors.dataNascimento ? '#FCA5A5' : '#E5E5E5'}
           />
-          {errors.dataNascimento && <span style={errorStyle}>{errors.dataNascimento}</span>}
         </div>
-
         <div>
           <label style={labelStyle}>Sexo biológico</label>
-          <select
+          <Select
+            label=""
+            options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }]}
             value={formData.sexoBiologico}
-            onChange={e => updateField('sexoBiologico', e.target.value as SexoBiologico)}
-            style={inputStyle}
-            onFocus={e => e.target.style.borderColor = '#10B981'}
-            onBlur={e => e.target.style.borderColor = '#E5E5E5'}
-          >
-            <option value="masculino">Masculino</option>
-            <option value="feminino">Feminino</option>
-          </select>
+            onChange={v => updateField('sexoBiologico', v as SexoBiologico)}
+          />
         </div>
       </div>
 
-      <div style={{ height: 1, background: '#F5F5F5', margin: '8px 0' }} />
+      <div style={{ height: 1, background: 'var(--color-border-light)', margin: '8px 0' }} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
         <div>
           <label style={labelStyle}>Peso inicial (kg)</label>
-          <input
+          <Input
             type="number"
             step="0.01"
             value={formData.pesoInicial}
+            error={errors.pesoInicial}
+            mono
             onChange={e => updateField('pesoInicial', e.target.value)}
-            style={{ ...inputStyle, borderColor: errors.pesoInicial ? '#FCA5A5' : '#E5E5E5', fontFamily: 'JetBrains Mono, monospace' }}
-            onFocus={e => e.target.style.borderColor = '#10B981'}
-            onBlur={e => e.target.style.borderColor = errors.pesoInicial ? '#FCA5A5' : '#E5E5E5'}
           />
-          {errors.pesoInicial && <span style={errorStyle}>{errors.pesoInicial}</span>}
         </div>
-
         <div>
           <label style={labelStyle}>Altura (cm)</label>
-          <input
+          <Input
             type="number"
             step="0.01"
             value={formData.altura}
+            error={errors.altura}
+            mono
             onChange={e => updateField('altura', e.target.value)}
-            style={{ ...inputStyle, borderColor: errors.altura ? '#FCA5A5' : '#E5E5E5', fontFamily: 'JetBrains Mono, monospace' }}
-            onFocus={e => e.target.style.borderColor = '#10B981'}
-            onBlur={e => e.target.style.borderColor = errors.altura ? '#FCA5A5' : '#E5E5E5'}
           />
-          {errors.altura && <span style={errorStyle}>{errors.altura}</span>}
         </div>
-        
         <div>
           <label style={labelStyle}>Nível de atividade física</label>
-          <select
+          <Select
+            label=""
+            options={[
+              { value: 'sedentario', label: 'Sedentário' },
+              { value: 'levemente_ativo', label: 'Levemente ativo' },
+              { value: 'moderadamente_ativo', label: 'Moderadamente ativo' },
+              { value: 'muito_ativo', label: 'Muito ativo' },
+              { value: 'extremamente_ativo', label: 'Extremamente ativo' },
+            ]}
             value={formData.nivelAtividadeFisica}
-            onChange={e => updateField('nivelAtividadeFisica', e.target.value as NivelAtividadeFisica)}
-            style={inputStyle}
-            onFocus={e => e.target.style.borderColor = '#10B981'}
-            onBlur={e => e.target.style.borderColor = '#E5E5E5'}
-          >
-            <option value="sedentario">Sedentário</option>
-            <option value="levemente_ativo">Levemente ativo</option>
-            <option value="moderadamente_ativo">Moderadamente ativo</option>
-            <option value="muito_ativo">Muito ativo</option>
-            <option value="extremamente_ativo">Extremamente ativo</option>
-          </select>
+            onChange={v => updateField('nivelAtividadeFisica', v as NivelAtividadeFisica)}
+          />
         </div>
       </div>
 
@@ -178,15 +215,19 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
           disabled={loading}
           style={{
             padding: '10px 24px',
-            backgroundColor: loading ? '#6EE7B7' : '#10B981',
+            background: loading ? 'var(--color-ink-tertiary)' : 'var(--color-primary)',
             color: '#fff',
             border: 'none',
-            borderRadius: '6px',
+            borderRadius: 'var(--radius-md)',
             cursor: loading ? 'not-allowed' : 'pointer',
             fontWeight: 500,
-            fontSize: 14,
-            transition: 'background-color 0.15s'
+            fontSize: 13,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            transition: 'background 150ms ease-out',
           }}
+          onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = 'var(--color-primary-hover)'; }}
+          onMouseLeave={(e) => { if (!loading) e.currentTarget.style.background = 'var(--color-primary)'; }}
         >
           {loading ? 'Salvando...' : editMode ? 'Salvar alterações' : 'Cadastrar paciente'}
         </button>
