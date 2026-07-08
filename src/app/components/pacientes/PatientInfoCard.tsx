@@ -1,8 +1,5 @@
-import { Paciente } from '../../../model/entities/Paciente';
-
-interface PatientInfoCardProps {
-  paciente: Paciente;
-}
+import type { ReactNode } from 'react';
+import type { Paciente } from '../../../model/entities/Paciente';
 
 const NIVEL_ATIVIDADE_LABEL: Record<string, string> = {
   sedentario: 'Sedentário',
@@ -12,18 +9,29 @@ const NIVEL_ATIVIDADE_LABEL: Record<string, string> = {
   extremamente_ativo: 'Extremamente ativo',
 };
 
-function StatItem({ label, value, mono = false }: { label: string; value: React.ReactNode; mono?: boolean }) {
+function StatItem({ label, value, mono = false }: { label: string; value: ReactNode; mono?: boolean }) {
   return (
-    <div>
-      <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 14, color: '#111827', fontWeight: 500, fontFamily: mono ? 'JetBrains Mono, monospace' : 'inherit' }}>{value}</div>
+    <div style={{ minWidth: 0 }}>
+      <div style={{
+        fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase',
+        letterSpacing: '0.05em', marginBottom: 4,
+      }}>
+        {label}
+      </div>
+      <div style={{
+        fontSize: 14, color: 'var(--color-ink-primary)', fontWeight: 500,
+        fontFamily: mono ? 'var(--font-mono)' : 'var(--font-body)',
+        overflow: 'hidden', textOverflow: 'ellipsis', wordBreak: 'break-all',
+      }}>
+        {value}
+      </div>
     </div>
   );
 }
 
-export function PatientInfoCard({ paciente }: PatientInfoCardProps) {
+export function PatientInfoCard({ paciente }: { paciente: Paciente }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 8, padding: 32 }}>
+    <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 32 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
         <StatItem label="E-mail" value={paciente.email} />
         <StatItem label="Data de Nasc." value={new Date(paciente.dataNascimento).toLocaleDateString('pt-BR')} mono />
@@ -35,9 +43,13 @@ export function PatientInfoCard({ paciente }: PatientInfoCardProps) {
 
       {paciente.imc !== undefined && (
         <>
-          <div style={{ height: 1, background: '#F5F5F5', margin: '24px 0' }} />
+          <div style={{ height: 1, background: 'var(--color-border-light)', margin: '24px 0' }} />
           <div>
-            <h3 style={{ margin: '0 0 16px', fontSize: 13, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <h3 style={{
+              margin: '0 0 16px', fontSize: 12, fontWeight: 600,
+              color: 'var(--color-ink-secondary)', textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}>
               Indicadores Clínicos Calculados
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 24 }}>
@@ -48,9 +60,9 @@ export function PatientInfoCard({ paciente }: PatientInfoCardProps) {
           </div>
         </>
       )}
-      
-      <div style={{ marginTop: 24, fontSize: 11, color: '#9CA3AF', fontFamily: 'JetBrains Mono, monospace' }}>
-        Cadastrado em: {new Date(paciente.createdAt).toLocaleDateString('pt-BR')} · 
+
+      <div style={{ marginTop: 24, fontSize: 11, color: 'var(--color-ink-tertiary)', fontFamily: 'var(--font-mono)' }}>
+        Cadastrado em: {new Date(paciente.createdAt).toLocaleDateString('pt-BR')} ·
         Atualizado em: {new Date(paciente.updatedAt).toLocaleDateString('pt-BR')}
       </div>
     </div>
