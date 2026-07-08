@@ -30,7 +30,7 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
   const [nextConsulta, setNextConsulta] = useState<Consulta | null>(null);
 
   useEffect(() => {
-    if (!pacienteId) return;
+    if (!pacienteId) { setLoading(false); return; }
     let cancelled = false;
 
     (async () => {
