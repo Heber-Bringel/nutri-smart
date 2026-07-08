@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Container } from '../../../di/container';
-import { ClinicalNote } from '../../../model/entities/ClinicalNote';
-import { Paciente } from '../../../model/entities/Paciente';
+import type { ClinicalNote } from '../../../model/entities/ClinicalNote';
+import type { Paciente } from '../../../model/entities/Paciente';
 
 export function ClinicalNotesPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -69,74 +69,103 @@ export function ClinicalNotesPage() {
     }
   }
 
-  if (loading) return <div style={{ color: '#9CA3AF', fontSize: 13 }}>Carregando anotações...</div>;
+  if (loading) return <div style={{ color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando anotações...</div>;
 
   return (
     <div style={{ paddingBottom: 64 }}>
       {error && (
-        <div style={{ padding: '12px 16px', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626', borderRadius: 6, fontSize: 13, marginBottom: 24 }}>
+        <div style={{
+          padding: '10px 14px', background: 'var(--color-danger-subtle)',
+          border: '1px solid var(--color-danger-border)',
+          color: 'var(--color-danger)', borderRadius: 'var(--radius-md)', fontSize: 13, marginBottom: 24,
+        }}>
           {error}
         </div>
       )}
 
-      {/* Form Card */}
-      <div style={{ background: '#fff', border: '1px solid #E5E5E5', borderRadius: 8, padding: 32, marginBottom: 48 }}>
-        <h3 style={{ margin: '0 0 24px', fontSize: 14, fontWeight: 600, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 32, marginBottom: 48 }}>
+        <h3 style={{
+          margin: '0 0 24px', fontSize: 12, fontWeight: 600, color: 'var(--color-ink-secondary)',
+          textTransform: 'uppercase', letterSpacing: '0.05em',
+        }}>
           {editId ? 'Editar Anotação' : 'Nova Anotação Clínica'}
         </h3>
-        
+
         <div style={{ marginBottom: 24 }}>
-          <label style={{ display: 'block', fontSize: 11, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8, fontWeight: 500 }}>
+          <label style={{
+            display: 'block', fontSize: 11, color: 'var(--color-ink-secondary)',
+            textTransform: 'uppercase', marginBottom: 8, fontWeight: 500, letterSpacing: '0.05em',
+          }}>
             Data do Atendimento
           </label>
-          <input 
-            type="date" 
-            value={dataAtendimento} 
-            onChange={e => setDataAtendimento(e.target.value)} 
-            style={{ 
-              width: '200px', padding: '10px 12px', borderRadius: 6, border: '1px solid #E5E5E5', 
-              fontSize: 14, outline: 'none', fontFamily: 'JetBrains Mono, monospace', background: '#fff'
+          <input
+            type="date"
+            value={dataAtendimento}
+            onChange={e => setDataAtendimento(e.target.value)}
+            style={{
+              width: 200, padding: '10px 12px', borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border)', fontSize: 14, outline: 'none',
+              fontFamily: 'var(--font-mono)', background: 'var(--color-surface)',
+              color: 'var(--color-ink-primary)',
+              transition: 'border-color 150ms ease-out',
             }}
-            onFocus={e => e.target.style.borderColor = '#10B981'}
-            onBlur={e => e.target.style.borderColor = '#E5E5E5'}
+            onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+            onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
           />
         </div>
-        
+
         <div style={{ marginBottom: 24 }}>
-          <label style={{ display: 'block', fontSize: 11, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8, fontWeight: 500 }}>
+          <label style={{
+            display: 'block', fontSize: 11, color: 'var(--color-ink-secondary)',
+            textTransform: 'uppercase', marginBottom: 8, fontWeight: 500, letterSpacing: '0.05em',
+          }}>
             Conteúdo
           </label>
           <textarea
             value={conteudo}
             onChange={e => setConteudo(e.target.value)}
-            style={{ 
-              width: '100%', padding: '12px', borderRadius: 6, border: '1px solid #E5E5E5', 
-              minHeight: '120px', fontSize: 14, fontFamily: 'inherit', outline: 'none', resize: 'vertical'
-            }}
             placeholder="Registre aqui suas observações clínicas sobre o paciente..."
-            onFocus={e => e.target.style.borderColor = '#10B981'}
-            onBlur={e => e.target.style.borderColor = '#E5E5E5'}
+            style={{
+              width: '100%', padding: '12px', borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--color-border)', minHeight: 120, fontSize: 14,
+              fontFamily: 'var(--font-body)', outline: 'none', resize: 'vertical',
+              background: 'var(--color-surface)', color: 'var(--color-ink-primary)',
+              transition: 'border-color 150ms ease-out',
+            }}
+            onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+            onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
           />
         </div>
 
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid #F5F5F5', paddingTop: 24 }}>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--color-border-light)', paddingTop: 24 }}>
           {editId && (
-            <button 
-              onClick={resetForm} 
-              style={{ 
-                padding: '10px 16px', backgroundColor: '#fff', border: '1px solid #E5E5E5', 
-                borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 500, color: '#374151' 
+            <button
+              onClick={resetForm}
+              style={{
+                padding: '10px 16px', background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)',
+                cursor: 'pointer', fontSize: 13, fontWeight: 500, color: 'var(--color-ink-primary)',
               }}
             >
               Cancelar
             </button>
           )}
-          <button 
-            onClick={handleSave} 
-            disabled={saving || !conteudo.trim()} 
-            style={{ 
-              padding: '10px 24px', backgroundColor: (saving || !conteudo.trim()) ? '#6EE7B7' : '#10B981', color: '#fff', 
-              border: 'none', borderRadius: 6, cursor: (saving || !conteudo.trim()) ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 500 
+          <button
+            onClick={handleSave}
+            disabled={saving || !conteudo.trim()}
+            style={{
+              padding: '10px 24px',
+              background: (saving || !conteudo.trim()) ? 'var(--color-ink-tertiary)' : 'var(--color-primary)',
+              color: '#fff', border: 'none', borderRadius: 'var(--radius-md)',
+              cursor: (saving || !conteudo.trim()) ? 'not-allowed' : 'pointer',
+              fontSize: 13, fontWeight: 500,
+              transition: 'background 150ms ease-out',
+            }}
+            onMouseEnter={(e) => {
+              if (!saving && conteudo.trim()) e.currentTarget.style.background = 'var(--color-primary-hover)';
+            }}
+            onMouseLeave={(e) => {
+              if (!saving && conteudo.trim()) e.currentTarget.style.background = 'var(--color-primary)';
             }}
           >
             {saving ? 'Salvando...' : editId ? 'Atualizar Anotação' : 'Registrar Anotação'}
@@ -144,39 +173,57 @@ export function ClinicalNotesPage() {
         </div>
       </div>
 
-      {/* Histórico */}
-      <h3 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      <h3 style={{
+        margin: '0 0 16px', fontSize: 12, fontWeight: 600, color: 'var(--color-ink-secondary)',
+        textTransform: 'uppercase', letterSpacing: '0.05em',
+      }}>
         Histórico
       </h3>
 
       {notes.length === 0 ? (
-        <div style={{ padding: '32px 0', textAlign: 'center', color: '#9CA3AF', fontSize: 13, border: '1px dashed #E5E5E5', borderRadius: 8 }}>
+        <div style={{
+          padding: '32px 0', textAlign: 'center', color: 'var(--color-ink-tertiary)',
+          fontSize: 13, border: '1px dashed var(--color-border)', borderRadius: 'var(--radius-lg)',
+        }}>
           Nenhuma anotação clínica registrada.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {notes.map(note => (
-            <div key={note.id} style={{ border: '1px solid #E5E5E5', borderRadius: 8, padding: 24, background: '#fff' }}>
+            <div key={note.id} style={{
+              border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)',
+              padding: 24, background: 'var(--color-surface)',
+            }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#4B5563', fontFamily: 'JetBrains Mono, monospace' }}>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-secondary)', fontFamily: 'var(--font-mono)' }}>
                   {new Date(note.dataAtendimento + 'T00:00:00').toLocaleDateString('pt-BR')}
                 </span>
                 <div>
-                  <button 
-                    onClick={() => editNote(note)} 
-                    style={{ padding: '4px 8px', marginRight: 8, backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#3B82F6' }}
+                  <button
+                    onClick={() => editNote(note)}
+                    style={{
+                      padding: '4px 8px', marginRight: 8, background: 'transparent',
+                      border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 500,
+                      color: 'var(--color-primary)',
+                    }}
                   >
                     Editar
                   </button>
-                  <button 
-                    onClick={() => handleDelete(note.id)} 
-                    style={{ padding: '4px 8px', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#DC2626' }}
+                  <button
+                    onClick={() => handleDelete(note.id)}
+                    style={{
+                      padding: '4px 8px', background: 'transparent', border: 'none',
+                      cursor: 'pointer', fontSize: 12, fontWeight: 500, color: 'var(--color-danger)',
+                    }}
                   >
                     Excluir
                   </button>
                 </div>
               </div>
-              <p style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: 14, color: '#111827', lineHeight: 1.6 }}>
+              <p style={{
+                margin: 0, whiteSpace: 'pre-wrap', fontSize: 14,
+                color: 'var(--color-ink-primary)', lineHeight: 1.6,
+              }}>
                 {note.conteudo}
               </p>
             </div>
