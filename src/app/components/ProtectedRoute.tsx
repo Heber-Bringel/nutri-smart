@@ -20,7 +20,7 @@ export function ProtectedRoute({ children, allowedRole }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login?sessionExpired=true" replace />;
   }
 
   if (allowedRole && user.role !== allowedRole) {

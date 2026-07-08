@@ -14,6 +14,8 @@ interface PacienteRow {
   imc?: number | null;
   tmb?: number | null;
   get?: number | null;
+  plano_ativo?: boolean | null;
+  ultimo_atendimento?: string | null;
   created_at: string;
   updated_at: string;
   deleted_at?: string | null;
@@ -35,6 +37,8 @@ export class PacienteMapper {
       imc: row.imc ?? undefined,
       tmb: row.tmb ?? undefined,
       get: row.get ?? undefined,
+      planoAtivo: row.plano_ativo ?? undefined,
+      ultimoAtendimento: row.ultimo_atendimento ?? undefined,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       deletedAt: row.deleted_at ?? null,

@@ -2,11 +2,11 @@
 
 
 
-## Versão 1.1 — MVP Acadêmico (Escopo Ampliado)
+## Versão 1.2 — MVP Acadêmico (Implementação Plano Alimentar)
 
 
 
-**Atualização:** inclusão de Medidas Corporais, Anotações Clínicas, Relatórios e Agenda de Consultas.
+**Atualização:** implementação completa do módulo de Plano Alimentar, Medidas Corporais, Anotações Clínicas, Adesão do Paciente e Base de Alimentos.
 
 
 
@@ -47,6 +47,8 @@ Esta seção resume as alterações desta versão (1.1) em relação à versão 
 | **1.0** | 29/04/2025 | Versão inicial do MVP: Gestão de Pacientes, Avaliação Nutricional (IMC/TMB/GET), Plano Alimentar e Adesão do Paciente. |
 
 | **1.1** | 21/06/2026 | Correção da inconsistência entre a stack tecnológica (Supabase Auth) e a Seção 5.1, que classificava a autenticação como fora do MVP. Inclusão de quatro novas funcionalidades: Registro de Medidas Corporais, Anotações Clínicas, Emissão de Relatórios e Agenda de Consultas. Atualização da matriz de rastreabilidade e dos requisitos não funcionais. |
+
+| **1.2** | 07/07/2026 | Implementação completa do módulo Plano Alimentar (RF007-RF008), Adesão do Paciente (RF011-RF013), Medidas Corporais (RF020-RF022), Anotações Clínicas (RF023-RF025), Base de Alimentos (RF034) e Gráfico de Evolução (RF010/RF014). Adicionados componentes de UI (ConfirmDialog, LoadingSkeleton, gráficos interativos). Correções de timezone nas datas do sistema. |
 
 
 
@@ -360,7 +362,7 @@ O sistema deve permitir que o nutricionista crie um plano alimentar para o pacie
 
 - Refeições (ex.: café da manhã, almoço, jantar, lanches);
 
-- Alimentos pertencentes a cada refeição;
+- Alimentos pertencentes a cada refeição (escolhidos de uma base cadastrada ou criados manualmente);
 
 - Quantidade de cada alimento (g/ml);
 
@@ -1023,6 +1025,15 @@ O sistema deve permitir que o paciente visualize, em sua área autenticada:
 - Data da próxima consulta;
 
 - Horário da próxima consulta agendada.
+
+---
+
+### RF034 — Base de Alimentos
+
+**Prioridade:** Alta
+
+O sistema deve permitir que o nutricionista selecione alimentos a partir de uma base cadastrada ou adicione alimentos manualmente (texto livre) durante a montagem de um plano alimentar.
+Para alimentos da base, o sistema deve carregar automaticamente a proporção de calorias e macros, se disponíveis.
 
 # 3. Requisitos Não Funcionais (RNF)
 

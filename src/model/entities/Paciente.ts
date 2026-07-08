@@ -21,6 +21,8 @@ export interface Paciente {
   imc?: number;
   tmb?: number;
   get?: number;
+  planoAtivo?: boolean;
+  ultimoAtendimento?: string;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
