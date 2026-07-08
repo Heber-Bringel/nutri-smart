@@ -351,14 +351,14 @@ CREATE TABLE public.refeicoes (
 -- 4.5 Tabela alimentos_base (Base de alimentos do sistema e customizados do nutricionista)
 CREATE TABLE public.alimentos_base (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    nutricionista_id UUID REFERENCES auth.users(id) ON DELETE CASCADE, -- NULL indica alimento padrão do sistema
+    nutricionista_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE, -- NULL indica alimento padrão do sistema
     nome TEXT NOT NULL,
-    porcao_base NUMERIC(7,2) NOT NULL DEFAULT 100,
+    porcao NUMERIC(7,2) NOT NULL DEFAULT 100,
     unidade_medida TEXT NOT NULL DEFAULT 'g',
     calorias NUMERIC(7,2) NOT NULL DEFAULT 0,
-    carboidratos NUMERIC(6,2) DEFAULT 0,
-    proteinas NUMERIC(6,2) DEFAULT 0,
-    gorduras NUMERIC(6,2) DEFAULT 0
+    carboidratos NUMERIC(6,2) NOT NULL DEFAULT 0,
+    proteinas NUMERIC(6,2) NOT NULL DEFAULT 0,
+    gorduras NUMERIC(6,2) NOT NULL DEFAULT 0
 );
 
 -- 5. Tabela alimentos
