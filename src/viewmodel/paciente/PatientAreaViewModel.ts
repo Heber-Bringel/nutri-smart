@@ -18,7 +18,6 @@ export interface PatientAreaViewModelState {
 export interface PatientAreaViewModelActions {
   setSelectedDate: (date: string) => void;
   handleToggle: (refeicaoId: string, concluida: boolean, pacienteId: string) => Promise<void>;
-  reload: (pacienteId: string) => Promise<void>;
 }
 
 export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewModelState & PatientAreaViewModelActions {
@@ -29,32 +28,6 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
   const [error, setError] = useState<string | null>(null);
   const [adesaoMap, setAdesaoMap] = useState<Map<string, boolean>>(new Map());
   const [nextConsulta, setNextConsulta] = useState<Consulta | null>(null);
-
-  async function load(pacienteId: string) {
-    if (!pacienteId) return;
-
-    try {
-      const [plan, prog, estados, next] = await Promise.all([
-        Container.getMealPlanUseCase.execute(pacienteId),
-        Container.getDailyProgressUseCase.execute(pacienteId, selectedDate),
-        Container.getDailyAdesaoStatesUseCase.execute(pacienteId, selectedDate),
-        Container.getNextConsultaUseCase.execute(pacienteId),
-      ]);
-
-      setMealPlan(plan);
-      setProgress(prog);
-      const map = new Map<string, boolean>();
-      for (const e of estados) {
-        map.set(e.refeicaoId, e.concluida);
-      }
-      setAdesaoMap(map);
-      setNextConsulta(next);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar plano.');
-    } finally {
-      setLoading(false);
-    }
-  }
 
   useEffect(() => {
     if (!pacienteId) return;
@@ -120,6 +93,5 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
     mealPlan, progress, selectedDate, loading, error, adesaoMap, nextConsulta,
     setSelectedDate: handleSetSelectedDate,
     handleToggle,
-    reload,
   };
 }

@@ -14,6 +14,35 @@ const localizer = dateFnsLocalizer({
   format, parse, startOfWeek, getDay, locales,
 });
 
+const labelStyle: React.CSSProperties = {
+  display: 'block', marginBottom: 6, fontSize: 11, fontWeight: 500,
+  color: 'var(--color-ink-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em',
+};
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--color-border)', fontSize: 14,
+  fontFamily: 'var(--font-body)', outline: 'none',
+  color: 'var(--color-ink-primary)', background: 'var(--color-surface)',
+  transition: 'border-color 150ms ease-out',
+  boxSizing: 'border-box',
+};
+const btnSecondary: React.CSSProperties = {
+  padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
+  border: '1px solid var(--color-border)', cursor: 'pointer',
+  background: 'var(--color-surface)', color: 'var(--color-ink-primary)',
+};
+const btnDanger: React.CSSProperties = {
+  padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
+  border: '1px solid var(--color-danger)', cursor: 'pointer',
+  background: 'var(--color-surface)', color: 'var(--color-danger)',
+};
+const btnPrimary: React.CSSProperties = {
+  padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
+  border: 'none', cursor: 'pointer',
+  background: 'var(--color-primary)', color: '#fff',
+  transition: 'background 150ms ease-out',
+};
+
 export function SchedulePage() {
   const { user } = useAuth();
   const vm = useAgendaViewModel();
@@ -124,24 +153,14 @@ export function SchedulePage() {
 
             {vm.editingConsulta ? (
               <div style={{ marginBottom: 16 }}>
-                <label style={{
-                  display: 'block', marginBottom: 6, fontSize: 11, fontWeight: 500,
-                  color: 'var(--color-ink-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em',
-                }}>
-                  Paciente
-                </label>
+                <label style={labelStyle}>Paciente</label>
                 <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-ink-primary)', margin: 0 }}>
                   {vm.editingConsulta.pacienteNome || 'Paciente'}
                 </p>
               </div>
             ) : (
               <div style={{ marginBottom: 16 }}>
-                <label style={{
-                  display: 'block', marginBottom: 6, fontSize: 11, fontWeight: 500,
-                  color: 'var(--color-ink-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em',
-                }}>
-                  Paciente
-                </label>
+                <label style={labelStyle}>Paciente</label>
                 <select
                   value={vm.form.pacienteId}
                   onChange={e => {
@@ -149,14 +168,7 @@ export function SchedulePage() {
                     const p = vm.patients.find(p => p.id === e.target.value);
                     vm.setFormField('pacienteNome', p?.nomeCompleto || '');
                   }}
-                  style={{
-                    width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--color-border)', fontSize: 14,
-                    fontFamily: 'var(--font-body)', outline: 'none',
-                    color: 'var(--color-ink-primary)', background: 'var(--color-surface)',
-                    transition: 'border-color 150ms ease-out',
-                    boxSizing: 'border-box',
-                  }}
+                  style={inputStyle}
                   onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
                   onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
                 >
@@ -169,48 +181,23 @@ export function SchedulePage() {
             )}
 
             <div style={{ marginBottom: 24 }}>
-              <label style={{
-                display: 'block', marginBottom: 6, fontSize: 11, fontWeight: 500,
-                color: 'var(--color-ink-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em',
-              }}>
-                Observações
-              </label>
+              <label style={labelStyle}>Observações</label>
               <textarea
                 value={vm.form.observacoes}
                 onChange={e => vm.setFormField('observacoes', e.target.value)}
                 rows={3}
-                style={{
-                  width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--color-border)', fontSize: 14,
-                  fontFamily: 'var(--font-body)', outline: 'none', resize: 'vertical',
-                  color: 'var(--color-ink-primary)', background: 'var(--color-surface)',
-                  transition: 'border-color 150ms ease-out',
-                  boxSizing: 'border-box',
-                }}
+                style={{ ...inputStyle, resize: 'vertical' }}
                 onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
                 onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
               />
             </div>
 
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button
-                onClick={vm.closeModal}
-                style={{
-                  padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
-                  border: '1px solid var(--color-border)', cursor: 'pointer',
-                  background: 'var(--color-surface)', color: 'var(--color-ink-primary)',
-                }}
-              >
-                Cancelar
-              </button>
+              <button onClick={vm.closeModal} style={btnSecondary}>Cancelar</button>
               {vm.editingConsulta && vm.editingConsulta.status !== 'cancelada' && user?.id && (
                 <button
                   onClick={() => vm.handleCancel(vm.editingConsulta!.id, user.id!)}
-                  style={{
-                    padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
-                    border: '1px solid var(--color-danger)', cursor: 'pointer',
-                    background: 'var(--color-surface)', color: 'var(--color-danger)',
-                  }}
+                  style={btnDanger}
                 >
                   Cancelar Consulta
                 </button>
@@ -218,12 +205,7 @@ export function SchedulePage() {
               {(!vm.editingConsulta || vm.editingConsulta.status !== 'cancelada') && user?.id && (
                 <button
                   onClick={() => vm.handleSave(user.id!)}
-                  style={{
-                    padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
-                    border: 'none', cursor: 'pointer',
-                    background: 'var(--color-primary)', color: '#fff',
-                    transition: 'background 150ms ease-out',
-                  }}
+                  style={btnPrimary}
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--color-primary-hover)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'var(--color-primary)'}
                 >
