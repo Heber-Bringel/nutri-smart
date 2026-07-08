@@ -1,13 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { Container } from '../../../di/container';
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
+import { useAgendaViewModel } from '../../../viewmodel/agenda/AgendaViewModel';
 import { CalendarEvent } from '../../../model/services/ICalendarAdapter';
-import { Consulta, CreateConsultaData } from '../../../model/entities/Consulta';
-import { AgendaError } from '../../../model/errors/AgendaError';
 import './agenda.css';
 
 const locales = { 'pt-BR': ptBR };
@@ -18,131 +16,21 @@ const localizer = dateFnsLocalizer({
 
 export function SchedulePage() {
   const { user } = useAuth();
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const [showModal, setShowModal] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
-  const [editingConsulta, setEditingConsulta] = useState<Consulta | null>(null);
-
-  const [pacienteId, setPacienteId] = useState('');
-  const [pacienteNome, setPacienteNome] = useState('');
-  const [observacoes, setObservacoes] = useState('');
-
-  const [patients, setPatients] = useState<{ id: string; nomeCompleto: string }[]>([]);
+  const vm = useAgendaViewModel();
 
   useEffect(() => {
-    Container.listPacientesUseCase.execute({ pageSize: 200 })
-      .then(res => setPatients(res.data))
-      .catch(() => {});
-  }, []);
+    if (user?.id) vm.fetchConsultas(user.id);
+  }, [user?.id]);
 
-  const fetchConsultas = useCallback(async (nutricionistaId?: string) => {
-    if (!nutricionistaId) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const consultas = await Container.listConsultasUseCase.execute(nutricionistaId);
-      const calendarEvents = Container.calendarAdapter.toEvents(consultas);
-      setEvents(calendarEvents);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar consultas.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (user?.id) fetchConsultas(user.id);
-  }, [user?.id, fetchConsultas]);
-
-  function resetForm() {
-    setPacienteId('');
-    setPacienteNome('');
-    setObservacoes('');
-    setEditingConsulta(null);
-    setError(null);
+  function onSelectSlot(slotInfo: SlotInfo) {
+    vm.openCreateModal({ start: slotInfo.start, end: slotInfo.end });
   }
 
-  function openCreateModal(slotInfo: SlotInfo) {
-    setSelectedSlot({ start: slotInfo.start, end: slotInfo.end });
-    resetForm();
-    setShowModal(true);
+  function onSelectEvent(event: CalendarEvent) {
+    vm.openEditModal(event);
   }
 
-  function openEditModal(event: CalendarEvent) {
-    const c = event.consulta;
-    setEditingConsulta(c);
-    setSelectedSlot({ start: event.start, end: event.end });
-    setPacienteId(c.pacienteId);
-    setPacienteNome(c.pacienteNome || '');
-    setObservacoes(c.observacoes || '');
-    setShowModal(true);
-  }
-
-  async function handleSave() {
-    if (!user?.id || !selectedSlot) return;
-    setError(null);
-
-    if (!pacienteId && !pacienteNome.trim()) {
-      setError('Selecione ou informe o paciente.');
-      return;
-    }
-
-    try {
-      const data = format(selectedSlot.start, 'yyyy-MM-dd');
-      const horarioInicio = format(selectedSlot.start, 'HH:mm');
-      const duracaoMinutos = Math.round(
-        (selectedSlot.end.getTime() - selectedSlot.start.getTime()) / 60000
-      );
-
-      if (editingConsulta) {
-        await Container.updateConsultaUseCase.execute(editingConsulta.id, {
-          data,
-          horarioInicio,
-          duracaoMinutos,
-          observacoes: observacoes || null,
-        });
-      } else {
-        if (!pacienteId) {
-          setError('Selecione um paciente da lista.');
-          return;
-        }
-        const createData: CreateConsultaData = {
-          nutricionistaId: user.id,
-          pacienteId,
-          data,
-          horarioInicio,
-          duracaoMinutos,
-          observacoes: observacoes || null,
-        };
-        await Container.createConsultaUseCase.execute(createData);
-      }
-
-      setShowModal(false);
-      resetForm();
-      await fetchConsultas(user.id);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar consulta.');
-    }
-  }
-
-  async function handleCancel(consultaId: string) {
-    if (!user?.id) return;
-    if (!window.confirm('Tem certeza que deseja cancelar esta consulta?')) return;
-
-    try {
-      await Container.cancelConsultaUseCase.execute(consultaId);
-      setShowModal(false);
-      resetForm();
-      await fetchConsultas(user.id);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao cancelar consulta.');
-    }
-  }
-
-  if (loading && events.length === 0) {
+  if (vm.loading && vm.events.length === 0) {
     return (
       <div style={{ maxWidth: 1024, margin: '0 auto', padding: '48px 40px' }}>
         <p style={{ color: 'var(--color-ink-secondary)', fontSize: 14 }}>Carregando agenda...</p>
@@ -161,13 +49,13 @@ export function SchedulePage() {
         </div>
       </div>
 
-      {error && (
+      {vm.error && (
         <div style={{
           padding: '10px 14px', background: 'var(--color-danger-subtle)',
           border: '1px solid var(--color-danger-border)',
           color: 'var(--color-danger)', borderRadius: 'var(--radius-md)', fontSize: 13, marginBottom: 16,
         }}>
-          {error}
+          {vm.error}
         </div>
       )}
 
@@ -177,13 +65,13 @@ export function SchedulePage() {
       }}>
         <Calendar
           localizer={localizer}
-          events={events}
+          events={vm.events}
           startAccessor="start"
           endAccessor="end"
           culture="pt-BR"
           selectable
-          onSelectSlot={openCreateModal}
-          onSelectEvent={openEditModal}
+          onSelectSlot={onSelectSlot}
+          onSelectEvent={onSelectEvent}
           messages={{
             next: "Próximo", previous: "Anterior", today: "Hoje",
             month: "Mês", week: "Semana", day: "Dia", agenda: "Agenda",
@@ -211,7 +99,7 @@ export function SchedulePage() {
         />
       </div>
 
-      {showModal && selectedSlot && (
+      {vm.showModal && vm.selectedSlot && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)',
@@ -224,17 +112,17 @@ export function SchedulePage() {
             boxShadow: 'var(--shadow-modal)',
           }}>
             <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 600, color: 'var(--color-ink-primary)' }}>
-              {editingConsulta ? 'Editar Consulta' : 'Agendar Consulta'}
+              {vm.editingConsulta ? 'Editar Consulta' : 'Agendar Consulta'}
             </h2>
 
             <p style={{
               margin: '0 0 24px', fontSize: 13, color: 'var(--color-ink-secondary)',
               fontFamily: 'var(--font-mono)',
             }}>
-              {format(selectedSlot.start, "dd/MM/yyyy HH:mm")} - {format(selectedSlot.end, "HH:mm")}
+              {format(vm.selectedSlot.start, "dd/MM/yyyy HH:mm")} - {format(vm.selectedSlot.end, "HH:mm")}
             </p>
 
-            {editingConsulta ? (
+            {vm.editingConsulta ? (
               <div style={{ marginBottom: 16 }}>
                 <label style={{
                   display: 'block', marginBottom: 6, fontSize: 11, fontWeight: 500,
@@ -243,7 +131,7 @@ export function SchedulePage() {
                   Paciente
                 </label>
                 <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-ink-primary)', margin: 0 }}>
-                  {editingConsulta.pacienteNome || 'Paciente'}
+                  {vm.editingConsulta.pacienteNome || 'Paciente'}
                 </p>
               </div>
             ) : (
@@ -255,11 +143,11 @@ export function SchedulePage() {
                   Paciente
                 </label>
                 <select
-                  value={pacienteId}
+                  value={vm.form.pacienteId}
                   onChange={e => {
-                    setPacienteId(e.target.value);
-                    const p = patients.find(p => p.id === e.target.value);
-                    setPacienteNome(p?.nomeCompleto || '');
+                    vm.setFormField('pacienteId', e.target.value);
+                    const p = vm.patients.find(p => p.id === e.target.value);
+                    vm.setFormField('pacienteNome', p?.nomeCompleto || '');
                   }}
                   style={{
                     width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
@@ -273,7 +161,7 @@ export function SchedulePage() {
                   onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
                 >
                   <option value="">Selecione um paciente</option>
-                  {patients.map(p => (
+                  {vm.patients.map(p => (
                     <option key={p.id} value={p.id}>{p.nomeCompleto}</option>
                   ))}
                 </select>
@@ -288,8 +176,8 @@ export function SchedulePage() {
                 Observações
               </label>
               <textarea
-                value={observacoes}
-                onChange={e => setObservacoes(e.target.value)}
+                value={vm.form.observacoes}
+                onChange={e => vm.setFormField('observacoes', e.target.value)}
                 rows={3}
                 style={{
                   width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
@@ -306,7 +194,7 @@ export function SchedulePage() {
 
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button
-                onClick={() => { setShowModal(false); resetForm(); }}
+                onClick={vm.closeModal}
                 style={{
                   padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
                   border: '1px solid var(--color-border)', cursor: 'pointer',
@@ -315,9 +203,9 @@ export function SchedulePage() {
               >
                 Cancelar
               </button>
-              {editingConsulta && editingConsulta.status !== 'cancelada' && (
+              {vm.editingConsulta && vm.editingConsulta.status !== 'cancelada' && user?.id && (
                 <button
-                  onClick={() => handleCancel(editingConsulta.id)}
+                  onClick={() => vm.handleCancel(vm.editingConsulta!.id, user.id!)}
                   style={{
                     padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
                     border: '1px solid var(--color-danger)', cursor: 'pointer',
@@ -327,9 +215,9 @@ export function SchedulePage() {
                   Cancelar Consulta
                 </button>
               )}
-              {(!editingConsulta || editingConsulta.status !== 'cancelada') && (
+              {(!vm.editingConsulta || vm.editingConsulta.status !== 'cancelada') && user?.id && (
                 <button
-                  onClick={handleSave}
+                  onClick={() => vm.handleSave(user.id!)}
                   style={{
                     padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
                     border: 'none', cursor: 'pointer',
@@ -339,7 +227,7 @@ export function SchedulePage() {
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--color-primary-hover)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'var(--color-primary)'}
                 >
-                  {editingConsulta ? 'Salvar' : 'Agendar'}
+                  {vm.editingConsulta ? 'Salvar' : 'Agendar'}
                 </button>
               )}
             </div>
