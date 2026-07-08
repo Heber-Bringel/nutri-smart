@@ -4,62 +4,72 @@ import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
 export function NutritionistLayout() {
   const location = useLocation();
   const auth = useAuth();
-  
-  // Extrai iniciais do usuário para o avatar
+
   const userName = auth.user?.email?.split('@')[0] || 'User';
   const initials = userName.substring(0, 2).toUpperCase();
-  
+
   return (
-    <div style={{ minHeight: '100vh', background: '#FAFAFA', fontFamily: 'Inter, system-ui, sans-serif' }}>
-      {/* Header minimalista */}
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <header style={{
         padding: '0 40px', height: 48, display: 'flex',
         alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid #E5E5E5', background: '#fff',
+        borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 18, height: 18, background: '#10B981', borderRadius: 4 }} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>NutriSmart</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 18, height: 18, background: 'var(--color-primary)', borderRadius: 4 }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-ink-primary)' }}>NutriSmart</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <nav style={{ display: 'flex', gap: 16 }}>
-            <Link 
-              to="/dashboard/pacientes" 
-              style={{ 
-                textDecoration: 'none', 
-                fontSize: 13, 
-                color: location.pathname.includes('/pacientes') ? '#111827' : '#9CA3AF', 
-                fontWeight: location.pathname.includes('/pacientes') ? 500 : 400 
+          <nav style={{ display: 'flex', gap: 4 }}>
+            <Link
+              to="/dashboard/pacientes"
+              style={{
+                textDecoration: 'none',
+                fontSize: 13,
+                padding: '0 12px',
+                height: 48,
+                display: 'flex',
+                alignItems: 'center',
+                color: location.pathname.includes('/pacientes') ? 'var(--color-ink-primary)' : 'var(--color-ink-tertiary)',
+                fontWeight: location.pathname.includes('/pacientes') ? 500 : 400,
+                borderBottom: location.pathname.includes('/pacientes') ? '2px solid var(--color-primary)' : '2px solid transparent',
+                transition: 'color 150ms ease-out, border-color 150ms ease-out',
               }}
             >
               Pacientes
             </Link>
-            <Link 
-              to="/dashboard/agenda" 
-              style={{ 
-                textDecoration: 'none', 
-                fontSize: 13, 
-                color: location.pathname.includes('/agenda') ? '#111827' : '#9CA3AF', 
-                fontWeight: location.pathname.includes('/agenda') ? 500 : 400 
+            <Link
+              to="/dashboard/agenda"
+              style={{
+                textDecoration: 'none',
+                fontSize: 13,
+                padding: '0 12px',
+                height: 48,
+                display: 'flex',
+                alignItems: 'center',
+                color: location.pathname.includes('/agenda') ? 'var(--color-ink-primary)' : 'var(--color-ink-tertiary)',
+                fontWeight: location.pathname.includes('/agenda') ? 500 : 400,
+                borderBottom: location.pathname.includes('/agenda') ? '2px solid var(--color-primary)' : '2px solid transparent',
+                transition: 'color 150ms ease-out, border-color 150ms ease-out',
               }}
             >
               Agenda
             </Link>
           </nav>
-          <div 
+          <div
             title="Sair"
             onClick={() => auth.logout()}
-            style={{ 
-              width: 26, height: 26, borderRadius: '50%', background: '#F5F5F5', 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', 
-              fontSize: 10, color: '#6B7280', cursor: 'pointer', fontWeight: 600
-            }} 
+            style={{
+              width: 26, height: 26, borderRadius: '50%', background: 'var(--color-subtle)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 10, color: 'var(--color-ink-secondary)', cursor: 'pointer', fontWeight: 600,
+            }}
           >
             {initials}
           </div>
         </div>
       </header>
-      
+
       <main>
         <Outlet />
       </main>
