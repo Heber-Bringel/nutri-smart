@@ -3,7 +3,7 @@ import { ReportPayload } from '../../model/services/IReportGenerator';
 import { Container } from '../../di/container';
 import { Paciente } from '../../model/entities/Paciente';
 
-export type TimeWindow = 30 | 60 | 90;
+export type TimeWindow = 30 | 60 | 90 | 180 | 365 | 9999;
 
 function calculateAge(birthDate: string): number {
   const diff = Date.now() - new Date(birthDate).getTime();
@@ -12,7 +12,7 @@ function calculateAge(birthDate: string): number {
 }
 
 export function usePatientReportViewModel(pacienteId?: string) {
-  const [timeWindow, setTimeWindow] = useState<TimeWindow>(30);
+  const [timeWindow, setTimeWindow] = useState<TimeWindow>(180);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,8 +61,8 @@ export function usePatientReportViewModel(pacienteId?: string) {
           planoAlimentar: mealPlan ? {
             refeicoes: mealPlan.refeicoes.map(r => ({
               nome: r.nome,
-              horario: r.horario,
-              alimentos: r.alimentos.map(a => `${a.quantidade || ''} ${a.unidade || ''} de ${a.nome}`.trim()),
+              horario: r.horarioSugerido || '',
+              alimentos: r.alimentos.map(a => `${a.quantidade || ''} ${a.unidadeMedida || ''} de ${a.nome}`.trim()),
             })),
             recomendacoesGerais: mealPlan.observacoes,
           } : undefined,

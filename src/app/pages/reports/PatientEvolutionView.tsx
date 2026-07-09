@@ -16,11 +16,11 @@ import { useNavigate } from 'react-router-dom';
 export const PatientEvolutionView: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  // O paciente enxerga apenas 30 dias (mockado aqui via viewmodel, limitando dados)
+  // O paciente enxerga os últimos 6 meses (padrão do viewmodel)
   const { chartData, isLoading, error } = usePatientReportViewModel(user?.pacienteId);
 
-  // Filtramos os dados para garantir que apenas os últimos 30 dias sejam visíveis e apenas peso
-  const patientData = chartData.slice(-30).map(d => ({
+  // Filtramos os dados para garantir que apenas o peso e adesão sejam exibidos
+  const patientData = chartData.map(d => ({
     data: d.data,
     peso: d.peso,
     adesao: 80 + Math.random() * 20 // Mock adesão entre 80 e 100%
@@ -41,7 +41,7 @@ export const PatientEvolutionView: React.FC = () => {
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: 'var(--color-ink-primary)' }}>Minha Evolução</h1>
           <p style={{ color: 'var(--color-ink-secondary)', margin: '4px 0 0', fontSize: 13 }}>
-            Histórico de Peso e Adesão (últimos 30 dias)
+            Histórico de Peso e Adesão (últimos 6 meses)
           </p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
