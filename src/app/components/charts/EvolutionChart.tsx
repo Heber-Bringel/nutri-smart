@@ -51,9 +51,9 @@ export const EvolutionChart: React.FC<EvolutionChartProps> = ({ data, onCapture 
             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 13 }}
           />
           <Legend wrapperStyle={{ paddingTop: 20, fontSize: 13, color: 'var(--color-ink-primary)' }} />
-          <Line yAxisId="left" type="monotone" dataKey="peso" name="Peso (kg)" stroke="var(--color-primary)" strokeWidth={3} activeDot={{ r: 6, strokeWidth: 0 }} dot={{ r: 4, strokeWidth: 0, fill: 'var(--color-primary)' }} />
-          <Line yAxisId="right" type="monotone" dataKey="cintura" name="Cintura (cm)" stroke="#f97316" strokeWidth={2} dot={{ r: 3, strokeWidth: 0, fill: '#f97316' }} />
-          <Line yAxisId="right" type="monotone" dataKey="quadril" name="Quadril (cm)" stroke="#f43f5e" strokeWidth={2} dot={{ r: 3, strokeWidth: 0, fill: '#f43f5e' }} />
+          <Line yAxisId="left" type="monotone" dataKey="peso" name="Peso (kg)" stroke="var(--color-primary)" strokeWidth={3} isAnimationActive={false} activeDot={{ r: 6, strokeWidth: 0 }} dot={{ r: 4, strokeWidth: 0, fill: 'var(--color-primary)' }} />
+          <Line yAxisId="right" type="monotone" dataKey="cintura" name="Cintura (cm)" stroke="#f97316" strokeWidth={2} isAnimationActive={false} dot={{ r: 3, strokeWidth: 0, fill: '#f97316' }} />
+          <Line yAxisId="right" type="monotone" dataKey="quadril" name="Quadril (cm)" stroke="#f43f5e" strokeWidth={2} isAnimationActive={false} dot={{ r: 3, strokeWidth: 0, fill: '#f43f5e' }} />
         </LineChart>
       </ResponsiveContainer>
     </div>
