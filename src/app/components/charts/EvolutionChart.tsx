@@ -27,8 +27,20 @@ export const EvolutionChart: React.FC<EvolutionChartProps> = ({ data, onCapture 
 
   const handleCapture = async () => {
     if (chartRef.current && onCapture) {
-      const canvas = await html2canvas(chartRef.current);
-      onCapture(canvas.toDataURL('image/png'));
+      const originalWidth = chartRef.current.style.width;
+      const w = chartRef.current.clientWidth;
+      
+      // html2canvas fails with ResponsiveContainer if the width is not explicitly set in pixels
+      if (w > 0) {
+        chartRef.current.style.width = `${w}px`;
+      }
+      
+      try {
+        const canvas = await html2canvas(chartRef.current, { scale: 2 });
+        onCapture(canvas.toDataURL('image/png'));
+      } finally {
+        chartRef.current.style.width = originalWidth;
+      }
     }
   };
 
@@ -40,7 +52,7 @@ export const EvolutionChart: React.FC<EvolutionChartProps> = ({ data, onCapture 
   }, [data, onCapture]);
 
   return (
-    <div ref={chartRef} style={{ height: 400, background: 'var(--color-surface)', position: 'relative' }}>
+    <div ref={chartRef} style={{ width: '100%', height: 400, background: 'var(--color-surface)', position: 'relative', padding: '10px' }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 20, right: 30, left: 10, bottom: 10 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-light)" />
