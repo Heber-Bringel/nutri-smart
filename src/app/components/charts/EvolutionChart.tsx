@@ -18,6 +18,7 @@ interface EvolutionChartProps {
     cintura?: number;
     abdominal?: number;
     quadril?: number;
+    adesao?: number;
   }>;
   onCapture?: (base64Image: string) => void;
 }
@@ -66,6 +67,7 @@ export const EvolutionChart: React.FC<EvolutionChartProps> = ({ data, onCapture 
           <Line yAxisId="left" type="monotone" dataKey="peso" name="Peso (kg)" stroke="var(--color-primary)" strokeWidth={3} isAnimationActive={false} activeDot={{ r: 6, strokeWidth: 0 }} dot={{ r: 4, strokeWidth: 0, fill: 'var(--color-primary)' }} />
           <Line yAxisId="right" type="monotone" dataKey="cintura" name="Cintura (cm)" stroke="#f97316" strokeWidth={2} isAnimationActive={false} dot={{ r: 3, strokeWidth: 0, fill: '#f97316' }} />
           <Line yAxisId="right" type="monotone" dataKey="quadril" name="Quadril (cm)" stroke="#f43f5e" strokeWidth={2} isAnimationActive={false} dot={{ r: 3, strokeWidth: 0, fill: '#f43f5e' }} />
+          <Line yAxisId="right" type="monotone" dataKey="adesao" name="Adesão (%)" stroke="#3b82f6" strokeWidth={2} isAnimationActive={false} strokeDasharray="5 5" dot={{ r: 3, strokeWidth: 0, fill: '#3b82f6' }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

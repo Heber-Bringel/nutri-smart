@@ -11,13 +11,14 @@ function calculateAge(birthDate: string): number {
   return Math.abs(ageDate.getUTCFullYear() - 1970);
 }
 
-export function usePatientReportViewModel(pacienteId?: string) {
-  const [timeWindow, setTimeWindow] = useState<TimeWindow>(180);
+export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow: TimeWindow = 180) {
+  const [timeWindow, setTimeWindow] = useState<TimeWindow>(initialTimeWindow);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [payloadData, setPayloadData] = useState<ReportPayload | null>(null);
+  const [adesaoRawData, setAdesaoRawData] = useState<any[]>([]);
 
   useEffect(() => {
     if (!pacienteId) {
@@ -33,6 +34,7 @@ export function usePatientReportViewModel(pacienteId?: string) {
         const paciente = await Container.getPacienteUseCase.execute(pacienteId as string);
         const mealPlan = await Container.getMealPlanUseCase.execute(pacienteId as string).catch(() => null);
         const medidasRaw = await Container.listMeasurementsUseCase.execute(pacienteId as string).catch(() => []);
+        const evolucaoAdesaoRaw = await Container.getEvolutionChartDataUseCase.execute(pacienteId as string, 365).catch(() => []);
 
         // Sort by date ascending to show chart properly
         const medidas = [...medidasRaw].sort((a, b) => new Date(a.dataAtendimento).getTime() - new Date(b.dataAtendimento).getTime());
@@ -63,10 +65,11 @@ export function usePatientReportViewModel(pacienteId?: string) {
               horario: r.horarioSugerido || '',
               alimentos: r.alimentos.map(a => `${a.quantidade || ''} ${a.unidadeMedida || ''} de ${a.nome}`.trim()),
             })),
-            recomendacoesGerais: mealPlan.observacoes,
+            recomendacoesGerais: mealPlan.observacoes || undefined,
           } : undefined,
         };
 
+        setAdesaoRawData(evolucaoAdesaoRaw);
         setPayloadData(payload);
       } catch (err: unknown) {
         if (!cancelled) {
@@ -101,13 +104,31 @@ export function usePatientReportViewModel(pacienteId?: string) {
   }, [timeWindow, payloadData]);
 
   const chartData = useMemo(() => {
-    return filteredMeasurements.map(m => ({
-      data: new Date(m.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-      peso: m.peso,
-      cintura: m.circunferenciaCintura,
-      quadril: m.circunferenciaQuadril,
-    }));
-  }, [filteredMeasurements]);
+    const dataPoints = [];
+    const hoje = new Date();
+    // Offset local timezone
+    const tzOffset = hoje.getTimezoneOffset() * 60000;
+    
+    for (let i = timeWindow; i >= 0; i--) {
+      const d = new Date(hoje.getTime());
+      d.setDate(d.getDate() - i);
+      const dataStrIso = new Date(d.getTime() - tzOffset).toISOString().split('T')[0];
+      
+      const measurement = payloadData?.historicoMedidas.find(m => m.data === dataStrIso);
+      const adesao = adesaoRawData.find(a => a.data === dataStrIso);
+      
+      if (measurement || adesao) {
+        dataPoints.push({
+          data: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+          peso: measurement?.peso ?? adesao?.peso ?? 0,
+          cintura: measurement?.circunferenciaCintura ?? undefined,
+          quadril: measurement?.circunferenciaQuadril ?? undefined,
+          adesao: adesao && adesao.adesaoPercentual > 0 ? adesao.adesaoPercentual : undefined,
+        });
+      }
+    }
+    return dataPoints;
+  }, [timeWindow, payloadData, adesaoRawData]);
 
   const generateReport = async (chartBase64?: string, action: 'download' | 'print' = 'download') => {
     if (!payloadData) return;

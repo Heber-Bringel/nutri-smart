@@ -16,14 +16,14 @@ import { useNavigate } from 'react-router-dom';
 export const PatientEvolutionView: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  // O paciente enxerga os últimos 6 meses (padrão do viewmodel)
-  const { chartData, isLoading, error } = usePatientReportViewModel(user?.pacienteId);
+  // O paciente enxerga os últimos 30 dias por padrão
+  const { chartData, isLoading, error } = usePatientReportViewModel(user?.pacienteId, 30);
 
   // Filtramos os dados para garantir que apenas o peso e adesão sejam exibidos
   const patientData = chartData.map(d => ({
     data: d.data,
     peso: d.peso,
-    adesao: 80 + Math.random() * 20 // Mock adesão entre 80 e 100%
+    adesao: d.adesao // Valor real vindo do viewmodel
   }));
 
   const headerBtn = {
