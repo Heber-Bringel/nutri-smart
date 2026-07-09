@@ -3,7 +3,7 @@ import { ReportPayload } from '../../model/services/IReportGenerator';
 import { Container } from '../../di/container';
 
 
-export type TimeWindow = 30 | 60 | 90 | 180 | 365 | 9999;
+export type TimeWindow = 30 | 60 | 90;
 
 function calculateAge(birthDate: string): number {
   const diff = Date.now() - new Date(birthDate).getTime();
@@ -11,7 +11,7 @@ function calculateAge(birthDate: string): number {
   return Math.abs(ageDate.getUTCFullYear() - 1970);
 }
 
-export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow: TimeWindow = 180) {
+export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow: TimeWindow = 30) {
   const [timeWindow, setTimeWindow] = useState<TimeWindow>(initialTimeWindow);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

@@ -49,9 +49,6 @@ export const PatientReportDashboard: React.FC = () => {
               <option value={30}>Últimos 30 dias</option>
               <option value={60}>Últimos 60 dias</option>
               <option value={90}>Últimos 90 dias</option>
-              <option value={180}>Últimos 6 meses</option>
-              <option value={365}>Último ano</option>
-              <option value={9999}>Todo o período</option>
             </select>
           </div>
           

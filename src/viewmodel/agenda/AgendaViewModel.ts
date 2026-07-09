@@ -123,6 +123,7 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
       const startYear = result.start.getFullYear();
       const startMonth = result.start.getMonth();
       const startDay = result.start.getDate();
+      result.end = new Date(result.end);
       result.end.setFullYear(startYear, startMonth, startDay);
       
       // Validação básica: end não pode ser antes do start

@@ -159,7 +159,6 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
         <div>
           <label style={labelStyle}>Sexo biológico</label>
           <Select
-            label=""
             options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }]}
             value={formData.sexoBiologico}
             onChange={v => updateField('sexoBiologico', v as SexoBiologico)}
@@ -195,7 +194,6 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
         <div>
           <label style={labelStyle}>Nível de atividade física</label>
           <Select
-            label=""
             options={[
               { value: 'sedentario', label: 'Sedentário' },
               { value: 'levemente_ativo', label: 'Levemente ativo' },

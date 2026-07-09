@@ -133,6 +133,10 @@ export class JsPdfReportAdapter implements IReportGenerator {
     document.body.appendChild(iframe);
     iframe.onload = () => {
       iframe.contentWindow?.print();
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+        URL.revokeObjectURL(url);
+      }, 1000);
     };
   }
 }

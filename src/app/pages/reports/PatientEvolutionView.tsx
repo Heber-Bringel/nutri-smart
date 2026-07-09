@@ -41,7 +41,7 @@ export const PatientEvolutionView: React.FC = () => {
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: 'var(--color-ink-primary)' }}>Minha Evolução</h1>
           <p style={{ color: 'var(--color-ink-secondary)', margin: '4px 0 0', fontSize: 13 }}>
-            Histórico de Peso e Adesão (últimos 6 meses)
+            Histórico de Peso e Adesão (últimos 30 dias)
           </p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>

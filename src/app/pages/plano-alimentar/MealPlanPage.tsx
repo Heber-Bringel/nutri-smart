@@ -33,8 +33,9 @@ export function MealPlanPage() {
             nome: r.nome,
             ordem: r.ordem ?? i,
             horarioSugerido: r.horarioSugerido || '',
-            alimentos: r.itens.map(it => ({
-              nome: it.nomeBase,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            alimentos: r.alimentos.map((it: any) => ({
+              nome: it.nomeBase || it.nome,
               quantidade: it.quantidade,
               unidadeMedida: it.unidadeMedida,
               calorias: it.calorias
