@@ -10,8 +10,12 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
+import { useNavigate } from 'react-router-dom';
 
 export const PatientEvolutionView: React.FC = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   // O paciente enxerga apenas 30 dias (mockado aqui via viewmodel, limitando dados)
   const { chartData } = usePatientReportViewModel();
 
@@ -22,29 +26,51 @@ export const PatientEvolutionView: React.FC = () => {
     adesao: 80 + Math.random() * 20 // Mock adesão entre 80 e 100%
   }));
 
-  return (
-    <div className="p-6 bg-slate-50 min-h-screen">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <header className="border-b pb-4 border-slate-200">
-          <h1 className="text-2xl font-bold text-slate-800">Minha Evolução</h1>
-          <p className="text-slate-500">Histórico de Peso e Adesão (Últimos 30 dias)</p>
-        </header>
+  const headerBtn = {
+    padding: '8px 16px', cursor: 'pointer', borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--color-border)', background: 'var(--color-surface)',
+    color: 'var(--color-ink-primary)', fontSize: 13, fontWeight: 500,
+  };
 
-        <section className="w-full h-80 bg-white p-4 rounded-lg shadow-sm">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={patientData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="data" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" domain={[0, 100]} />
-              <Tooltip />
-              <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="peso" name="Peso (kg)" stroke="#8884d8" activeDot={{ r: 8 }} />
-              <Line yAxisId="right" type="monotone" dataKey="adesao" name="Adesão ao Plano (%)" stroke="#82ca9d" />
-            </LineChart>
-          </ResponsiveContainer>
-        </section>
+  return (
+    <div style={{ padding: 32, maxWidth: 800, margin: '0 auto', animation: 'fadeIn 0.4s ease-out' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div>
+          <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: 'var(--color-ink-primary)' }}>Minha Evolução</h1>
+          <p style={{ color: 'var(--color-ink-secondary)', margin: '4px 0 0', fontSize: 13 }}>
+            Histórico de Peso e Adesão (últimos 30 dias)
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={() => navigate('/paciente/meu-plano')} style={headerBtn}>
+            Meu Plano
+          </button>
+          <button onClick={logout} style={{...headerBtn, background: 'var(--color-bg)'}}>
+            Sair
+          </button>
+        </div>
       </div>
+
+      <section style={{
+        background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+        borderRadius: 'var(--radius-lg)', padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+        height: 400
+      }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={patientData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-light)" />
+            <XAxis dataKey="data" tick={{ fontSize: 12, fill: 'var(--color-ink-secondary)' }} axisLine={false} tickLine={false} dy={10} />
+            <YAxis yAxisId="left" tick={{ fontSize: 12, fill: 'var(--color-ink-secondary)' }} axisLine={false} tickLine={false} dx={-10} />
+            <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fontSize: 12, fill: 'var(--color-ink-secondary)' }} axisLine={false} tickLine={false} dx={10} />
+            <Tooltip 
+              contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 13 }}
+            />
+            <Legend wrapperStyle={{ paddingTop: 20, fontSize: 13, color: 'var(--color-ink-primary)' }} />
+            <Line yAxisId="left" type="monotone" dataKey="peso" name="Peso (kg)" stroke="var(--color-primary)" strokeWidth={3} activeDot={{ r: 6, strokeWidth: 0 }} dot={false} />
+            <Line yAxisId="right" type="monotone" dataKey="adesao" name="Adesão ao Plano (%)" stroke="var(--color-success)" strokeWidth={3} dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </section>
     </div>
   );
 };
