@@ -144,12 +144,37 @@ export function SchedulePage() {
               {vm.editingConsulta ? 'Editar Consulta' : 'Agendar Consulta'}
             </h2>
 
-            <p style={{
-              margin: '0 0 24px', fontSize: 13, color: 'var(--color-ink-secondary)',
-              fontFamily: 'var(--font-mono)',
+            <div style={{
+              display: 'flex', gap: 16, marginBottom: 24,
+              fontSize: 13, color: 'var(--color-ink-secondary)',
+              fontFamily: 'var(--font-mono)', alignItems: 'center'
             }}>
-              {format(vm.selectedSlot.start, "dd/MM/yyyy HH:mm")} - {format(vm.selectedSlot.end, "HH:mm")}
-            </p>
+              <div>
+                <span style={{ marginRight: 8, color: 'var(--color-ink-primary)' }}>
+                  Data: {format(vm.selectedSlot.start, "dd/MM/yyyy")}
+                </span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+              <div style={{ flex: 1 }}>
+                <label style={labelStyle}>Início</label>
+                <input 
+                  type="time" 
+                  value={format(vm.selectedSlot.start, "HH:mm")}
+                  onChange={e => vm.updateSlotTime('start', e.target.value)}
+                  style={inputStyle} 
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={labelStyle}>Fim</label>
+                <input 
+                  type="time" 
+                  value={format(vm.selectedSlot.end, "HH:mm")}
+                  onChange={e => vm.updateSlotTime('end', e.target.value)}
+                  style={inputStyle} 
+                />
+              </div>
+            </div>
 
             {vm.editingConsulta ? (
               <div style={{ marginBottom: 16 }}>

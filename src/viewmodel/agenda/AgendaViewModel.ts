@@ -28,6 +28,7 @@ export interface AgendaViewModelActions {
   setFormField: (field: keyof AgendaFormState, value: string) => void;
   handleSave: (nutricionistaId: string) => Promise<void>;
   handleCancel: (consultaId: string, nutricionistaId: string) => Promise<void>;
+  updateSlotTime: (field: 'start' | 'end', timeStr: string) => void;
 }
 
 export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActions {
@@ -93,6 +94,33 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
     setForm(prev => ({ ...prev, [field]: value }));
   }
 
+  function updateSlotTime(field: 'start' | 'end', timeStr: string) {
+    setSelectedSlot(prev => {
+      if (!prev) return prev;
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) return prev;
+
+      const newDate = new Date(prev[field]);
+      newDate.setHours(hours, minutes, 0, 0);
+
+      const result = { ...prev, [field]: newDate };
+      
+      // Validação básica: end não pode ser antes do start
+      if (field === 'start' && result.start > result.end) {
+        const adjustedEnd = new Date(result.start);
+        adjustedEnd.setHours(result.start.getHours() + 1);
+        result.end = adjustedEnd;
+      }
+      if (field === 'end' && result.end < result.start) {
+        const adjustedStart = new Date(result.end);
+        adjustedStart.setHours(result.end.getHours() - 1);
+        result.start = adjustedStart;
+      }
+
+      return result;
+    });
+  }
+
   async function handleSave(nutricionistaId: string) {
     if (!selectedSlot) return;
     setError(null);
@@ -155,6 +183,6 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
 
   return {
     events, loading, error, showModal, selectedSlot, editingConsulta, form, patients,
-    fetchConsultas, openCreateModal, openEditModal, closeModal, setFormField, handleSave, handleCancel,
+    fetchConsultas, openCreateModal, openEditModal, closeModal, setFormField, handleSave, handleCancel, updateSlotTime,
   };
 }
