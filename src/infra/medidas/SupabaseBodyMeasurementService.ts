@@ -29,11 +29,26 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
     if (error) throw new MeasurementError(error.message);
 
     if (data.peso != null && data.peso > 0) {
-      await supabase.from('historico_peso').upsert({
-        paciente_id: data.pacienteId,
-        peso: data.peso,
-        data_registro: data.dataAtendimento ?? getTodayLocal(),
-      }, { onConflict: 'paciente_id, data_registro', ignoreDuplicates: false });
+      const { data: existingPeso } = await supabase.from('historico_peso')
+        .select('id')
+        .eq('paciente_id', data.pacienteId)
+        .eq('data_registro', data.dataAtendimento ?? getTodayLocal())
+        .maybeSingle();
+
+      if (existingPeso) {
+        const { error: updErr } = await supabase.from('historico_peso')
+          .update({ peso: data.peso })
+          .eq('id', existingPeso.id);
+        if (updErr) throw new MeasurementError(`Erro ao atualizar peso: ${updErr.message}`);
+      } else {
+        const { error: insErr } = await supabase.from('historico_peso')
+          .insert({
+            paciente_id: data.pacienteId,
+            peso: data.peso,
+            data_registro: data.dataAtendimento ?? getTodayLocal(),
+          });
+        if (insErr) throw new MeasurementError(`Erro ao salvar peso: ${insErr.message}`);
+      }
     }
 
     return BodyMeasurementMapper.toDomain(row);
@@ -91,11 +106,26 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
     if (error) throw new MeasurementError(error.message);
 
     if (data.peso != null && data.peso > 0) {
-      await supabase.from('historico_peso').upsert({
-        paciente_id: row.paciente_id,
-        peso: data.peso,
-        data_registro: row.data_atendimento,
-      }, { onConflict: 'paciente_id, data_registro', ignoreDuplicates: false });
+      const { data: existingPeso } = await supabase.from('historico_peso')
+        .select('id')
+        .eq('paciente_id', row.paciente_id)
+        .eq('data_registro', row.data_atendimento)
+        .maybeSingle();
+
+      if (existingPeso) {
+        const { error: updErr } = await supabase.from('historico_peso')
+          .update({ peso: data.peso })
+          .eq('id', existingPeso.id);
+        if (updErr) throw new MeasurementError(`Erro ao atualizar peso: ${updErr.message}`);
+      } else {
+        const { error: insErr } = await supabase.from('historico_peso')
+          .insert({
+            paciente_id: row.paciente_id,
+            peso: data.peso,
+            data_registro: row.data_atendimento,
+          });
+        if (insErr) throw new MeasurementError(`Erro ao salvar peso: ${insErr.message}`);
+      }
     }
 
     const domain = BodyMeasurementMapper.toDomain(row);
