@@ -20,6 +20,11 @@ export function ProtectedRoute({ children, allowedRole }: ProtectedRouteProps) {
   }
 
   if (!user) {
+    const isVoluntario = sessionStorage.getItem('logout_voluntario') === 'true';
+    if (isVoluntario) {
+      sessionStorage.removeItem('logout_voluntario');
+      return <Navigate to="/login" replace />;
+    }
     return <Navigate to="/login?sessionExpired=true" replace />;
   }
 

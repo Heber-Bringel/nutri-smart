@@ -7,9 +7,19 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [validationError, setValidationError] = useState('');
   const [sessionExpiredMsg, setSessionExpiredMsg] = useState('');
-  const { login, loading, error, clearError } = useAuth();
+  const { user, login, loading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!loading && user) {
+      if (user.role === 'nutricionista') {
+        navigate('/dashboard/pacientes', { replace: true });
+      } else {
+        navigate('/paciente/meu-plano', { replace: true });
+      }
+    }
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     if (searchParams.get('sessionExpired') === 'true') {
