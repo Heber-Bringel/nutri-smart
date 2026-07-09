@@ -68,7 +68,14 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
   }
 
   function openCreateModal(slot: { start: Date; end: Date }) {
-    setSelectedSlot(slot);
+    let { start, end } = slot;
+    // Se o clique foi no mês, `end` costuma vir como o dia seguinte (00:00) e start (00:00)
+    if (end.getTime() - start.getTime() >= 24 * 60 * 60 * 1000) {
+      end = new Date(start);
+      end.setHours(start.getHours() + 1);
+    }
+    
+    setSelectedSlot({ start, end });
     resetForm();
     setShowModal(true);
   }
@@ -105,6 +112,12 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
 
       const result = { ...prev, [field]: newDate };
       
+      // Força a data de fim a ser exatamente o mesmo dia da data de início
+      const startYear = result.start.getFullYear();
+      const startMonth = result.start.getMonth();
+      const startDay = result.start.getDate();
+      result.end.setFullYear(startYear, startMonth, startDay);
+      
       // Validação básica: end não pode ser antes do start
       if (field === 'start' && result.start > result.end) {
         const adjustedEnd = new Date(result.start);
@@ -136,6 +149,16 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
       const duracaoMinutos = Math.round(
         (selectedSlot.end.getTime() - selectedSlot.start.getTime()) / 60000
       );
+
+      if (duracaoMinutos <= 0) {
+        setError('O horário de término deve ser maior que o horário de início no mesmo dia.');
+        return;
+      }
+      
+      if (duracaoMinutos > 12 * 60) {
+        setError('A consulta não pode ter mais que 12 horas de duração.');
+        return;
+      }
 
       if (editingConsulta) {
         await Container.updateConsultaUseCase.execute(editingConsulta.id, {
