@@ -96,12 +96,6 @@ export const PatientReportDashboard: React.FC = () => {
           </div>
         )}
       </section>
-      
-      {/* TODO: Remover debug visual depois */}
-      <div style={{ marginTop: 24, fontSize: 11, color: 'var(--color-ink-secondary)', background: 'var(--color-surface)', padding: 16, borderRadius: 8 }}>
-        <p>Debug Info (Nutritionist View):</p>
-        <pre>{JSON.stringify({ pacienteId: paciente?.id, timeWindow, items: chartData.length, data: chartData }, null, 2)}</pre>
-      </div>
     </div>
   );
 };

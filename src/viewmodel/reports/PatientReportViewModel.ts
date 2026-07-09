@@ -88,8 +88,17 @@ export function usePatientReportViewModel(pacienteId?: string) {
 
   const filteredMeasurements = useMemo(() => {
     if (!payloadData) return [];
-    return payloadData.historicoMedidas;
-  }, [payloadData]);
+    
+    // Calcula a data de corte de forma segura (YYYY-MM-DD)
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - timeWindow);
+    // Ajuste fuso horário local para a string ISO YYYY-MM-DD
+    const tzOffset = cutoffDate.getTimezoneOffset() * 60000;
+    const cutoffString = new Date(cutoffDate.getTime() - tzOffset).toISOString().split('T')[0];
+    
+    // Comparação de string YYYY-MM-DD garante que não há bugs de Timezone/JS Engine
+    return payloadData.historicoMedidas.filter(m => m.data >= cutoffString);
+  }, [timeWindow, payloadData]);
 
   const chartData = useMemo(() => {
     return filteredMeasurements.map(m => ({
@@ -130,13 +139,12 @@ export function usePatientReportViewModel(pacienteId?: string) {
   return {
     timeWindow,
     setTimeWindow,
-    filteredMeasurements: payloadData?.historicoMedidas || [],
+    filteredMeasurements,
     chartData,
     generateReport,
     isGenerating,
     isLoading,
     error,
     patientName: payloadData?.paciente.nome || '',
-    rawMedidasCount: payloadData?.historicoMedidas?.length || 0,
   };
 }
