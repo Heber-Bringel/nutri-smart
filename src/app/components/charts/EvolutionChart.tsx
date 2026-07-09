@@ -53,7 +53,6 @@ export const EvolutionChart: React.FC<EvolutionChartProps> = ({ data, onCapture 
           <Legend wrapperStyle={{ paddingTop: 20, fontSize: 13, color: 'var(--color-ink-primary)' }} />
           <Line yAxisId="left" type="monotone" dataKey="peso" name="Peso (kg)" stroke="var(--color-primary)" strokeWidth={3} activeDot={{ r: 6, strokeWidth: 0 }} dot={false} />
           <Line yAxisId="right" type="monotone" dataKey="cintura" name="Cintura (cm)" stroke="#10b981" strokeWidth={2} dot={false} />
-          <Line yAxisId="right" type="monotone" dataKey="abdominal" name="Abdominal (cm)" stroke="#f59e0b" strokeWidth={2} dot={false} />
           <Line yAxisId="right" type="monotone" dataKey="quadril" name="Quadril (cm)" stroke="#f43f5e" strokeWidth={2} dot={false} />
         </LineChart>
       </ResponsiveContainer>

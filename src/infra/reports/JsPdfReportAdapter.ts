@@ -34,13 +34,12 @@ export class JsPdfReportAdapter implements IReportGenerator {
       new Date(m.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
       `${m.peso} kg`,
       m.circunferenciaCintura ? `${m.circunferenciaCintura} cm` : '-',
-      m.circunferenciaAbdominal ? `${m.circunferenciaAbdominal} cm` : '-',
       m.circunferenciaQuadril ? `${m.circunferenciaQuadril} cm` : '-'
     ]);
 
     autoTable(doc, {
       startY: currentY + 6,
-      head: [['Data', 'Peso', 'Cintura', 'Abdominal', 'Quadril']],
+      head: [['Data', 'Peso', 'Cintura', 'Quadril']],
       body: historicoBody,
     });
     

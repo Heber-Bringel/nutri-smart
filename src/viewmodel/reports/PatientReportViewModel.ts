@@ -35,7 +35,7 @@ export function usePatientReportViewModel(pacienteId?: string) {
         const medidasRaw = await Container.listMeasurementsUseCase.execute(pacienteId as string).catch(() => []);
 
         // Sort by date ascending to show chart properly
-        const medidas = [...medidasRaw].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
+        const medidas = [...medidasRaw].sort((a, b) => new Date(a.dataAtendimento).getTime() - new Date(b.dataAtendimento).getTime());
 
         if (cancelled) return;
 
@@ -52,11 +52,10 @@ export function usePatientReportViewModel(pacienteId?: string) {
             get: paciente.get || 0,
           },
           historicoMedidas: medidas.map(m => ({
-            data: m.data,
-            peso: m.peso,
-            circunferenciaCintura: m.cintura,
-            circunferenciaAbdominal: m.abdominal,
-            circunferenciaQuadril: m.quadril,
+            data: m.dataAtendimento,
+            peso: m.peso || 0,
+            circunferenciaCintura: m.circunferenciaCintura || undefined,
+            circunferenciaQuadril: m.circunferenciaQuadril || undefined,
           })),
           planoAlimentar: mealPlan ? {
             refeicoes: mealPlan.refeicoes.map(r => ({
@@ -99,7 +98,6 @@ export function usePatientReportViewModel(pacienteId?: string) {
       data: new Date(m.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
       peso: m.peso,
       cintura: m.circunferenciaCintura,
-      abdominal: m.circunferenciaAbdominal,
       quadril: m.circunferenciaQuadril,
     }));
   }, [filteredMeasurements]);

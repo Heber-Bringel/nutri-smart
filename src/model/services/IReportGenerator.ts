@@ -16,7 +16,6 @@ export interface ReportMeasurement {
   data: string;
   peso: number;
   circunferenciaCintura?: number;
-  circunferenciaAbdominal?: number;
   circunferenciaQuadril?: number;
 }
 

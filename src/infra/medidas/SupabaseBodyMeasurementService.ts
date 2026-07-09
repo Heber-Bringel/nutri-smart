@@ -40,15 +40,30 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
   }
 
   async findByPatientId(pacienteId: string): Promise<BodyMeasurement[]> {
-    const { data: rows, error } = await supabase
-      .from('medidas_corporais')
-      .select('*')
-      .eq('paciente_id', pacienteId)
-      .order('data_atendimento', { ascending: false });
+    const [{ data: rows, error }, { data: pesos, error: pesosError }] = await Promise.all([
+      supabase
+        .from('medidas_corporais')
+        .select('*')
+        .eq('paciente_id', pacienteId)
+        .order('data_atendimento', { ascending: false }),
+      supabase
+        .from('historico_peso')
+        .select('*')
+        .eq('paciente_id', pacienteId)
+        .order('data_registro', { ascending: false })
+    ]);
 
     if (error) throw new MeasurementError(error.message);
+    if (pesosError) throw new MeasurementError(pesosError.message);
 
-    return (rows || []).map(BodyMeasurementMapper.toDomain);
+    const pesoMap = new Map<string, number>();
+    pesos?.forEach(p => pesoMap.set(p.data_registro, p.peso));
+
+    return (rows || []).map(row => {
+      const domain = BodyMeasurementMapper.toDomain(row);
+      domain.peso = pesoMap.get(domain.dataAtendimento) || null;
+      return domain;
+    });
   }
 
   async update(id: string, data: UpdateMeasurementData): Promise<BodyMeasurement> {
