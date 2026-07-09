@@ -122,7 +122,7 @@ export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow
       if (measurement || adesao) {
         dataPoints.push({
           data: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-          peso: measurement?.peso ?? adesao?.peso ?? 0,
+          peso: measurement?.peso || adesao?.peso || undefined,
           cintura: measurement?.circunferenciaCintura ?? undefined,
           quadril: measurement?.circunferenciaQuadril ?? undefined,
           adesao: adesao && adesao.adesaoPercentual > 0 ? adesao.adesaoPercentual : undefined,

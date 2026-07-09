@@ -14,7 +14,7 @@ import html2canvas from 'html2canvas';
 interface EvolutionChartProps {
   data: Array<{
     data: string;
-    peso: number;
+    peso?: number;
     cintura?: number;
     abdominal?: number;
     quadril?: number;

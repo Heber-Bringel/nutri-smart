@@ -52,7 +52,7 @@ export function EvolutionChartPage() {
           }}>
             Evolução de Peso (Últimos 30 dias)
           </h3>
-          <EvolutionChart data={data.map(d => ({ data: d.data, peso: d.peso || 0, adesao: d.adesaoPercentual }))} />
+          <EvolutionChart data={data.map(d => ({ data: d.data, peso: d.peso || undefined, adesao: d.adesaoPercentual }))} />
           {data.length > 0 && data.every(d => !d.peso && d.adesaoPercentual === 0) && (
             <div style={{ textAlign: 'center', marginTop: 16 }}>
               <button
