@@ -54,12 +54,7 @@ export function LoginPage() {
     }
 
     try {
-      const user = await login({ email, password });
-      if (user.role === 'nutricionista') {
-        navigate('/dashboard/pacientes');
-      } else {
-        navigate('/paciente/meu-plano');
-      }
+      await login({ email, password });
     } catch {
       // Ignore error
     }

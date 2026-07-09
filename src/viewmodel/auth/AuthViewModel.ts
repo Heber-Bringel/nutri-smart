@@ -81,8 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async (): Promise<void> => {
     setLoading(true);
     try {
-      sessionStorage.setItem('logout_voluntario', 'true');
       await Container.logoutUseCase.execute();
+      sessionStorage.setItem('logout_voluntario', 'true');
       setUser(null);
     } finally {
       setLoading(false);
@@ -90,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const clearError = () => setError(null);
+
 
   return createElement(
     AuthContext.Provider,
