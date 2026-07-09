@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usePatientReportViewModel, TimeWindow } from '../../../viewmodel/reports/PatientReportViewModel';
-import { EvolutionChart } from '../charts/EvolutionChart';
+import { EvolutionChart } from '../../components/charts/EvolutionChart';
 
 export const PatientReportDashboard: React.FC = () => {
   const {

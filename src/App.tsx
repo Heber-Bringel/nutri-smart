@@ -14,6 +14,8 @@ import { SchedulePage } from './app/pages/agenda/SchedulePage';
 import { PatientMealPlanPage } from './app/pages/paciente/PatientMealPlanPage';
 import { NutritionistLayout } from './app/components/layouts/NutritionistLayout';
 import { PatientProfileLayout } from './app/components/layouts/PatientProfileLayout';
+import { PatientReportDashboard } from './app/pages/reports/PatientReportDashboard';
+import { PatientEvolutionView } from './app/pages/reports/PatientEvolutionView';
 
 export function App() {
   return (
@@ -40,6 +42,7 @@ export function App() {
               <Route index element={<PatientProfilePage />} />
               <Route path="plano-alimentar" element={<MealPlanPage />} />
               <Route path="evolucao" element={<EvolutionChartPage />} />
+              <Route path="relatorio" element={<PatientReportDashboard />} />
               <Route path="medidas" element={<BodyMeasurementFormPage />} />
               <Route path="anotacoes" element={<ClinicalNotesPage />} />
             </Route>
@@ -53,6 +56,13 @@ export function App() {
             element={
               <ProtectedRoute allowedRole="paciente">
                 <PatientMealPlanPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/paciente/evolucao"
+            element={
+              <ProtectedRoute allowedRole="paciente">
+                <PatientEvolutionView />
               </ProtectedRoute>
             }
           />
