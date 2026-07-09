@@ -18,6 +18,8 @@ export interface AgendaViewModelState {
   selectedSlot: { start: Date; end: Date } | null;
   form: AgendaFormState;
   patients: { id: string; nomeCompleto: string }[];
+  currentDate: Date;
+  currentView: 'month' | 'week' | 'work_week' | 'day' | 'agenda';
 }
 
 export interface AgendaViewModelActions {
@@ -28,6 +30,9 @@ export interface AgendaViewModelActions {
   setFormField: (field: keyof AgendaFormState, value: string) => void;
   handleSave: (nutricionistaId: string) => Promise<void>;
   handleCancel: (consultaId: string, nutricionistaId: string) => Promise<void>;
+  updateSlotTime: (field: 'start' | 'end', timeStr: string) => void;
+  onNavigate: (newDate: Date) => void;
+  onView: (newView: 'month' | 'week' | 'work_week' | 'day' | 'agenda') => void;
 }
 
 export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActions {
@@ -39,6 +44,8 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
   const [editingConsulta, setEditingConsulta] = useState<Consulta | null>(null);
   const [form, setForm] = useState<AgendaFormState>({ pacienteId: '', pacienteNome: '', observacoes: '' });
   const [patients, setPatients] = useState<{ id: string; nomeCompleto: string }[]>([]);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [currentView, setCurrentView] = useState<'month' | 'week' | 'work_week' | 'day' | 'agenda'>('month');
 
   useEffect(() => {
     Container.listPacientesUseCase.execute({ pageSize: 200 })
@@ -67,7 +74,15 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
   }
 
   function openCreateModal(slot: { start: Date; end: Date }) {
-    setSelectedSlot(slot);
+    const { start } = slot;
+    let end = slot.end;
+    // Se o clique foi no mês, `end` costuma vir como o dia seguinte (00:00) e start (00:00)
+    if (end.getTime() - start.getTime() >= 24 * 60 * 60 * 1000) {
+      end = new Date(start);
+      end.setHours(start.getHours() + 1);
+    }
+    
+    setSelectedSlot({ start, end });
     resetForm();
     setShowModal(true);
   }
@@ -93,6 +108,40 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
     setForm(prev => ({ ...prev, [field]: value }));
   }
 
+  function updateSlotTime(field: 'start' | 'end', timeStr: string) {
+    setSelectedSlot(prev => {
+      if (!prev) return prev;
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) return prev;
+
+      const newDate = new Date(prev[field]);
+      newDate.setHours(hours, minutes, 0, 0);
+
+      const result = { ...prev, [field]: newDate };
+      
+      // Força a data de fim a ser exatamente o mesmo dia da data de início
+      const startYear = result.start.getFullYear();
+      const startMonth = result.start.getMonth();
+      const startDay = result.start.getDate();
+      result.end = new Date(result.end);
+      result.end.setFullYear(startYear, startMonth, startDay);
+      
+      // Validação básica: end não pode ser antes do start
+      if (field === 'start' && result.start > result.end) {
+        const adjustedEnd = new Date(result.start);
+        adjustedEnd.setHours(result.start.getHours() + 1);
+        result.end = adjustedEnd;
+      }
+      if (field === 'end' && result.end < result.start) {
+        const adjustedStart = new Date(result.end);
+        adjustedStart.setHours(result.end.getHours() - 1);
+        result.start = adjustedStart;
+      }
+
+      return result;
+    });
+  }
+
   async function handleSave(nutricionistaId: string) {
     if (!selectedSlot) return;
     setError(null);
@@ -108,6 +157,16 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
       const duracaoMinutos = Math.round(
         (selectedSlot.end.getTime() - selectedSlot.start.getTime()) / 60000
       );
+
+      if (duracaoMinutos <= 0) {
+        setError('O horário de término deve ser maior que o horário de início no mesmo dia.');
+        return;
+      }
+      
+      if (duracaoMinutos > 12 * 60) {
+        setError('A consulta não pode ter mais que 12 horas de duração.');
+        return;
+      }
 
       if (editingConsulta) {
         await Container.updateConsultaUseCase.execute(editingConsulta.id, {
@@ -153,8 +212,16 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
     }
   }
 
+  function onNavigate(newDate: Date) {
+    setCurrentDate(newDate);
+  }
+
+  function onView(newView: 'month' | 'week' | 'work_week' | 'day' | 'agenda') {
+    setCurrentView(newView);
+  }
+
   return {
-    events, loading, error, showModal, selectedSlot, editingConsulta, form, patients,
-    fetchConsultas, openCreateModal, openEditModal, closeModal, setFormField, handleSave, handleCancel,
+    events, loading, error, showModal, selectedSlot, editingConsulta, form, patients, currentDate, currentView,
+    fetchConsultas, openCreateModal, openEditModal, closeModal, setFormField, handleSave, handleCancel, updateSlotTime, onNavigate, onView,
   };
 }

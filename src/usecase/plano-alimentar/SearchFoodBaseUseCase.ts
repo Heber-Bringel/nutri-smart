@@ -1,6 +1,5 @@
 import { IFoodBaseService } from '../../model/services/IFoodBaseService';
 import { AlimentoBase } from '../../model/entities/AlimentoBase';
-import { PlanoAlimentarError } from '../../model/errors/PlanoAlimentarError';
 
 export class SearchFoodBaseUseCase {
   constructor(private foodBaseService: IFoodBaseService) {}

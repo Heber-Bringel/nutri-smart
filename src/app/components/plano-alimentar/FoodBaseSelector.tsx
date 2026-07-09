@@ -21,6 +21,7 @@ export function FoodBaseSelector({ onSelect, onCancel }: FoodBaseSelectorProps) 
 
   useEffect(() => {
     if (termo.length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([]);
       return;
     }
@@ -31,6 +32,7 @@ export function FoodBaseSelector({ onSelect, onCancel }: FoodBaseSelectorProps) 
         const data = await Container.searchFoodBaseUseCase.execute(termo);
         setResults(data);
       } catch {
+        // ignore
         setResults([]);
       } finally {
         setLoading(false);
@@ -45,6 +47,7 @@ export function FoodBaseSelector({ onSelect, onCancel }: FoodBaseSelectorProps) 
       const food = await Container.createCustomFoodUseCase.execute(custom);
       onSelect(food);
     } catch {
+      // Ignore
     }
   }
 

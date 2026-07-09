@@ -13,6 +13,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (searchParams.get('sessionExpired') === 'true') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSessionExpiredMsg('Sua sessão expirou. Faça login novamente.');
     }
   }, [searchParams]);
@@ -45,6 +46,7 @@ export function LoginPage() {
         navigate('/paciente/meu-plano');
       }
     } catch {
+      // Ignore error
     }
   };
 

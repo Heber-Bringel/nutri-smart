@@ -40,6 +40,8 @@ import { UpdateConsultaUseCase } from '../usecase/agenda/UpdateConsultaUseCase';
 import { CancelConsultaUseCase } from '../usecase/agenda/CancelConsultaUseCase';
 import { ListConsultasUseCase } from '../usecase/agenda/ListConsultasUseCase';
 import { GetNextConsultaUseCase } from '../usecase/agenda/GetNextConsultaUseCase';
+import { JsPdfReportAdapter } from '../infra/reports/JsPdfReportAdapter';
+import { GeneratePatientReportUseCase } from '../usecase/reports/GeneratePatientReportUseCase';
 
 class Container {
   private static _authService = new SupabaseAuthService();
@@ -54,6 +56,7 @@ class Container {
   private static _calendarAdapter = new ReactBigCalendarAdapter();
   private static _agendaValidator = new EvitarChoqueHorarioValidator();
   private static _consultaEventEmitter = ConsultaEventEmitter.getInstance();
+  private static _reportAdapter = new JsPdfReportAdapter();
 
   static get authService() {
     return this._authService;
@@ -221,6 +224,14 @@ class Container {
 
   static get getNextConsultaUseCase() {
     return new GetNextConsultaUseCase(this._consultaRepository);
+  }
+
+  static get reportAdapter() {
+    return this._reportAdapter;
+  }
+
+  static get generatePatientReportUseCase() {
+    return new GeneratePatientReportUseCase(this._reportAdapter);
   }
 }
 

@@ -76,7 +76,7 @@ export class SupabaseConsultaRepository implements IConsultaRepository {
   ): Promise<Consulta[]> {
     let query = supabase
       .from('consultas')
-      .select('*')
+      .select('*, pacientes(nome_completo)')
       .eq('nutricionista_id', nutricionistaId)
       .order('data', { ascending: true })
       .order('horario_inicio', { ascending: true });

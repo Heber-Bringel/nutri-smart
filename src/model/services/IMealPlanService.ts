@@ -1,4 +1,4 @@
-import { MealPlan, Refeicao, Alimento } from '../entities/MealPlan';
+import { MealPlan } from '../entities/MealPlan';
 
 export interface CreateAlimentoData {
   nome: string;

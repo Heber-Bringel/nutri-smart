@@ -100,7 +100,7 @@ export class SupabaseAdesaoService implements IAdesaoService {
 
     if (adError) throw new AdesaoError(adError.message);
 
-    return AdesaoMapper.toDailyProgress(pacienteId, data, {
+    return AdesaoMapper.toDailyProgress(data, {
       total: totalRefeicoes,
       concluidas: concluidas ?? 0,
     });

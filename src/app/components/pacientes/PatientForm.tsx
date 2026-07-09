@@ -79,8 +79,8 @@ function Input({ error, mono, ...props }: {
   );
 }
 
-function Select({ error, label, options, value, onChange }: {
-  error?: string; label: string;
+function Select({ error, options, value, onChange }: {
+  error?: string;
   options: { value: string; label: string }[];
   value: string; onChange: (v: string) => void;
 }) {
@@ -159,7 +159,6 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
         <div>
           <label style={labelStyle}>Sexo biológico</label>
           <Select
-            label=""
             options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }]}
             value={formData.sexoBiologico}
             onChange={v => updateField('sexoBiologico', v as SexoBiologico)}
@@ -195,7 +194,6 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
         <div>
           <label style={labelStyle}>Nível de atividade física</label>
           <Select
-            label=""
             options={[
               { value: 'sedentario', label: 'Sedentário' },
               { value: 'levemente_ativo', label: 'Levemente ativo' },
