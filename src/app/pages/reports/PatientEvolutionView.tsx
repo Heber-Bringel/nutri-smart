@@ -15,9 +15,9 @@ import { useNavigate } from 'react-router-dom';
 
 export const PatientEvolutionView: React.FC = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   // O paciente enxerga apenas 30 dias (mockado aqui via viewmodel, limitando dados)
-  const { chartData } = usePatientReportViewModel();
+  const { chartData, isLoading, error } = usePatientReportViewModel(user?.pacienteId);
 
   // Filtramos os dados para garantir que apenas os últimos 30 dias sejam visíveis e apenas peso
   const patientData = chartData.slice(-30).map(d => ({
@@ -31,6 +31,9 @@ export const PatientEvolutionView: React.FC = () => {
     border: '1px solid var(--color-border)', background: 'var(--color-surface)',
     color: 'var(--color-ink-primary)', fontSize: 13, fontWeight: 500,
   };
+
+  if (isLoading) return <div style={{ padding: 32 }}>Carregando evolução...</div>;
+  if (error) return <div style={{ padding: 32, color: 'var(--color-danger)' }}>{error}</div>;
 
   return (
     <div style={{ padding: 32, maxWidth: 800, margin: '0 auto', animation: 'fadeIn 0.4s ease-out' }}>

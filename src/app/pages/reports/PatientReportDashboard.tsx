@@ -1,18 +1,27 @@
 import React, { useState } from 'react';
 import { usePatientReportViewModel, TimeWindow } from '../../../viewmodel/reports/PatientReportViewModel';
 import { EvolutionChart } from '../../components/charts/EvolutionChart';
+import { useOutletContext } from 'react-router-dom';
+import { Paciente } from '../../../model/entities/Paciente';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 
 export const PatientReportDashboard: React.FC = () => {
+  const { paciente } = useOutletContext<{ paciente: Paciente }>();
   const {
     timeWindow,
     setTimeWindow,
     chartData,
     generateReport,
     isGenerating,
+    isLoading,
+    error,
     patientName
-  } = usePatientReportViewModel();
+  } = usePatientReportViewModel(paciente?.id);
 
   const [chartImage, setChartImage] = useState<string | undefined>();
+
+  if (isLoading) return <LoadingSkeleton lines={4} />;
+  if (error) return <div style={{ color: 'var(--color-danger)' }}>{error}</div>;
 
   return (
     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>

@@ -1,59 +1,98 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ReportPayload } from '../../model/services/IReportGenerator';
 import { Container } from '../../di/container';
+import { Paciente } from '../../model/entities/Paciente';
 
 export type TimeWindow = 30 | 60 | 90;
 
-export function usePatientReportViewModel() {
+function calculateAge(birthDate: string): number {
+  const diff = Date.now() - new Date(birthDate).getTime();
+  const ageDate = new Date(diff); 
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+}
+
+export function usePatientReportViewModel(pacienteId?: string) {
   const [timeWindow, setTimeWindow] = useState<TimeWindow>(30);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const mockPayload: ReportPayload = {
-    paciente: {
-      nome: 'João Silva',
-      idade: 35,
-      sexo: 'M',
-      email: 'joao.silva@example.com',
-      telefone: '(11) 98765-4321',
-    },
-    indicadores: {
-      imc: 24.5,
-      tmb: 1800,
-      get: 2400,
-    },
-    historicoMedidas: Array.from({ length: 10 }).map((_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - i * 15);
-      return {
-        data: d.toISOString(),
-        peso: 80 - i * 0.5,
-        circunferenciaCintura: 90 - i * 0.5,
-        circunferenciaAbdominal: 95 - i * 0.5,
-        circunferenciaQuadril: 100 - i * 0.5,
-      };
-    }).reverse(),
-    planoAlimentar: {
-      refeicoes: [
-        {
-          nome: 'Café da Manhã',
-          horario: '08:00',
-          alimentos: ['2 fatias de pão integral', '2 ovos mexidos', '1 xícara de café'],
-        },
-        {
-          nome: 'Almoço',
-          horario: '12:30',
-          alimentos: ['150g peito de frango', '100g arroz integral', 'Salada à vontade'],
-        },
-      ],
-      recomendacoesGerais: 'Beber 3L de água por dia. Evitar doces e frituras.',
-    },
-  };
+  const [payloadData, setPayloadData] = useState<ReportPayload | null>(null);
+
+  useEffect(() => {
+    if (!pacienteId) {
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoading(true);
+
+    async function loadData() {
+      try {
+        const paciente = await Container.getPacienteUseCase.execute(pacienteId as string);
+        const mealPlan = await Container.getMealPlanUseCase.execute(pacienteId as string).catch(() => null);
+        const medidasRaw = await Container.listMeasurementsUseCase.execute(pacienteId as string).catch(() => []);
+
+        // Sort by date ascending to show chart properly
+        const medidas = [...medidasRaw].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
+
+        if (cancelled) return;
+
+        const payload: ReportPayload = {
+          paciente: {
+            nome: paciente.nomeCompleto,
+            idade: calculateAge(paciente.dataNascimento),
+            sexo: paciente.sexoBiologico === 'masculino' ? 'M' : 'F',
+            email: paciente.email,
+          },
+          indicadores: {
+            imc: paciente.imc || 0,
+            tmb: paciente.tmb || 0,
+            get: paciente.get || 0,
+          },
+          historicoMedidas: medidas.map(m => ({
+            data: m.data,
+            peso: m.peso,
+            circunferenciaCintura: m.cintura,
+            circunferenciaAbdominal: m.abdominal,
+            circunferenciaQuadril: m.quadril,
+          })),
+          planoAlimentar: mealPlan ? {
+            refeicoes: mealPlan.refeicoes.map(r => ({
+              nome: r.nome,
+              horario: r.horario,
+              alimentos: r.alimentos.map(a => `${a.quantidade || ''} ${a.unidade || ''} de ${a.nome}`.trim()),
+            })),
+            recomendacoesGerais: mealPlan.observacoes,
+          } : undefined,
+        };
+
+        setPayloadData(payload);
+      } catch (err: unknown) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Erro ao carregar dados para o relatório.');
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pacienteId]);
 
   const filteredMeasurements = useMemo(() => {
+    if (!payloadData) return [];
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - timeWindow);
-    return mockPayload.historicoMedidas.filter(m => new Date(m.data) >= cutoffDate);
-  }, [timeWindow, mockPayload.historicoMedidas]);
+    return payloadData.historicoMedidas.filter(m => new Date(m.data) >= cutoffDate);
+  }, [timeWindow, payloadData]);
 
   const chartData = useMemo(() => {
     return filteredMeasurements.map(m => ({
@@ -66,12 +105,13 @@ export function usePatientReportViewModel() {
   }, [filteredMeasurements]);
 
   const generateReport = async (chartBase64?: string, action: 'download' | 'print' = 'download') => {
+    if (!payloadData) return;
     setIsGenerating(true);
     try {
       const useCase = Container.generatePatientReportUseCase;
       
       const payload: ReportPayload = {
-        ...mockPayload,
+        ...payloadData,
         historicoMedidas: filteredMeasurements,
         evolucaoPesoChartImage: chartBase64,
       };
@@ -79,7 +119,7 @@ export function usePatientReportViewModel() {
       const blob = await useCase.execute(payload);
       
       if (action === 'download') {
-        useCase.download(blob, `relatorio_${mockPayload.paciente.nome.replace(/\s/g, '_')}_${timeWindow}d.pdf`);
+        useCase.download(blob, `relatorio_${payloadData.paciente.nome.replace(/\s/g, '_')}_${timeWindow}d.pdf`);
       } else {
         useCase.print(blob);
       }
@@ -98,6 +138,8 @@ export function usePatientReportViewModel() {
     chartData,
     generateReport,
     isGenerating,
-    patientName: mockPayload.paciente.nome,
+    isLoading,
+    error,
+    patientName: payloadData?.paciente.nome || '',
   };
 }
