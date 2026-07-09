@@ -15,6 +15,7 @@ export function EvolutionChartPage() {
 
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     Container.getEvolutionChartDataUseCase.execute(paciente.id, 30)

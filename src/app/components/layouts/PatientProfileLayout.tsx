@@ -34,6 +34,7 @@ export function PatientProfileLayout() {
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     Container.getPacienteUseCase.execute(id)

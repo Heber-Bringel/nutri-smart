@@ -79,8 +79,8 @@ function Input({ error, mono, ...props }: {
   );
 }
 
-function Select({ error, label, options, value, onChange }: {
-  error?: string; label: string;
+function Select({ error, options, value, onChange }: {
+  error?: string;
   options: { value: string; label: string }[];
   value: string; onChange: (v: string) => void;
 }) {

@@ -230,10 +230,7 @@ export function PatientListPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Telefone</span>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)' }}>{pacienteSelecionado.telefone || '--'}</span>
-              </div>
+
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nasc.</span>
                 <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)', fontFamily: 'var(--font-mono)' }}>{formatDate(pacienteSelecionado.dataNascimento)}</span>

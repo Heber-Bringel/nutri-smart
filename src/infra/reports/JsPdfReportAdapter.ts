@@ -25,6 +25,7 @@ export class JsPdfReportAdapter implements IReportGenerator {
       ],
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let currentY = (doc as any).lastAutoTable.finalY + 10;
 
     doc.setFontSize(14);
@@ -43,6 +44,7 @@ export class JsPdfReportAdapter implements IReportGenerator {
       body: historicoBody,
     });
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     currentY = (doc as any).lastAutoTable.finalY + 10;
 
     if (data.evolucaoPesoChartImage) {

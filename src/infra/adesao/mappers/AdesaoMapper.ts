@@ -19,14 +19,13 @@ export class AdesaoMapper {
     return {
       id: row.id,
       refeicaoId: row.refeicao_id,
-      pacienteId: row.paciente_id,
       data: row.data,
       concluida: row.concluida,
       createdAt: row.created_at,
     };
   }
 
-  static toDailyProgress(pacienteId: string, data: string, row: ProgressRow): DailyProgress {
+  static toDailyProgress(data: string, row: ProgressRow): DailyProgress {
     return {
       data,
       totalRefeicoes: row.total,

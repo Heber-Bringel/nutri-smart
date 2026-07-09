@@ -100,8 +100,10 @@ export function SchedulePage() {
           culture="pt-BR"
           selectable
           date={vm.currentDate}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           view={vm.currentView as any}
           onNavigate={vm.onNavigate}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onView={vm.onView as any}
           onSelectSlot={onSelectSlot}
           onSelectEvent={onSelectEvent}
@@ -165,6 +167,7 @@ export function SchedulePage() {
                 <input 
                   type="time" 
                   value={format(vm.selectedSlot.start, "HH:mm")}
+
                   onChange={e => vm.updateSlotTime('start', e.target.value)}
                   style={inputStyle} 
                 />

@@ -20,7 +20,7 @@ export class SupabaseAuthService implements IAuthService {
     }
 
     // Busca dados do perfil público na tabela profiles
-    const { data: profile } = await supabase
+    await supabase
       .from('profiles')
       .select('nome_completo, role')
       .eq('id', data.user.id)

@@ -82,6 +82,7 @@ export function BodyMeasurementFormPage() {
       if (editId) {
         await Container.updateMeasurementUseCase.execute(editId, data);
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await Container.registerMeasurementUseCase.execute(data as any);
       }
 

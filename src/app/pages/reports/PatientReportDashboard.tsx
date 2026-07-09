@@ -14,8 +14,7 @@ export const PatientReportDashboard: React.FC = () => {
     generateReport,
     isGenerating,
     isLoading,
-    error,
-    patientName
+    error
   } = usePatientReportViewModel(paciente?.id);
 
   const [chartImage, setChartImage] = useState<string | undefined>();

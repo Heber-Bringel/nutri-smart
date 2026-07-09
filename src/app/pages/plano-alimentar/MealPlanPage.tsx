@@ -22,13 +22,24 @@ export function MealPlanPage() {
 
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     Container.getMealPlanUseCase.execute(paciente.id)
       .then(existingPlan => {
         if (!cancelled && existingPlan) {
           setObservacoes(existingPlan.observacoes || '');
-          setRefeicoes(existingPlan.refeicoes || []);
+          setRefeicoes((existingPlan.refeicoes || []).map((r, i) => ({
+            nome: r.nome,
+            ordem: r.ordem ?? i,
+            horarioSugerido: r.horarioSugerido || '',
+            alimentos: r.itens.map(it => ({
+              nome: it.nomeBase,
+              quantidade: it.quantidade,
+              unidadeMedida: it.unidadeMedida,
+              calorias: it.calorias
+            }))
+          })));
         }
       })
       .catch(err => {

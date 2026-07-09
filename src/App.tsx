@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './viewmodel/auth/AuthViewModel';
 import { LoginPage } from './app/pages/auth/LoginPage';
-import { PatientDietPage } from './app/pages/diet/PatientDietPage';
 import { ProtectedRoute } from './app/components/ProtectedRoute';
 import { PatientListPage } from './app/pages/pacientes/PatientListPage';
 import { PatientFormPage } from './app/pages/pacientes/PatientFormPage';

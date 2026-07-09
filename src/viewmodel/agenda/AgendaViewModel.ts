@@ -74,7 +74,8 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
   }
 
   function openCreateModal(slot: { start: Date; end: Date }) {
-    let { start, end } = slot;
+    const { start } = slot;
+    let end = slot.end;
     // Se o clique foi no mês, `end` costuma vir como o dia seguinte (00:00) e start (00:00)
     if (end.getTime() - start.getTime() >= 24 * 60 * 60 * 1000) {
       end = new Date(start);

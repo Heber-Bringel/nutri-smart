@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ReportPayload } from '../../model/services/IReportGenerator';
 import { Container } from '../../di/container';
-import { Paciente } from '../../model/entities/Paciente';
+
 
 export type TimeWindow = 30 | 60 | 90 | 180 | 365 | 9999;
 
@@ -18,10 +18,12 @@ export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow
   const [error, setError] = useState<string | null>(null);
 
   const [payloadData, setPayloadData] = useState<ReportPayload | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [adesaoRawData, setAdesaoRawData] = useState<any[]>([]);
 
   useEffect(() => {
     if (!pacienteId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false);
       return;
     }

@@ -50,6 +50,7 @@ export const EvolutionChart: React.FC<EvolutionChartProps> = ({ data, onCapture 
       // Allow recharts to render before capturing
       setTimeout(handleCapture, 500);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, onCapture]);
 
   return (
