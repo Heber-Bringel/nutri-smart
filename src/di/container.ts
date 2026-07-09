@@ -1,8 +1,10 @@
-import { SupabaseAuthService } from '../infra/auth/SupabaseAuthService';
+import { SupabaseAuthAdapter } from '../infra/auth/SupabaseAuthAdapter';
 import { SupabaseInviteService } from '../infra/auth/SupabaseInviteService';
 import { LoginUseCase } from '../usecase/auth/LoginUseCase';
 import { RegisterUseCase } from '../usecase/auth/RegisterUseCase';
 import { GetCurrentUserUseCase } from '../usecase/auth/GetCurrentUserUseCase';
+import { LogoutUseCase } from '../usecase/auth/LogoutUseCase';
+import { SubscribeAuthStateUseCase } from '../usecase/auth/SubscribeAuthStateUseCase';
 import { SupabasePacienteService } from '../infra/pacientes/SupabasePacienteService';
 import { CreatePacienteUseCase } from '../usecase/pacientes/CreatePacienteUseCase';
 import { ListPacientesUseCase } from '../usecase/pacientes/ListPacientesUseCase';
@@ -44,7 +46,7 @@ import { JsPdfReportAdapter } from '../infra/reports/JsPdfReportAdapter';
 import { GeneratePatientReportUseCase } from '../usecase/reports/GeneratePatientReportUseCase';
 
 class Container {
-  private static _authService = new SupabaseAuthService();
+  private static _authService = new SupabaseAuthAdapter();
   private static _pacienteService = new SupabasePacienteService();
   private static _inviteService = new SupabaseInviteService();
   private static _mealPlanService = new SupabaseMealPlanService();
@@ -100,6 +102,14 @@ class Container {
 
   static get getCurrentUserUseCase() {
     return new GetCurrentUserUseCase(this._authService);
+  }
+
+  static get logoutUseCase() {
+    return new LogoutUseCase(this._authService);
+  }
+
+  static get subscribeAuthStateUseCase() {
+    return new SubscribeAuthStateUseCase(this._authService);
   }
 
   static get createPacienteUseCase() {
