@@ -1,0 +1,73 @@
+import { useState, useEffect } from 'react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import { Container } from '../../../di/container';
+import type { EvolutionChartData } from '../../../model/services/IAdesaoService';
+import { EvolutionChart } from '../../components/evolucao/EvolutionChart';
+import type { Paciente } from '../../../model/entities/Paciente';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
+
+export function EvolutionChartPage() {
+  const { paciente } = useOutletContext<{ paciente: Paciente }>();
+  const navigate = useNavigate();
+  const [data, setData] = useState<EvolutionChartData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    Container.getEvolutionChartDataUseCase.execute(paciente.id, 30)
+      .then(result => { if (!cancelled) setData(result); })
+      .catch(err => { if (!cancelled) setError(err instanceof Error ? err.message : 'Erro ao carregar dados.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [paciente.id]);
+
+  if (loading) return <LoadingSkeleton lines={4} />;
+
+  return (
+    <div style={{ paddingBottom: 64 }}>
+      {error && (
+        <div style={{
+          padding: '10px 14px', background: 'var(--color-danger-subtle)',
+          border: '1px solid var(--color-danger-border)',
+          color: 'var(--color-danger)', borderRadius: 'var(--radius-md)', fontSize: 13, marginBottom: 24,
+        }}>
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && (
+        <div style={{
+          background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-lg)', padding: 32,
+        }}>
+          <h3 style={{
+            margin: '0 0 24px', fontSize: 12, fontWeight: 600,
+            color: 'var(--color-ink-secondary)', textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}>
+            Evolução de Peso (Últimos 30 dias)
+          </h3>
+          <EvolutionChart data={data} />
+          {data.length > 0 && data.every(d => !d.peso && d.adesaoPercentual === 0) && (
+            <div style={{ textAlign: 'center', marginTop: 16 }}>
+              <button
+                onClick={() => navigate('../medidas', { relative: 'path' })}
+                style={{
+                  padding: '8px 16px', background: 'var(--color-primary)', color: '#fff',
+                  border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer',
+                  fontSize: 13, fontWeight: 500,
+                }}
+              >
+                Registrar medidas corporais
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

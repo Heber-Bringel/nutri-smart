@@ -20,14 +20,14 @@ export function ProtectedRoute({ children, allowedRole }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login?sessionExpired=true" replace />;
   }
 
   if (allowedRole && user.role !== allowedRole) {
     if (user.role === 'nutricionista') {
       return <Navigate to="/dashboard/pacientes" replace />;
     }
-    return <Navigate to="/dieta" replace />;
+    return <Navigate to="/paciente/meu-plano" replace />;
   }
 
   return <>{children}</>;
