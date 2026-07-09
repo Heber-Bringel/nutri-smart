@@ -35,12 +35,15 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
 
     (async () => {
       try {
-        const [plan, prog, estados, next] = await Promise.all([
+        const [plan, prog, estadosRaw, next] = await Promise.all([
           Container.getMealPlanUseCase.execute(pacienteId),
           Container.getDailyProgressUseCase.execute(pacienteId, selectedDate),
           Container.getDailyAdesaoStatesUseCase.execute(pacienteId, selectedDate),
           Container.getNextConsultaUseCase.execute(pacienteId),
         ]);
+
+        // Guard defensivo: garante que estadosRaw é sempre um array iterável
+        const estados = Array.isArray(estadosRaw) ? estadosRaw : [];
 
         if (!cancelled) {
           setMealPlan(plan);
@@ -69,11 +72,12 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
       await Container.markMealAsCompletedUseCase.execute(refeicaoId, pacienteId, concluida, selectedDate);
       setAdesaoMap(prev => new Map(prev).set(refeicaoId, concluida));
 
-      const [prog, estados] = await Promise.all([
+      const [prog, estadosRaw] = await Promise.all([
         Container.getDailyProgressUseCase.execute(pacienteId, selectedDate),
         Container.getDailyAdesaoStatesUseCase.execute(pacienteId, selectedDate),
       ]);
       setProgress(prog);
+      const estados = Array.isArray(estadosRaw) ? estadosRaw : [];
       const map = new Map<string, boolean>();
       for (const e of estados) {
         map.set(e.refeicaoId, e.concluida);

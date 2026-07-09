@@ -42,7 +42,7 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
 
   useEffect(() => {
     Container.listPacientesUseCase.execute({ pageSize: 200 })
-      .then(res => setPatients(res.data))
+      .then(res => setPatients(Array.isArray(res.data) ? res.data : []))
       .catch(() => {});
   }, []);
 
