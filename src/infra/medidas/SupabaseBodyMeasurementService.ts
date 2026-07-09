@@ -57,11 +57,17 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
     if (pesosError) throw new MeasurementError(pesosError.message);
 
     const pesoMap = new Map<string, number>();
-    pesos?.forEach(p => pesoMap.set(p.data_registro, p.peso));
+    pesos?.forEach(p => {
+      if (p.data_registro) {
+        pesoMap.set(p.data_registro.split('T')[0], p.peso);
+      }
+    });
 
     return (rows || []).map(row => {
       const domain = BodyMeasurementMapper.toDomain(row);
-      domain.peso = pesoMap.get(domain.dataAtendimento) || null;
+      if (domain.dataAtendimento) {
+        domain.peso = pesoMap.get(domain.dataAtendimento.split('T')[0]) || null;
+      }
       return domain;
     });
   }
