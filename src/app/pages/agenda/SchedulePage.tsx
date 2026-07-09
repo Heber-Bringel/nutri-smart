@@ -99,6 +99,10 @@ export function SchedulePage() {
           endAccessor="end"
           culture="pt-BR"
           selectable
+          date={vm.currentDate}
+          view={vm.currentView as any}
+          onNavigate={vm.onNavigate}
+          onView={vm.onView as any}
           onSelectSlot={onSelectSlot}
           onSelectEvent={onSelectEvent}
           messages={{

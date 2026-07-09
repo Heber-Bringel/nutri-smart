@@ -18,6 +18,8 @@ export interface AgendaViewModelState {
   selectedSlot: { start: Date; end: Date } | null;
   form: AgendaFormState;
   patients: { id: string; nomeCompleto: string }[];
+  currentDate: Date;
+  currentView: 'month' | 'week' | 'work_week' | 'day' | 'agenda';
 }
 
 export interface AgendaViewModelActions {
@@ -29,6 +31,8 @@ export interface AgendaViewModelActions {
   handleSave: (nutricionistaId: string) => Promise<void>;
   handleCancel: (consultaId: string, nutricionistaId: string) => Promise<void>;
   updateSlotTime: (field: 'start' | 'end', timeStr: string) => void;
+  onNavigate: (newDate: Date) => void;
+  onView: (newView: 'month' | 'week' | 'work_week' | 'day' | 'agenda') => void;
 }
 
 export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActions {
@@ -40,6 +44,8 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
   const [editingConsulta, setEditingConsulta] = useState<Consulta | null>(null);
   const [form, setForm] = useState<AgendaFormState>({ pacienteId: '', pacienteNome: '', observacoes: '' });
   const [patients, setPatients] = useState<{ id: string; nomeCompleto: string }[]>([]);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [currentView, setCurrentView] = useState<'month' | 'week' | 'work_week' | 'day' | 'agenda'>('month');
 
   useEffect(() => {
     Container.listPacientesUseCase.execute({ pageSize: 200 })
@@ -204,8 +210,16 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
     }
   }
 
+  function onNavigate(newDate: Date) {
+    setCurrentDate(newDate);
+  }
+
+  function onView(newView: 'month' | 'week' | 'work_week' | 'day' | 'agenda') {
+    setCurrentView(newView);
+  }
+
   return {
-    events, loading, error, showModal, selectedSlot, editingConsulta, form, patients,
-    fetchConsultas, openCreateModal, openEditModal, closeModal, setFormField, handleSave, handleCancel, updateSlotTime,
+    events, loading, error, showModal, selectedSlot, editingConsulta, form, patients, currentDate, currentView,
+    fetchConsultas, openCreateModal, openEditModal, closeModal, setFormField, handleSave, handleCancel, updateSlotTime, onNavigate, onView,
   };
 }
