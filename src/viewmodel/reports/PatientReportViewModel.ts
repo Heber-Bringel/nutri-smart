@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
-import { GeneratePatientReportUseCase } from '../../usecase/reports/GeneratePatientReportUseCase';
 import { ReportPayload } from '../../model/services/IReportGenerator';
-import { JsPdfReportAdapter } from '../../infra/reports/JsPdfReportAdapter';
+import { Container } from '../../di/container';
 
 export type TimeWindow = 30 | 60 | 90;
 
@@ -69,8 +68,7 @@ export function usePatientReportViewModel() {
   const generateReport = async (chartBase64?: string, action: 'download' | 'print' = 'download') => {
     setIsGenerating(true);
     try {
-      const adapter = new JsPdfReportAdapter();
-      const useCase = new GeneratePatientReportUseCase(adapter);
+      const useCase = Container.generatePatientReportUseCase;
       
       const payload: ReportPayload = {
         ...mockPayload,
