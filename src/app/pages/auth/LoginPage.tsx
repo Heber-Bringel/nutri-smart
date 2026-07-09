@@ -22,6 +22,11 @@ export function LoginPage() {
   }, [user, loading, navigate]);
 
   useEffect(() => {
+    // Limpa a flag de logout voluntário ao montar a página de login
+    sessionStorage.removeItem('logout_voluntario');
+  }, []);
+
+  useEffect(() => {
     if (searchParams.get('sessionExpired') === 'true') {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSessionExpiredMsg('Sua sessão expirou. Faça login novamente.');
