@@ -67,10 +67,9 @@ export function PatientMealPlanPage() {
               Proxima Consulta
             </p>
             <p style={{ margin: '2px 0 0', fontSize: 14, fontWeight: 600, color: 'var(--color-ink-primary)' }}>
-              {new Date(vm.nextConsulta.data + 'T' + vm.nextConsulta.horarioInicio).toLocaleDateString('pt-BR', {
-                day: '2-digit', month: 'long', year: 'numeric',
-                hour: '2-digit', minute: '2-digit',
-              })}
+              {new Date(vm.nextConsulta.data + 'T00:00:00').toLocaleDateString('pt-BR', {
+                day: '2-digit', month: 'long', year: 'numeric'
+              })} • {vm.nextConsulta.horarioInicio.slice(0, 5)} às {vm.nextConsulta.horarioFim.slice(0, 5)}
             </p>
             {vm.nextConsulta.observacoes && (
               <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-ink-secondary)' }}>
