@@ -580,7 +580,7 @@ Plano alimentar vinculado ao paciente, persistido no Supabase com RLS e disponí
 | 3 | O nutricionista seleciona a opção **Criar plano alimentar** (RF007). |
 | 4 | O sistema apresenta um formulário para definição de refeições. |
 | 5 | O nutricionista define as refeições do dia (ex.: café da manhã, almoço, lanche da tarde e jantar). |
-| 6 | Para cada refeição, o nutricionista adiciona alimentos com nome, quantidade (g/ml) e valor calórico. |
+| 6 | Para cada refeição, o nutricionista adiciona alimentos, podendo selecioná-los de uma base cadastrada (que preenche calorias e macros automaticamente) ou criá-los manualmente informando nome, quantidade e calorias. |
 | 7 | O sistema calcula automaticamente o total calórico por refeição. |
 | 8 | O nutricionista revisa o plano e confirma o salvamento. |
 | 9 | O sistema persiste o plano no Supabase com RLS vinculando o plano ao nutricionista e ao paciente. Exibe confirmação de sucesso. |

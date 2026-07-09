@@ -5,5 +5,6 @@ export interface User {
   email: string;
   nomeCompleto: string;
   role: UserRole;
+  pacienteId?: string;
   createdAt?: string;
 }
