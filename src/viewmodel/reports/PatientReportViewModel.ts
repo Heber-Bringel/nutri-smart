@@ -88,10 +88,8 @@ export function usePatientReportViewModel(pacienteId?: string) {
 
   const filteredMeasurements = useMemo(() => {
     if (!payloadData) return [];
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - timeWindow);
-    return payloadData.historicoMedidas.filter(m => new Date(m.data) >= cutoffDate);
-  }, [timeWindow, payloadData]);
+    return payloadData.historicoMedidas;
+  }, [payloadData]);
 
   const chartData = useMemo(() => {
     return filteredMeasurements.map(m => ({
@@ -132,12 +130,13 @@ export function usePatientReportViewModel(pacienteId?: string) {
   return {
     timeWindow,
     setTimeWindow,
-    filteredMeasurements,
+    filteredMeasurements: payloadData?.historicoMedidas || [],
     chartData,
     generateReport,
     isGenerating,
     isLoading,
     error,
     patientName: payloadData?.paciente.nome || '',
+    rawMedidasCount: payloadData?.historicoMedidas?.length || 0,
   };
 }

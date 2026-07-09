@@ -17,7 +17,7 @@ export const PatientEvolutionView: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   // O paciente enxerga os últimos 6 meses (padrão do viewmodel)
-  const { chartData, isLoading, error } = usePatientReportViewModel(user?.pacienteId);
+  const { chartData, isLoading, error, rawMedidasCount } = usePatientReportViewModel(user?.pacienteId);
 
   // Filtramos os dados para garantir que apenas o peso e adesão sejam exibidos
   const patientData = chartData.map(d => ({
@@ -84,7 +84,7 @@ export const PatientEvolutionView: React.FC = () => {
       {/* TODO: Remover debug visual depois */}
       <div style={{ marginTop: 24, fontSize: 11, color: 'var(--color-ink-secondary)' }}>
         <p>Debug Info:</p>
-        <pre>{JSON.stringify({ pacienteId: user?.pacienteId, items: patientData.length, data: patientData }, null, 2)}</pre>
+        <pre>{JSON.stringify({ pacienteId: user?.pacienteId, rawMedidasCount, items: patientData.length, data: patientData }, null, 2)}</pre>
       </div>
     </div>
   );
