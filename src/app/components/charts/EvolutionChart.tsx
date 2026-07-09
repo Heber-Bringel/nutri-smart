@@ -14,11 +14,11 @@ import html2canvas from 'html2canvas';
 interface EvolutionChartProps {
   data: Array<{
     data: string;
-    peso?: number;
-    cintura?: number;
-    abdominal?: number;
-    quadril?: number;
-    adesao?: number;
+    peso?: number | null;
+    cintura?: number | null;
+    abdominal?: number | null;
+    quadril?: number | null;
+    adesao?: number | null;
   }>;
   onCapture?: (base64Image: string) => void;
 }
