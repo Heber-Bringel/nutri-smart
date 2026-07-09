@@ -59,14 +59,14 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
     const pesoMap = new Map<string, number>();
     pesos?.forEach(p => {
       if (p.data_registro) {
-        pesoMap.set(p.data_registro.split('T')[0], p.peso);
+        pesoMap.set(p.data_registro.substring(0, 10), p.peso);
       }
     });
 
     return (rows || []).map(row => {
       const domain = BodyMeasurementMapper.toDomain(row);
       if (domain.dataAtendimento) {
-        domain.peso = pesoMap.get(domain.dataAtendimento.split('T')[0]) || null;
+        domain.peso = pesoMap.get(domain.dataAtendimento.substring(0, 10)) || null;
       }
       return domain;
     });
@@ -90,7 +90,17 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
 
     if (error) throw new MeasurementError(error.message);
 
-    return BodyMeasurementMapper.toDomain(row);
+    if (data.peso != null && data.peso > 0) {
+      await supabase.from('historico_peso').upsert({
+        paciente_id: row.paciente_id,
+        peso: data.peso,
+        data_registro: row.data_atendimento,
+      }, { onConflict: 'paciente_id, data_registro', ignoreDuplicates: false });
+    }
+
+    const domain = BodyMeasurementMapper.toDomain(row);
+    domain.peso = data.peso || null;
+    return domain;
   }
 
   async delete(id: string): Promise<void> {
