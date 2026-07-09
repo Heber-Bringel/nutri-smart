@@ -80,10 +80,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async (): Promise<void> => {
     setLoading(true);
+    sessionStorage.setItem('logout_voluntario', 'true');
     try {
       await Container.logoutUseCase.execute();
-      sessionStorage.setItem('logout_voluntario', 'true');
       setUser(null);
+    } catch (err: unknown) {
+      sessionStorage.removeItem('logout_voluntario');
+      throw err;
     } finally {
       setLoading(false);
     }
