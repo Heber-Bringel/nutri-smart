@@ -1,74 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Container } from '../../../di/container';
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
-import type { MealPlan } from '../../../model/entities/MealPlan';
-import type { DailyProgress } from '../../../model/entities/Adesao';
+import { usePatientAreaViewModel } from '../../../viewmodel/paciente/PatientAreaViewModel';
 import { AdherenceToggle } from '../../components/paciente/AdherenceToggle';
-import { getTodayLocal } from '../../../shared/utils/date';
 import { ProgressBar } from '../../components/paciente/ProgressBar';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 
 export function PatientMealPlanPage() {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
-  const [progress, setProgress] = useState<DailyProgress | null>(null);
-  const [selectedDate, setSelectedDate] = useState(getTodayLocal());
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [adesaoMap, setAdesaoMap] = useState<Map<string, boolean>>(new Map());
+  const vm = usePatientAreaViewModel(user?.pacienteId);
 
-  useEffect(() => {
-    if (!user?.pacienteId) return;
-    let cancelled = false;
-
-    Promise.all([
-      Container.getMealPlanUseCase.execute(user.pacienteId!),
-      Container.getDailyProgressUseCase.execute(user.pacienteId!, selectedDate),
-      Container.getDailyAdesaoStatesUseCase.execute(user.pacienteId!, selectedDate),
-    ])
-      .then(([plan, prog, estados]) => {
-        if (!cancelled) {
-          setMealPlan(plan);
-          setProgress(prog);
-          const map = new Map<string, boolean>();
-          for (const e of estados) {
-            map.set(e.refeicaoId, e.concluida);
-          }
-          setAdesaoMap(map);
-        }
-      })
-      .catch(err => { if (!cancelled) setError(err instanceof Error ? err.message : 'Erro ao carregar plano.'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-
-    return () => { cancelled = true; };
-  }, [user?.pacienteId, selectedDate]);
-
-  async function handleToggle(refeicaoId: string, concluida: boolean) {
-    if (!user?.pacienteId) return;
-
-    try {
-      await Container.markMealAsCompletedUseCase.execute(refeicaoId, user.pacienteId, concluida, selectedDate);
-
-      setAdesaoMap(prev => new Map(prev).set(refeicaoId, concluida));
-
-      const [prog, estados] = await Promise.all([
-        Container.getDailyProgressUseCase.execute(user.pacienteId, selectedDate),
-        Container.getDailyAdesaoStatesUseCase.execute(user.pacienteId, selectedDate),
-      ]);
-      setProgress(prog);
-      const map = new Map<string, boolean>();
-      for (const e of estados) {
-        map.set(e.refeicaoId, e.concluida);
-      }
-      setAdesaoMap(map);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar. Tente novamente.');
-    }
-  }
-
-  if (loading) {
+  if (vm.loading) {
     return <LoadingSkeleton lines={4} />;
   }
 
@@ -92,13 +32,55 @@ export function PatientMealPlanPage() {
         </button>
       </div>
 
-      {error && (
+      {vm.error && (
         <div style={{
           padding: '10px 14px', background: 'var(--color-danger-subtle)',
           border: '1px solid var(--color-danger-border)',
           color: 'var(--color-danger)', borderRadius: 'var(--radius-md)', fontSize: 13, marginBottom: 16,
         }}>
-          {error}
+          {vm.error}
+        </div>
+      )}
+
+      {vm.nextConsulta ? (
+        <div style={{
+          padding: '16px 20px', marginBottom: 24,
+          border: '1px solid var(--color-primary)', borderRadius: 'var(--radius-lg)',
+          background: 'var(--color-primary-subtle)',
+          display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <div>
+            <p style={{ margin: 0, fontSize: 11, fontWeight: 500, color: 'var(--color-primary-text)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Proxima Consulta
+            </p>
+            <p style={{ margin: '2px 0 0', fontSize: 14, fontWeight: 600, color: 'var(--color-ink-primary)' }}>
+              {new Date(vm.nextConsulta.data + 'T' + vm.nextConsulta.horarioInicio).toLocaleDateString('pt-BR', {
+                day: '2-digit', month: 'long', year: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+              })}
+            </p>
+            {vm.nextConsulta.observacoes && (
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-ink-secondary)' }}>
+                {vm.nextConsulta.observacoes}
+              </p>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          padding: '12px 16px', marginBottom: 24,
+          border: '1px dashed var(--color-border)', borderRadius: 'var(--radius-md)',
+          background: 'var(--color-bg)', textAlign: 'center',
+        }}>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-ink-tertiary)' }}>
+            Nenhuma consulta agendada.
+          </p>
         </div>
       )}
 
@@ -111,8 +93,8 @@ export function PatientMealPlanPage() {
         </label>
         <input
           type="date"
-          value={selectedDate}
-          onChange={e => setSelectedDate(e.target.value)}
+          value={vm.selectedDate}
+          onChange={e => vm.setSelectedDate(e.target.value)}
           style={{
             padding: '8px 12px', borderRadius: 'var(--radius-sm)',
             border: '1px solid var(--color-border)', fontSize: 13,
@@ -125,15 +107,15 @@ export function PatientMealPlanPage() {
         />
       </div>
 
-      {progress && (
+      {vm.progress && (
         <ProgressBar
-          concluidas={progress.concluidas}
-          total={progress.totalRefeicoes}
-          percentual={progress.percentual}
+          concluidas={vm.progress.concluidas}
+          total={vm.progress.totalRefeicoes}
+          percentual={vm.progress.percentual}
         />
       )}
 
-      {!mealPlan ? (
+      {!vm.mealPlan ? (
         <div style={{
           textAlign: 'center', padding: 48, color: 'var(--color-ink-tertiary)',
           border: '2px dashed var(--color-border)', borderRadius: 'var(--radius-lg)',
@@ -143,7 +125,7 @@ export function PatientMealPlanPage() {
         </div>
       ) : (
         <div>
-          {mealPlan.refeicoes
+          {vm.mealPlan.refeicoes
             .sort((a, b) => a.ordem - b.ordem)
             .map(refeicao => (
               <div
@@ -173,8 +155,8 @@ export function PatientMealPlanPage() {
                     </span>
                     <AdherenceToggle
                       refeicaoId={refeicao.id}
-                      concluida={adesaoMap.get(refeicao.id) ?? false}
-                      onToggle={handleToggle}
+                      concluida={vm.adesaoMap.get(refeicao.id) ?? false}
+                      onToggle={(id, concluida) => vm.handleToggle(id, concluida, user?.pacienteId || '')}
                     />
                   </div>
                 </div>

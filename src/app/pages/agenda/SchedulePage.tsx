@@ -1,76 +1,70 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
+import { useAgendaViewModel } from '../../../viewmodel/agenda/AgendaViewModel';
+import { CalendarEvent } from '../../../model/services/ICalendarAdapter';
 import './agenda.css';
 
 const locales = { 'pt-BR': ptBR };
 
 const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
+  format, parse, startOfWeek, getDay, locales,
 });
 
-interface ApptEvent {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  type: 'primeira_consulta' | 'retorno';
-}
+const labelStyle: React.CSSProperties = {
+  display: 'block', marginBottom: 6, fontSize: 11, fontWeight: 500,
+  color: 'var(--color-ink-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em',
+};
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+  border: '1px solid var(--color-border)', fontSize: 14,
+  fontFamily: 'var(--font-body)', outline: 'none',
+  color: 'var(--color-ink-primary)', background: 'var(--color-surface)',
+  transition: 'border-color 150ms ease-out',
+  boxSizing: 'border-box',
+};
+const btnSecondary: React.CSSProperties = {
+  padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
+  border: '1px solid var(--color-border)', cursor: 'pointer',
+  background: 'var(--color-surface)', color: 'var(--color-ink-primary)',
+};
+const btnDanger: React.CSSProperties = {
+  padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
+  border: '1px solid var(--color-danger)', cursor: 'pointer',
+  background: 'var(--color-surface)', color: 'var(--color-danger)',
+};
+const btnPrimary: React.CSSProperties = {
+  padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
+  border: 'none', cursor: 'pointer',
+  background: 'var(--color-primary)', color: '#fff',
+  transition: 'background 150ms ease-out',
+};
 
 export function SchedulePage() {
-  const [events, setEvents] = useState<ApptEvent[]>([
-    {
-      id: '1',
-      title: 'Primeira Consulta: Marcos Paulo',
-      start: new Date(new Date().setHours(10, 0, 0, 0)),
-      end: new Date(new Date().setHours(11, 0, 0, 0)),
-      type: 'primeira_consulta'
-    },
-    {
-      id: '2',
-      title: 'Retorno: Ana Silva',
-      start: new Date(new Date().setHours(14, 30, 0, 0)),
-      end: new Date(new Date().setHours(15, 0, 0, 0)),
-      type: 'retorno'
-    }
-  ]);
+  const { user } = useAuth();
+  const vm = useAgendaViewModel();
 
-  const [showModal, setShowModal] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
+  useEffect(() => {
+    if (user?.id) vm.fetchConsultas(user.id);
+  }, [user?.id]);
 
-  const [pacienteNome, setPacienteNome] = useState('');
-  const [apptType, setApptType] = useState<'primeira_consulta' | 'retorno'>('primeira_consulta');
-
-  function handleSelectSlot(slotInfo: SlotInfo) {
-    setSelectedSlot({ start: slotInfo.start, end: slotInfo.end });
-    setPacienteNome('');
-    setApptType('primeira_consulta');
-    setShowModal(true);
+  function onSelectSlot(slotInfo: SlotInfo) {
+    vm.openCreateModal({ start: slotInfo.start, end: slotInfo.end });
   }
 
-  function handleSelectEvent(event: ApptEvent) {
-    alert(`Consulta: ${event.title}\nInício: ${format(event.start, "HH:mm")}\nFim: ${format(event.end, "HH:mm")}`);
+  function onSelectEvent(event: CalendarEvent) {
+    vm.openEditModal(event);
   }
 
-  function handleAddEvent() {
-    if (!pacienteNome.trim() || !selectedSlot) return;
-
-    const newEvent: ApptEvent = {
-      id: Math.random().toString(36).substr(2, 9),
-      title: `${apptType === 'primeira_consulta' ? 'Primeira Consulta' : 'Retorno'}: ${pacienteNome}`,
-      start: selectedSlot.start,
-      end: selectedSlot.end,
-      type: apptType
-    };
-
-    setEvents([...events, newEvent]);
-    setShowModal(false);
+  if (vm.loading && vm.events.length === 0) {
+    return (
+      <div style={{ maxWidth: 1024, margin: '0 auto', padding: '48px 40px' }}>
+        <p style={{ color: 'var(--color-ink-secondary)', fontSize: 14 }}>Carregando agenda...</p>
+      </div>
+    );
   }
 
   return (
@@ -82,27 +76,17 @@ export function SchedulePage() {
             Gerencie suas consultas e horários de atendimento.
           </p>
         </div>
-        <button
-          onClick={() => {
-            const start = new Date();
-            start.setHours(start.getHours() + 1, 0, 0, 0);
-            const end = new Date(start);
-            end.setHours(start.getHours() + 1);
-            setSelectedSlot({ start, end });
-            setShowModal(true);
-          }}
-          style={{
-            padding: '8px 16px', background: 'var(--color-primary)', color: '#fff',
-            border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer',
-            fontSize: 13, fontWeight: 500,
-            transition: 'background 150ms ease-out',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--color-primary-hover)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'var(--color-primary)'}
-        >
-          + Nova Consulta
-        </button>
       </div>
+
+      {vm.error && (
+        <div style={{
+          padding: '10px 14px', background: 'var(--color-danger-subtle)',
+          border: '1px solid var(--color-danger-border)',
+          color: 'var(--color-danger)', borderRadius: 'var(--radius-md)', fontSize: 13, marginBottom: 16,
+        }}>
+          {vm.error}
+        </div>
+      )}
 
       <div className="rbc-tech-theme" style={{
         background: 'var(--color-surface)', border: '1px solid var(--color-border)',
@@ -110,44 +94,41 @@ export function SchedulePage() {
       }}>
         <Calendar
           localizer={localizer}
-          events={events}
+          events={vm.events}
           startAccessor="start"
           endAccessor="end"
           culture="pt-BR"
           selectable
-          onSelectSlot={handleSelectSlot}
-          onSelectEvent={handleSelectEvent}
+          onSelectSlot={onSelectSlot}
+          onSelectEvent={onSelectEvent}
           messages={{
-            next: "Próximo",
-            previous: "Anterior",
-            today: "Hoje",
-            month: "Mês",
-            week: "Semana",
-            day: "Dia",
-            agenda: "Agenda",
-            date: "Data",
-            time: "Hora",
-            event: "Evento",
+            next: "Próximo", previous: "Anterior", today: "Hoje",
+            month: "Mês", week: "Semana", day: "Dia", agenda: "Agenda",
+            date: "Data", time: "Hora", event: "Evento",
             noEventsInRange: "Não há consultas neste período.",
-            showMore: (total: number) => `+ ${total} mais`
+            showMore: (total: number) => `+ ${total} mais`,
           }}
           eventPropGetter={(event) => {
-            const isRetorno = event.type === 'retorno';
+            const c = (event as CalendarEvent).consulta;
+            const isCancelada = c?.status === 'cancelada';
+            const isRealizada = c?.status === 'realizada';
             return {
               style: {
-                backgroundColor: isRetorno ? 'var(--color-bg)' : 'var(--color-primary-subtle)',
-                color: isRetorno ? 'var(--color-ink-primary)' : 'var(--color-primary-text)',
-                border: isRetorno ? '1px solid var(--color-border)' : '1px solid var(--color-success-border)',
+                backgroundColor: isCancelada ? 'var(--color-bg)' : isRealizada ? 'var(--color-success-subtle)' : 'var(--color-primary-subtle)',
+                color: isCancelada ? 'var(--color-ink-tertiary)' : isRealizada ? 'var(--color-success-text)' : 'var(--color-primary-text)',
+                border: isCancelada ? '1px solid var(--color-border)' : isRealizada ? '1px solid var(--color-success-border)' : '1px solid var(--color-primary)',
                 borderRadius: 'var(--radius-sm)',
                 fontSize: 12,
                 fontWeight: 500,
+                textDecoration: isCancelada ? 'line-through' : 'none',
+                opacity: isCancelada ? 0.6 : 1,
               }
             };
           }}
         />
       </div>
 
-      {showModal && selectedSlot && (
+      {vm.showModal && vm.selectedSlot && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)',
@@ -160,93 +141,77 @@ export function SchedulePage() {
             boxShadow: 'var(--shadow-modal)',
           }}>
             <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 600, color: 'var(--color-ink-primary)' }}>
-              Agendar Consulta
+              {vm.editingConsulta ? 'Editar Consulta' : 'Agendar Consulta'}
             </h2>
 
             <p style={{
               margin: '0 0 24px', fontSize: 13, color: 'var(--color-ink-secondary)',
               fontFamily: 'var(--font-mono)',
             }}>
-              {format(selectedSlot.start, "dd/MM/yyyy HH:mm")} - {format(selectedSlot.end, "HH:mm")}
+              {format(vm.selectedSlot.start, "dd/MM/yyyy HH:mm")} - {format(vm.selectedSlot.end, "HH:mm")}
             </p>
 
-            <div style={{ marginBottom: 16 }}>
-              <label style={{
-                display: 'block', marginBottom: 6, fontSize: 11, fontWeight: 500,
-                color: 'var(--color-ink-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em',
-              }}>
-                Paciente
-              </label>
-              <input
-                type="text"
-                value={pacienteNome}
-                onChange={e => setPacienteNome(e.target.value)}
-                autoFocus
-                placeholder="Nome do paciente"
-                style={{
-                  width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--color-border)', fontSize: 14,
-                  fontFamily: 'var(--font-body)', outline: 'none',
-                  color: 'var(--color-ink-primary)',
-                  background: 'var(--color-surface)',
-                  transition: 'border-color 150ms ease-out',
-                  boxSizing: 'border-box',
-                }}
+            {vm.editingConsulta ? (
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>Paciente</label>
+                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-ink-primary)', margin: 0 }}>
+                  {vm.editingConsulta.pacienteNome || 'Paciente'}
+                </p>
+              </div>
+            ) : (
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>Paciente</label>
+                <select
+                  value={vm.form.pacienteId}
+                  onChange={e => {
+                    vm.setFormField('pacienteId', e.target.value);
+                    const p = vm.patients.find(p => p.id === e.target.value);
+                    vm.setFormField('pacienteNome', p?.nomeCompleto || '');
+                  }}
+                  style={inputStyle}
+                  onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+                  onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
+                >
+                  <option value="">Selecione um paciente</option>
+                  {vm.patients.map(p => (
+                    <option key={p.id} value={p.id}>{p.nomeCompleto}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div style={{ marginBottom: 24 }}>
+              <label style={labelStyle}>Observações</label>
+              <textarea
+                value={vm.form.observacoes}
+                onChange={e => vm.setFormField('observacoes', e.target.value)}
+                rows={3}
+                style={{ ...inputStyle, resize: 'vertical' }}
                 onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
                 onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
               />
             </div>
 
-            <div style={{ marginBottom: 32 }}>
-              <label style={{
-                display: 'block', marginBottom: 6, fontSize: 11, fontWeight: 500,
-                color: 'var(--color-ink-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em',
-              }}>
-                Tipo de Consulta
-              </label>
-              <select
-                value={apptType}
-                onChange={e => setApptType(e.target.value as 'primeira_consulta' | 'retorno')}
-                style={{
-                  width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--color-border)', fontSize: 14,
-                  fontFamily: 'var(--font-body)', outline: 'none',
-                  color: 'var(--color-ink-primary)', background: 'var(--color-surface)',
-                  transition: 'border-color 150ms ease-out',
-                  boxSizing: 'border-box',
-                }}
-                onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
-                onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
-              >
-                <option value="primeira_consulta">Primeira Consulta</option>
-                <option value="retorno">Retorno</option>
-              </select>
-            </div>
-
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => setShowModal(false)}
-                style={{
-                  padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
-                  border: '1px solid var(--color-border)', cursor: 'pointer',
-                  background: 'var(--color-surface)', color: 'var(--color-ink-primary)',
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleAddEvent}
-                disabled={!pacienteNome.trim()}
-                style={{
-                  padding: '8px 16px', borderRadius: 'var(--radius-md)', fontSize: 13, fontWeight: 500,
-                  border: 'none', cursor: pacienteNome.trim() ? 'pointer' : 'not-allowed',
-                  background: pacienteNome.trim() ? 'var(--color-primary)' : 'var(--color-subtle)',
-                  color: pacienteNome.trim() ? '#fff' : 'var(--color-ink-tertiary)',
-                  transition: 'background 150ms ease-out',
-                }}
-              >
-                Agendar
-              </button>
+              <button onClick={vm.closeModal} style={btnSecondary}>Cancelar</button>
+              {vm.editingConsulta && vm.editingConsulta.status !== 'cancelada' && user?.id && (
+                <button
+                  onClick={() => vm.handleCancel(vm.editingConsulta!.id, user.id!)}
+                  style={btnDanger}
+                >
+                  Cancelar Consulta
+                </button>
+              )}
+              {(!vm.editingConsulta || vm.editingConsulta.status !== 'cancelada') && user?.id && (
+                <button
+                  onClick={() => vm.handleSave(user.id!)}
+                  style={btnPrimary}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--color-primary-hover)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'var(--color-primary)'}
+                >
+                  {vm.editingConsulta ? 'Salvar' : 'Agendar'}
+                </button>
+              )}
             </div>
           </div>
         </div>

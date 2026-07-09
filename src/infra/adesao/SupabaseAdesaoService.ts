@@ -69,14 +69,27 @@ export class SupabaseAdesaoService implements IAdesaoService {
   }
 
   async getDailyProgress(pacienteId: string, data: string): Promise<DailyProgress> {
-    const { count: total, error: totalError } = await supabase
-      .from('refeicoes')
-      .select('*', { count: 'exact', head: true })
-      .in('plano_alimentar_id', 
-        supabase.from('planos_alimentares').select('id').eq('paciente_id', pacienteId).eq('ativo', true) as any
-      );
+    // Busca IDs dos planos ativos separadamente — .in() do SDK v2 não aceita subquery builder
+    const { data: planos, error: planosError } = await supabase
+      .from('planos_alimentares')
+      .select('id')
+      .eq('paciente_id', pacienteId)
+      .eq('ativo', true);
 
-    if (totalError) throw new AdesaoError(totalError.message);
+    if (planosError) throw new AdesaoError(planosError.message);
+
+    const planoIds = (planos || []).map(p => p.id);
+
+    let totalRefeicoes = 0;
+    if (planoIds.length > 0) {
+      const { count: total, error: totalError } = await supabase
+        .from('refeicoes')
+        .select('*', { count: 'exact', head: true })
+        .in('plano_alimentar_id', planoIds);
+
+      if (totalError) throw new AdesaoError(totalError.message);
+      totalRefeicoes = total ?? 0;
+    }
 
     const { count: concluidas, error: adError } = await supabase
       .from('adesao_refeicoes')
@@ -87,12 +100,9 @@ export class SupabaseAdesaoService implements IAdesaoService {
 
     if (adError) throw new AdesaoError(adError.message);
 
-    const totalRefeicoes = total ?? 0;
-    const concluidasCount = concluidas ?? 0;
-
     return AdesaoMapper.toDailyProgress(pacienteId, data, {
       total: totalRefeicoes,
-      concluidas: concluidasCount,
+      concluidas: concluidas ?? 0,
     });
   }
 

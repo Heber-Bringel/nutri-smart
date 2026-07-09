@@ -31,6 +31,15 @@ import { SupabaseAdesaoService } from '../infra/adesao/SupabaseAdesaoService';
 import { MarkMealAsCompletedUseCase } from '../usecase/adesao/MarkMealAsCompletedUseCase';
 import { GetDailyProgressUseCase } from '../usecase/adesao/GetDailyProgressUseCase';
 import { GetDailyAdesaoStatesUseCase } from '../usecase/adesao/GetDailyAdesaoStatesUseCase';
+import { SupabaseConsultaRepository } from '../infra/agenda/SupabaseConsultaRepository';
+import { ReactBigCalendarAdapter } from '../infra/agenda/ReactBigCalendarAdapter';
+import { EvitarChoqueHorarioValidator } from '../model/services/EvitarChoqueHorarioValidator';
+import { ConsultaEventEmitter } from '../model/services/ConsultaEventEmitter';
+import { CreateConsultaUseCase } from '../usecase/agenda/CreateConsultaUseCase';
+import { UpdateConsultaUseCase } from '../usecase/agenda/UpdateConsultaUseCase';
+import { CancelConsultaUseCase } from '../usecase/agenda/CancelConsultaUseCase';
+import { ListConsultasUseCase } from '../usecase/agenda/ListConsultasUseCase';
+import { GetNextConsultaUseCase } from '../usecase/agenda/GetNextConsultaUseCase';
 
 class Container {
   private static _authService = new SupabaseAuthService();
@@ -41,6 +50,10 @@ class Container {
   private static _measurementService = new SupabaseBodyMeasurementService();
   private static _clinicalNoteService = new SupabaseClinicalNoteService();
   private static _adesaoService = new SupabaseAdesaoService();
+  private static _consultaRepository = new SupabaseConsultaRepository();
+  private static _calendarAdapter = new ReactBigCalendarAdapter();
+  private static _agendaValidator = new EvitarChoqueHorarioValidator();
+  private static _consultaEventEmitter = ConsultaEventEmitter.getInstance();
 
   static get authService() {
     return this._authService;
@@ -172,6 +185,42 @@ class Container {
 
   static get getDailyAdesaoStatesUseCase() {
     return new GetDailyAdesaoStatesUseCase(this._adesaoService);
+  }
+
+  static get consultaRepository() {
+    return this._consultaRepository;
+  }
+
+  static get calendarAdapter() {
+    return this._calendarAdapter;
+  }
+
+  static get agendaValidator() {
+    return this._agendaValidator;
+  }
+
+  static get consultaEventEmitter() {
+    return this._consultaEventEmitter;
+  }
+
+  static get createConsultaUseCase() {
+    return new CreateConsultaUseCase(this._consultaRepository, this._agendaValidator, this._consultaEventEmitter);
+  }
+
+  static get updateConsultaUseCase() {
+    return new UpdateConsultaUseCase(this._consultaRepository, this._agendaValidator, this._consultaEventEmitter);
+  }
+
+  static get cancelConsultaUseCase() {
+    return new CancelConsultaUseCase(this._consultaRepository, this._consultaEventEmitter);
+  }
+
+  static get listConsultasUseCase() {
+    return new ListConsultasUseCase(this._consultaRepository);
+  }
+
+  static get getNextConsultaUseCase() {
+    return new GetNextConsultaUseCase(this._consultaRepository);
   }
 }
 

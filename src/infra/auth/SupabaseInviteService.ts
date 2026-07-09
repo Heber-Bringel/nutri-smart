@@ -22,3 +22,4 @@ export class SupabaseInviteService implements IInviteService {
     await this.sendInvite(email);
   }
 }
+
