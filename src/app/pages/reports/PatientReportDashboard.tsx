@@ -90,7 +90,18 @@ export const PatientReportDashboard: React.FC = () => {
           data={chartData} 
           onCapture={setChartImage}
         />
+        {chartData.length === 0 && (
+          <div style={{ marginTop: 16, textAlign: 'center', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>
+            Nenhum dado encontrado no período selecionado.
+          </div>
+        )}
       </section>
+      
+      {/* TODO: Remover debug visual depois */}
+      <div style={{ marginTop: 24, fontSize: 11, color: 'var(--color-ink-secondary)', background: 'var(--color-surface)', padding: 16, borderRadius: 8 }}>
+        <p>Debug Info (Nutritionist View):</p>
+        <pre>{JSON.stringify({ pacienteId: paciente?.id, timeWindow, items: chartData.length, data: chartData }, null, 2)}</pre>
+      </div>
     </div>
   );
 };

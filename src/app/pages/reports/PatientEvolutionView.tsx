@@ -59,7 +59,12 @@ export const PatientEvolutionView: React.FC = () => {
         borderRadius: 'var(--radius-lg)', padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
         height: 400
       }}>
-        <ResponsiveContainer width="100%" height="100%">
+        {patientData.length === 0 ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>
+            Nenhum dado encontrado para gerar o gráfico.
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
           <LineChart data={patientData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border-light)" />
             <XAxis dataKey="data" tick={{ fontSize: 12, fill: 'var(--color-ink-secondary)' }} axisLine={false} tickLine={false} dy={10} />
@@ -73,7 +78,14 @@ export const PatientEvolutionView: React.FC = () => {
             <Line yAxisId="right" type="monotone" dataKey="adesao" name="Adesão ao Plano (%)" stroke="#3b82f6" strokeWidth={3} isAnimationActive={false} dot={{ r: 4, strokeWidth: 0, fill: '#3b82f6' }} />
           </LineChart>
         </ResponsiveContainer>
+        )}
       </section>
+      
+      {/* TODO: Remover debug visual depois */}
+      <div style={{ marginTop: 24, fontSize: 11, color: 'var(--color-ink-secondary)' }}>
+        <p>Debug Info:</p>
+        <pre>{JSON.stringify({ pacienteId: user?.pacienteId, items: patientData.length, data: patientData }, null, 2)}</pre>
+      </div>
     </div>
   );
 };
