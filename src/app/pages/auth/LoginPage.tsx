@@ -1,62 +1,45 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
+import { loginSchema, LoginFormData } from '../../../viewmodel/auth/AuthSchema';
 
 export function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [validationError, setValidationError] = useState('');
   const [sessionExpiredMsg, setSessionExpiredMsg] = useState('');
-  const { user, login, loading, error, clearError } = useAuth();
+  const { login, loading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    if (!loading && user) {
-      if (user.role === 'nutricionista') {
-        navigate('/dashboard/pacientes', { replace: true });
-      } else {
-        navigate('/paciente/meu-plano', { replace: true });
-      }
-    }
-  }, [user, loading, navigate]);
-
-  useEffect(() => {
-    // Limpa a flag de logout voluntário ao montar a página de login
-    sessionStorage.removeItem('logout_voluntario');
-  }, []);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
   useEffect(() => {
     if (searchParams.get('sessionExpired') === 'true') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSessionExpiredMsg('Sua sessão expirou. Faça login novamente.');
     }
   }, [searchParams]);
 
-  const validateEmail = (emailStr: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(emailStr);
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: LoginFormData) => {
     clearError();
-    setValidationError('');
-
-    if (!email || !validateEmail(email)) {
-      setValidationError('Por favor, informe um e-mail válido.');
-      return;
-    }
-
-    if (!password || password.length < 6) {
-      setValidationError('A senha deve conter pelo menos 6 caracteres.');
-      return;
-    }
-
     try {
-      await login({ email, password });
+      const user = await login(data);
+      if (user.role === 'nutricionista') {
+        navigate('/dashboard/pacientes');
+      } else {
+        navigate('/paciente/meu-plano');
+      }
     } catch {
-      // Ignore error
+      // O erro é tratado no AuthViewModel e exibido na UI via variável `error`
     }
   };
 
@@ -99,7 +82,7 @@ export function LoginPage() {
           Acesse sua conta
         </p>
 
-        {(validationError || error || sessionExpiredMsg) && (
+        {(error || sessionExpiredMsg) && (
           <div style={{
             padding: '10px 14px',
             marginBottom: 20,
@@ -109,11 +92,11 @@ export function LoginPage() {
             color: 'var(--color-danger)',
             fontSize: 12,
           }}>
-            {sessionExpiredMsg || validationError || error}
+            {sessionExpiredMsg || error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div style={{ marginBottom: 16 }}>
             <label style={{
               display: 'block',
@@ -128,14 +111,16 @@ export function LoginPage() {
             </label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               placeholder="seuemail@exemplo.com"
-              style={inputStyle}
+              style={{ ...inputStyle, borderColor: errors.email ? 'var(--color-danger)' : 'var(--color-border)' }}
               onFocus={(e) => { e.target.style.borderColor = 'var(--color-primary)'; }}
-              onBlur={(e) => { e.target.style.borderColor = 'var(--color-border)'; }}
-              required
+              {...register('email')}
             />
+            {errors.email && (
+              <span style={{ color: 'var(--color-danger)', fontSize: 11, marginTop: 4, display: 'block' }}>
+                {errors.email.message}
+              </span>
+            )}
           </div>
 
           <div style={{ marginBottom: 24 }}>
@@ -152,14 +137,16 @@ export function LoginPage() {
             </label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              style={inputStyle}
+              style={{ ...inputStyle, borderColor: errors.password ? 'var(--color-danger)' : 'var(--color-border)' }}
               onFocus={(e) => { e.target.style.borderColor = 'var(--color-primary)'; }}
-              onBlur={(e) => { e.target.style.borderColor = 'var(--color-border)'; }}
-              required
+              {...register('password')}
             />
+            {errors.password && (
+              <span style={{ color: 'var(--color-danger)', fontSize: 11, marginTop: 4, display: 'block' }}>
+                {errors.password.message}
+              </span>
+            )}
           </div>
 
           <button

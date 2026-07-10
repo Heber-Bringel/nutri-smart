@@ -1,52 +1,13 @@
-import { useState } from 'react';
-import type { SexoBiologico, NivelAtividadeFisica } from '../../../model/entities/Paciente';
-
-interface PatientFormData {
-  nomeCompleto: string;
-  email: string;
-  dataNascimento: string;
-  sexoBiologico: SexoBiologico;
-  pesoInicial: string;
-  altura: string;
-  nivelAtividadeFisica: NivelAtividadeFisica;
-}
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { patientSchema, PatientFormData } from '../../../viewmodel/pacientes/PatientSchema';
 
 interface PatientFormProps {
   onSubmit: (data: PatientFormData) => Promise<void>;
   loading: boolean;
   initialData?: Partial<PatientFormData>;
   editMode?: boolean;
-}
-
-function usePatientForm(initialData?: Partial<PatientFormData>) {
-  const [formData, setFormData] = useState<PatientFormData>({
-    nomeCompleto: initialData?.nomeCompleto || '',
-    email: initialData?.email || '',
-    dataNascimento: initialData?.dataNascimento || '',
-    sexoBiologico: initialData?.sexoBiologico || 'masculino',
-    pesoInicial: initialData?.pesoInicial || '',
-    altura: initialData?.altura || '',
-    nivelAtividadeFisica: initialData?.nivelAtividadeFisica || 'sedentario',
-  });
-  const [errors, setErrors] = useState<Partial<Record<keyof PatientFormData, string>>>({});
-
-  function validate(): boolean {
-    const newErrors: Partial<Record<keyof PatientFormData, string>> = {};
-    if (!formData.nomeCompleto.trim()) newErrors.nomeCompleto = 'Nome é obrigatório.';
-    if (!formData.email.trim()) newErrors.email = 'E-mail é obrigatório.';
-    if (!formData.dataNascimento) newErrors.dataNascimento = 'Data de nascimento é obrigatória.';
-    if (!formData.pesoInicial || Number(formData.pesoInicial) <= 0) newErrors.pesoInicial = 'Peso deve ser maior que zero.';
-    if (!formData.altura || Number(formData.altura) <= 0) newErrors.altura = 'Altura deve ser maior que zero.';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }
-
-  function updateField<K extends keyof PatientFormData>(key: K, value: PatientFormData[K]) {
-    setFormData(prev => ({ ...prev, [key]: value }));
-    setErrors(prev => ({ ...prev, [key]: undefined }));
-  }
-
-  return { formData, errors, validate, updateField };
 }
 
 function Input({ error, mono, ...props }: {
@@ -79,16 +40,15 @@ function Input({ error, mono, ...props }: {
   );
 }
 
-function Select({ error, options, value, onChange }: {
-  error?: string;
+function Select({ error, label, options, ...props }: {
+  error?: string; label?: string;
   options: { value: string; label: string }[];
-  value: string; onChange: (v: string) => void;
-}) {
+} & React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <div>
+      {label && <label style={{ display: 'block', marginBottom: 8, fontSize: 11, fontWeight: 500, color: 'var(--color-ink-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</label>}
       <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
+        {...props}
         style={{
           width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
           border: '1px solid', borderColor: error ? 'var(--color-danger-border)' : 'var(--color-border)',
@@ -97,8 +57,8 @@ function Select({ error, options, value, onChange }: {
           color: 'var(--color-ink-primary)',
           transition: 'border-color 150ms ease-out',
         }}
-        onFocus={(e) => { e.target.style.borderColor = 'var(--color-primary)'; }}
-        onBlur={(e) => { e.target.style.borderColor = error ? 'var(--color-danger-border)' : 'var(--color-border)'; }}
+        onFocus={(e) => { e.target.style.borderColor = 'var(--color-primary)'; props.onFocus?.(e); }}
+        onBlur={(e) => { e.target.style.borderColor = error ? 'var(--color-danger-border)' : 'var(--color-border)'; props.onBlur?.(e); }}
       >
         {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
       </select>
@@ -108,13 +68,30 @@ function Select({ error, options, value, onChange }: {
 }
 
 export function PatientForm({ onSubmit, loading, initialData, editMode }: PatientFormProps) {
-  const { formData, errors, validate, updateField } = usePatientForm(initialData);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<PatientFormData>({
+    resolver: zodResolver(patientSchema) as any,
+    defaultValues: {
+      nomeCompleto: '',
+      email: '',
+      dataNascimento: '',
+      sexoBiologico: 'masculino',
+      pesoInicial: '' as any,
+      altura: '' as any,
+      nivelAtividadeFisica: 'sedentario',
+      ...initialData,
+    },
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!validate()) return;
-    await onSubmit(formData);
-  }
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
 
   const labelStyle: React.CSSProperties = {
     display: 'block', marginBottom: 8, fontSize: 11, fontWeight: 500,
@@ -123,45 +100,29 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <form onSubmit={handleSubmit(onSubmit as any)} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
         <div>
           <label style={labelStyle}>Nome completo</label>
-          <Input
-            type="text"
-            value={formData.nomeCompleto}
-            error={errors.nomeCompleto}
-            onChange={e => updateField('nomeCompleto', e.target.value)}
-          />
+          <Input type="text" error={errors.nomeCompleto?.message} {...register('nomeCompleto')} />
         </div>
         <div>
           <label style={labelStyle}>E-mail</label>
-          <Input
-            type="email"
-            value={formData.email}
-            error={errors.email}
-            onChange={e => updateField('email', e.target.value)}
-          />
+          <Input type="email" error={errors.email?.message} {...register('email')} />
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
         <div>
           <label style={labelStyle}>Data de nascimento</label>
-          <Input
-            type="date"
-            value={formData.dataNascimento}
-            error={errors.dataNascimento}
-            mono
-            onChange={e => updateField('dataNascimento', e.target.value)}
-          />
+          <Input type="date" mono error={errors.dataNascimento?.message} {...register('dataNascimento')} />
         </div>
         <div>
           <label style={labelStyle}>Sexo biológico</label>
           <Select
             options={[{ value: 'masculino', label: 'Masculino' }, { value: 'feminino', label: 'Feminino' }]}
-            value={formData.sexoBiologico}
-            onChange={v => updateField('sexoBiologico', v as SexoBiologico)}
+            error={errors.sexoBiologico?.message}
+            {...register('sexoBiologico')}
           />
         </div>
       </div>
@@ -171,25 +132,11 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 24 }}>
         <div>
           <label style={labelStyle}>Peso inicial (kg)</label>
-          <Input
-            type="number"
-            step="0.01"
-            value={formData.pesoInicial}
-            error={errors.pesoInicial}
-            mono
-            onChange={e => updateField('pesoInicial', e.target.value)}
-          />
+          <Input type="number" step="0.01" mono error={errors.pesoInicial?.message} {...register('pesoInicial')} />
         </div>
         <div>
           <label style={labelStyle}>Altura (cm)</label>
-          <Input
-            type="number"
-            step="0.01"
-            value={formData.altura}
-            error={errors.altura}
-            mono
-            onChange={e => updateField('altura', e.target.value)}
-          />
+          <Input type="number" step="0.01" mono error={errors.altura?.message} {...register('altura')} />
         </div>
         <div>
           <label style={labelStyle}>Nível de atividade física</label>
@@ -201,8 +148,8 @@ export function PatientForm({ onSubmit, loading, initialData, editMode }: Patien
               { value: 'muito_ativo', label: 'Muito ativo' },
               { value: 'extremamente_ativo', label: 'Extremamente ativo' },
             ]}
-            value={formData.nivelAtividadeFisica}
-            onChange={v => updateField('nivelAtividadeFisica', v as NivelAtividadeFisica)}
+            error={errors.nivelAtividadeFisica?.message}
+            {...register('nivelAtividadeFisica')}
           />
         </div>
       </div>
