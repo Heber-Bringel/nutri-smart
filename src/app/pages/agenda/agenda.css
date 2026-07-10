@@ -40,7 +40,6 @@
   text-transform: uppercase;
   color: var(--color-ink-secondary, #6B7280);
   border-bottom: 1px solid var(--color-border, #E5E5E5);
-  border-left: 1px solid var(--color-border, #E5E5E5);
   background: var(--color-bg, #FAFAFA);
 }
 
@@ -143,4 +142,35 @@
 
 .rbc-tech-theme .rbc-allday-cell {
   background-color: var(--color-bg, #FAFAFA);
+}
+
+.rbc-tech-theme .rbc-time-header-gutter {
+  position: relative;
+  background: var(--color-bg, #FAFAFA);
+  border-bottom: 1px solid var(--color-border, #E5E5E5);
+  border-right: 1px solid var(--color-border, #E5E5E5);
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+}
+
+.rbc-tech-theme .rbc-time-header-gutter::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 25px;
+  height: 1px;
+  background-color: var(--color-border, #E5E5E5);
+}
+
+.rbc-tech-theme .rbc-time-gutter {
+  border-right: 1px solid var(--color-border, #E5E5E5);
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+}
+
+.rbc-tech-theme .rbc-time-header-content {
+  border-left: none;
 }
