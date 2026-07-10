@@ -2,12 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Container } from '../../di/container';
 import { CalendarEvent } from '../../model/services/ICalendarAdapter';
 import { Consulta, CreateConsultaData, UpdateConsultaData } from '../../model/entities/Consulta';
-
-export interface AgendaFormState {
-  pacienteId: string;
-  pacienteNome: string;
-  observacoes: string;
-}
+import { AgendaFormData } from './AgendaSchema';
 
 export interface AgendaViewModelState {
   events: CalendarEvent[];
@@ -16,7 +11,6 @@ export interface AgendaViewModelState {
   showModal: boolean;
   editingConsulta: Consulta | null;
   selectedSlot: { start: Date; end: Date } | null;
-  form: AgendaFormState;
   patients: { id: string; nomeCompleto: string }[];
 }
 
@@ -25,8 +19,7 @@ export interface AgendaViewModelActions {
   openCreateModal: (slot: { start: Date; end: Date }) => void;
   openEditModal: (event: CalendarEvent) => void;
   closeModal: () => void;
-  setFormField: (field: keyof AgendaFormState, value: string) => void;
-  handleSave: (nutricionistaId: string) => Promise<void>;
+  handleSave: (nutricionistaId: string, data: AgendaFormData) => Promise<void>;
   handleCancel: (consultaId: string, nutricionistaId: string) => Promise<void>;
 }
 
@@ -37,7 +30,6 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
   const [showModal, setShowModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const [editingConsulta, setEditingConsulta] = useState<Consulta | null>(null);
-  const [form, setForm] = useState<AgendaFormState>({ pacienteId: '', pacienteNome: '', observacoes: '' });
   const [patients, setPatients] = useState<{ id: string; nomeCompleto: string }[]>([]);
 
   useEffect(() => {
@@ -60,15 +52,10 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
     }
   }, []);
 
-  function resetForm() {
-    setForm({ pacienteId: '', pacienteNome: '', observacoes: '' });
-    setEditingConsulta(null);
-    setError(null);
-  }
-
   function openCreateModal(slot: { start: Date; end: Date }) {
     setSelectedSlot(slot);
-    resetForm();
+    setEditingConsulta(null);
+    setError(null);
     setShowModal(true);
   }
 
@@ -76,34 +63,22 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
     const c = event.consulta;
     setEditingConsulta(c);
     setSelectedSlot({ start: event.start, end: event.end });
-    setForm({
-      pacienteId: c.pacienteId,
-      pacienteNome: c.pacienteNome || '',
-      observacoes: c.observacoes || '',
-    });
+    setError(null);
     setShowModal(true);
   }
 
   function closeModal() {
     setShowModal(false);
-    resetForm();
+    setEditingConsulta(null);
+    setError(null);
   }
 
-  function setFormField(field: keyof AgendaFormState, value: string) {
-    setForm(prev => ({ ...prev, [field]: value }));
-  }
-
-  async function handleSave(nutricionistaId: string) {
+  async function handleSave(nutricionistaId: string, formData: AgendaFormData) {
     if (!selectedSlot) return;
     setError(null);
 
-    if (!form.pacienteId && !form.pacienteNome.trim()) {
-      setError('Selecione ou informe o paciente.');
-      return;
-    }
-
     try {
-      const data = selectedSlot.start.toISOString().split('T')[0];
+      const dataStr = selectedSlot.start.toISOString().split('T')[0];
       const horarioInicio = selectedSlot.start.toTimeString().slice(0, 5);
       const duracaoMinutos = Math.round(
         (selectedSlot.end.getTime() - selectedSlot.start.getTime()) / 60000
@@ -111,29 +86,25 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
 
       if (editingConsulta) {
         await Container.updateConsultaUseCase.execute(editingConsulta.id, {
-          data,
+          data: dataStr,
           horarioInicio,
           duracaoMinutos,
-          observacoes: form.observacoes || null,
+          observacoes: formData.observacoes || null,
         } as UpdateConsultaData);
       } else {
-        if (!form.pacienteId) {
-          setError('Selecione um paciente da lista.');
-          return;
-        }
         const createData: CreateConsultaData = {
           nutricionistaId,
-          pacienteId: form.pacienteId,
-          data,
+          pacienteId: formData.pacienteId,
+          data: dataStr,
           horarioInicio,
           duracaoMinutos,
-          observacoes: form.observacoes || null,
+          observacoes: formData.observacoes || null,
         };
         await Container.createConsultaUseCase.execute(createData);
       }
 
       setShowModal(false);
-      resetForm();
+      setEditingConsulta(null);
       await fetchConsultas(nutricionistaId);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao salvar consulta.');
@@ -146,7 +117,7 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
     try {
       await Container.cancelConsultaUseCase.execute(consultaId);
       setShowModal(false);
-      resetForm();
+      setEditingConsulta(null);
       await fetchConsultas(nutricionistaId);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao cancelar consulta.');
@@ -154,7 +125,7 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
   }
 
   return {
-    events, loading, error, showModal, selectedSlot, editingConsulta, form, patients,
-    fetchConsultas, openCreateModal, openEditModal, closeModal, setFormField, handleSave, handleCancel,
+    events, loading, error, showModal, selectedSlot, editingConsulta, patients,
+    fetchConsultas, openCreateModal, openEditModal, closeModal, handleSave, handleCancel,
   };
 }

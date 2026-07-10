@@ -84,7 +84,7 @@ export function EvolutionChart({ data }: EvolutionChartProps) {
         {/* Linha de peso */}
         {hasPeso && pesoData.length > 1 && (
           <polyline
-            points={pesoData.map((d, i) => {
+            points={pesoData.map((d) => {
               const idx = data.indexOf(d);
               return `${getX(idx, data.length)},${getPesoY(d.peso!)}`;
             }).join(' ')}

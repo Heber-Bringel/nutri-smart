@@ -1,81 +1,52 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { PatientForm } from '../../components/pacientes/PatientForm';
-import { Container } from '../../../di/container';
-import type { NivelAtividadeFisica } from '../../../model/entities/Paciente';
-
-type PatientFormData = {
-  nomeCompleto: string;
-  email: string;
-  dataNascimento: string;
-  sexoBiologico: 'masculino' | 'feminino';
-  pesoInicial: string;
-  altura: string;
-  nivelAtividadeFisica: NivelAtividadeFisica;
-};
+import { usePacientesViewModel } from '../../../viewmodel/pacientes/usePacientesViewModel';
+import { PatientFormData } from '../../../viewmodel/pacientes/PatientSchema';
 
 export function PatientFormPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const editMode = !!id;
-  const [loading, setLoading] = useState(false);
+  
+  const { getPaciente, createPaciente, updatePaciente, loading, error } = usePacientesViewModel();
   const [pageLoading, setPageLoading] = useState(editMode);
-  const [error, setError] = useState<string | null>(null);
   const [initialData, setInitialData] = useState<PatientFormData | undefined>(undefined);
 
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
 
-    Container.getPacienteUseCase.execute(id)
-      .then(p => {
-        if (!cancelled) {
+    getPaciente(id).then(p => {
+      if (!cancelled) {
+        if (p) {
           setInitialData({
             nomeCompleto: p.nomeCompleto,
             email: p.email,
             dataNascimento: p.dataNascimento,
             sexoBiologico: p.sexoBiologico,
-            pesoInicial: String(p.pesoInicial),
-            altura: String(p.altura),
+            pesoInicial: p.pesoInicial,
+            altura: p.altura,
             nivelAtividadeFisica: p.nivelAtividadeFisica,
           });
-          setPageLoading(false);
         }
-      })
-      .catch(err => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Erro ao carregar paciente.');
-          setPageLoading(false);
-        }
-      });
+        setPageLoading(false);
+      }
+    });
 
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, getPaciente]);
 
   async function handleSubmit(formData: PatientFormData) {
-    setLoading(true);
-    setError(null);
     try {
-      const data = {
-        nomeCompleto: formData.nomeCompleto,
-        email: formData.email,
-        dataNascimento: formData.dataNascimento,
-        sexoBiologico: formData.sexoBiologico,
-        pesoInicial: Number(formData.pesoInicial),
-        altura: Number(formData.altura),
-        nivelAtividadeFisica: formData.nivelAtividadeFisica,
-      };
-
       if (editMode && id) {
-        await Container.updatePacienteUseCase.execute(id, data);
+        await updatePaciente(id, formData);
       } else {
-        await Container.createPacienteUseCase.execute(data);
+        await createPaciente(formData);
       }
       navigate('/dashboard/pacientes');
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao salvar paciente.');
-    } finally {
-      setLoading(false);
+    } catch {
+      // erro é gerenciado no viewmodel e exibido via 'error'
     }
   }
 

@@ -19,12 +19,7 @@ export class SupabaseAuthService implements IAuthService {
       throw new AuthError('E-mail ou senha inválidos.');
     }
 
-    // Busca dados do perfil público na tabela profiles
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('nome_completo, role')
-      .eq('id', data.user.id)
-      .single();
+    // Busca dados do perfil público na tabela profiles (substituido por fetchProfileWithPacienteId)
 
     const enrichedProfile = await this.fetchProfileWithPacienteId(data.user.id);
     return UserMapper.toDomain(data.user, enrichedProfile);

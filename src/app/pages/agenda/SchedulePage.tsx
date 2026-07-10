@@ -2,9 +2,12 @@ import { useEffect } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
 import { useAgendaViewModel } from '../../../viewmodel/agenda/AgendaViewModel';
+import { agendaSchema, AgendaFormData } from '../../../viewmodel/agenda/AgendaSchema';
 import { CalendarEvent } from '../../../model/services/ICalendarAdapter';
 import './agenda.css';
 
@@ -47,9 +50,31 @@ export function SchedulePage() {
   const { user } = useAuth();
   const vm = useAgendaViewModel();
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<AgendaFormData>({
+    resolver: zodResolver(agendaSchema),
+    defaultValues: {
+      pacienteId: '',
+      observacoes: '',
+    },
+  });
+
   useEffect(() => {
     if (user?.id) vm.fetchConsultas(user.id);
-  }, [user?.id]);
+  }, [user?.id, vm.fetchConsultas]);
+
+  useEffect(() => {
+    if (vm.showModal) {
+      reset({
+        pacienteId: vm.editingConsulta?.pacienteId || '',
+        observacoes: vm.editingConsulta?.observacoes || '',
+      });
+    }
+  }, [vm.showModal, vm.editingConsulta, reset]);
 
   function onSelectSlot(slotInfo: SlotInfo) {
     vm.openCreateModal({ start: slotInfo.start, end: slotInfo.end });
@@ -58,6 +83,12 @@ export function SchedulePage() {
   function onSelectEvent(event: CalendarEvent) {
     vm.openEditModal(event);
   }
+
+  const onSubmit = async (data: AgendaFormData) => {
+    if (user?.id) {
+      await vm.handleSave(user.id, data);
+    }
+  };
 
   if (vm.loading && vm.events.length === 0) {
     return (
@@ -151,68 +182,71 @@ export function SchedulePage() {
               {format(vm.selectedSlot.start, "dd/MM/yyyy HH:mm")} - {format(vm.selectedSlot.end, "HH:mm")}
             </p>
 
-            {vm.editingConsulta ? (
-              <div style={{ marginBottom: 16 }}>
-                <label style={labelStyle}>Paciente</label>
-                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-ink-primary)', margin: 0 }}>
-                  {vm.editingConsulta.pacienteNome || 'Paciente'}
-                </p>
-              </div>
-            ) : (
-              <div style={{ marginBottom: 16 }}>
-                <label style={labelStyle}>Paciente</label>
-                <select
-                  value={vm.form.pacienteId}
-                  onChange={e => {
-                    vm.setFormField('pacienteId', e.target.value);
-                    const p = vm.patients.find(p => p.id === e.target.value);
-                    vm.setFormField('pacienteNome', p?.nomeCompleto || '');
-                  }}
-                  style={inputStyle}
+            <form onSubmit={handleSubmit(onSubmit)}>
+              {vm.editingConsulta ? (
+                <div style={{ marginBottom: 16 }}>
+                  <label style={labelStyle}>Paciente</label>
+                  <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--color-ink-primary)', margin: 0 }}>
+                    {vm.editingConsulta.pacienteNome || 'Paciente'}
+                  </p>
+                  <input type="hidden" {...register('pacienteId')} />
+                </div>
+              ) : (
+                <div style={{ marginBottom: 16 }}>
+                  <label style={labelStyle}>Paciente</label>
+                  <select
+                    {...register('pacienteId')}
+                    style={{ ...inputStyle, borderColor: errors.pacienteId ? 'var(--color-danger)' : 'var(--color-border)' }}
+                    onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+                    onBlur={e => e.target.style.borderColor = errors.pacienteId ? 'var(--color-danger)' : 'var(--color-border)'}
+                  >
+                    <option value="">Selecione um paciente</option>
+                    {vm.patients.map(p => (
+                      <option key={p.id} value={p.id}>{p.nomeCompleto}</option>
+                    ))}
+                  </select>
+                  {errors.pacienteId && (
+                    <span style={{ color: 'var(--color-danger)', fontSize: 11, marginTop: 4, display: 'block' }}>
+                      {errors.pacienteId.message}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div style={{ marginBottom: 24 }}>
+                <label style={labelStyle}>Observações</label>
+                <textarea
+                  {...register('observacoes')}
+                  rows={3}
+                  style={{ ...inputStyle, resize: 'vertical', borderColor: errors.observacoes ? 'var(--color-danger)' : 'var(--color-border)' }}
                   onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
-                  onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
-                >
-                  <option value="">Selecione um paciente</option>
-                  {vm.patients.map(p => (
-                    <option key={p.id} value={p.id}>{p.nomeCompleto}</option>
-                  ))}
-                </select>
+                  onBlur={e => e.target.style.borderColor = errors.observacoes ? 'var(--color-danger)' : 'var(--color-border)'}
+                />
               </div>
-            )}
 
-            <div style={{ marginBottom: 24 }}>
-              <label style={labelStyle}>Observações</label>
-              <textarea
-                value={vm.form.observacoes}
-                onChange={e => vm.setFormField('observacoes', e.target.value)}
-                rows={3}
-                style={{ ...inputStyle, resize: 'vertical' }}
-                onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
-                onBlur={e => e.target.style.borderColor = 'var(--color-border)'}
-              />
-            </div>
-
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={vm.closeModal} style={btnSecondary}>Cancelar</button>
-              {vm.editingConsulta && vm.editingConsulta.status !== 'cancelada' && user?.id && (
-                <button
-                  onClick={() => vm.handleCancel(vm.editingConsulta!.id, user.id!)}
-                  style={btnDanger}
-                >
-                  Cancelar Consulta
-                </button>
-              )}
-              {(!vm.editingConsulta || vm.editingConsulta.status !== 'cancelada') && user?.id && (
-                <button
-                  onClick={() => vm.handleSave(user.id!)}
-                  style={btnPrimary}
-                  onMouseEnter={e => e.currentTarget.style.background = 'var(--color-primary-hover)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'var(--color-primary)'}
-                >
-                  {vm.editingConsulta ? 'Salvar' : 'Agendar'}
-                </button>
-              )}
-            </div>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button type="button" onClick={vm.closeModal} style={btnSecondary}>Cancelar</button>
+                {vm.editingConsulta && vm.editingConsulta.status !== 'cancelada' && user?.id && (
+                  <button
+                    type="button"
+                    onClick={() => vm.handleCancel(vm.editingConsulta!.id, user.id!)}
+                    style={btnDanger}
+                  >
+                    Cancelar Consulta
+                  </button>
+                )}
+                {(!vm.editingConsulta || vm.editingConsulta.status !== 'cancelada') && user?.id && (
+                  <button
+                    type="submit"
+                    style={btnPrimary}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--color-primary-hover)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'var(--color-primary)'}
+                  >
+                    {vm.editingConsulta ? 'Salvar' : 'Agendar'}
+                  </button>
+                )}
+              </div>
+            </form>
           </div>
         </div>
       )}

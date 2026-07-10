@@ -28,7 +28,10 @@ export function MealPlanPage() {
       .then(existingPlan => {
         if (!cancelled && existingPlan) {
           setObservacoes(existingPlan.observacoes || '');
-          setRefeicoes(existingPlan.refeicoes || []);
+          setRefeicoes((existingPlan.refeicoes || []).map(r => ({
+            ...r,
+            horarioSugerido: r.horarioSugerido || '',
+          })));
         }
       })
       .catch(err => {

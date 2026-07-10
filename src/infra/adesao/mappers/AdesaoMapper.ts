@@ -26,7 +26,7 @@ export class AdesaoMapper {
     };
   }
 
-  static toDailyProgress(pacienteId: string, data: string, row: ProgressRow): DailyProgress {
+  static toDailyProgress(_pacienteId: string, data: string, row: ProgressRow): DailyProgress {
     return {
       data,
       totalRefeicoes: row.total,

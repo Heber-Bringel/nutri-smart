@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Paciente } from '../../../model/entities/Paciente';
-import { Container } from '../../../di/container';
+import { usePacientesViewModel } from '../../../viewmodel/pacientes/usePacientesViewModel';
 
 function getInitials(name: string) {
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -14,44 +13,20 @@ function formatDate(isoString?: string) {
 
 export function PatientListPage() {
   const navigate = useNavigate();
-  const [pacientes, setPacientes] = useState<Paciente[]>([]);
-  const [total, setTotal] = useState(0);
+  const { fetchPacientes, pacientes, total, loading } = usePacientesViewModel();
+  
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
   const [filtro, setFiltro] = useState<'todos' | 'ativo' | 'sem-plano'>('todos');
   const [selecionado, setSelecionado] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const pageSize = 50;
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function fetchPacientes() {
-      setLoading(true);
-      try {
-        const result = await Container.listPacientesUseCase.execute({ search: query, page, pageSize });
-        if (!cancelled) {
-          setPacientes(result.data);
-          setTotal(result.total);
-        }
-      } catch {
-        if (!cancelled) {
-          setPacientes([]);
-          setTotal(0);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    const timeout = setTimeout(fetchPacientes, 300);
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
-  }, [query, page, filtro]);
+    const timeout = setTimeout(() => {
+      fetchPacientes(query, page, pageSize);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [query, page, fetchPacientes]);
 
   const pacientesFiltrados = pacientes.filter(p => {
     if (filtro === 'todos') return true;
@@ -231,8 +206,8 @@ export function PatientListPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Telefone</span>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)' }}>{pacienteSelecionado.telefone || '--'}</span>
+                <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)' }}>{pacienteSelecionado.email || '--'}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nasc.</span>
