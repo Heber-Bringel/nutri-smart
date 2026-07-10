@@ -6,13 +6,14 @@ import { PatientListPage } from './app/pages/pacientes/PatientListPage';
 import { PatientFormPage } from './app/pages/pacientes/PatientFormPage';
 import { PatientProfilePage } from './app/pages/pacientes/PatientProfilePage';
 import { MealPlanPage } from './app/pages/plano-alimentar/MealPlanPage';
-import { EvolutionChartPage } from './app/pages/evolucao/EvolutionChartPage';
 import { BodyMeasurementFormPage } from './app/pages/medidas/BodyMeasurementFormPage';
 import { ClinicalNotesPage } from './app/pages/anotacoes/ClinicalNotesPage';
 import { SchedulePage } from './app/pages/agenda/SchedulePage';
 import { PatientMealPlanPage } from './app/pages/paciente/PatientMealPlanPage';
 import { NutritionistLayout } from './app/components/layouts/NutritionistLayout';
 import { PatientProfileLayout } from './app/components/layouts/PatientProfileLayout';
+import { PatientReportDashboard } from './app/pages/reports/PatientReportDashboard';
+import { PatientEvolutionView } from './app/pages/reports/PatientEvolutionView';
 
 export function App() {
   return (
@@ -38,7 +39,7 @@ export function App() {
             <Route path="pacientes/:id" element={<PatientProfileLayout />}>
               <Route index element={<PatientProfilePage />} />
               <Route path="plano-alimentar" element={<MealPlanPage />} />
-              <Route path="evolucao" element={<EvolutionChartPage />} />
+              <Route path="evolucao" element={<PatientReportDashboard />} />
               <Route path="medidas" element={<BodyMeasurementFormPage />} />
               <Route path="anotacoes" element={<ClinicalNotesPage />} />
             </Route>
@@ -52,6 +53,13 @@ export function App() {
             element={
               <ProtectedRoute allowedRole="paciente">
                 <PatientMealPlanPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/paciente/evolucao"
+            element={
+              <ProtectedRoute allowedRole="paciente">
+                <PatientEvolutionView />
               </ProtectedRoute>
             }
           />

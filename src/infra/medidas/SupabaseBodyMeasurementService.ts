@@ -29,26 +29,51 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
     if (error) throw new MeasurementError(error.message);
 
     if (data.peso != null && data.peso > 0) {
-      await supabase.from('historico_peso').upsert({
-        paciente_id: data.pacienteId,
-        peso: data.peso,
-        data_registro: data.dataAtendimento ?? getTodayLocal(),
-      }, { onConflict: 'paciente_id, data_registro', ignoreDuplicates: false });
+      const { error: upsertErr } = await supabase.from('historico_peso')
+        .upsert({
+          paciente_id: data.pacienteId,
+          peso: data.peso,
+          data_registro: data.dataAtendimento ?? getTodayLocal(),
+        }, {
+          onConflict: 'paciente_id, data_registro'
+        });
+      if (upsertErr) throw new MeasurementError(`Erro ao atualizar peso: ${upsertErr.message}`);
     }
 
     return BodyMeasurementMapper.toDomain(row);
   }
 
   async findByPatientId(pacienteId: string): Promise<BodyMeasurement[]> {
-    const { data: rows, error } = await supabase
-      .from('medidas_corporais')
-      .select('*')
-      .eq('paciente_id', pacienteId)
-      .order('data_atendimento', { ascending: false });
+    const [{ data: rows, error }, { data: pesos, error: pesosError }] = await Promise.all([
+      supabase
+        .from('medidas_corporais')
+        .select('*')
+        .eq('paciente_id', pacienteId)
+        .order('data_atendimento', { ascending: false }),
+      supabase
+        .from('historico_peso')
+        .select('*')
+        .eq('paciente_id', pacienteId)
+        .order('data_registro', { ascending: false })
+    ]);
 
     if (error) throw new MeasurementError(error.message);
+    if (pesosError) throw new MeasurementError(pesosError.message);
 
-    return (rows || []).map(BodyMeasurementMapper.toDomain);
+    const pesoMap = new Map<string, number>();
+    pesos?.forEach(p => {
+      if (p.data_registro) {
+        pesoMap.set(p.data_registro.substring(0, 10), p.peso);
+      }
+    });
+
+    return (rows || []).map(row => {
+      const domain = BodyMeasurementMapper.toDomain(row);
+      if (domain.dataAtendimento) {
+        domain.peso = pesoMap.get(domain.dataAtendimento.substring(0, 10)) || null;
+      }
+      return domain;
+    });
   }
 
   async update(id: string, data: UpdateMeasurementData): Promise<BodyMeasurement> {
@@ -69,7 +94,21 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
 
     if (error) throw new MeasurementError(error.message);
 
-    return BodyMeasurementMapper.toDomain(row);
+    if (data.peso != null && data.peso > 0) {
+      const { error: upsertErr } = await supabase.from('historico_peso')
+        .upsert({
+          paciente_id: row.paciente_id,
+          peso: data.peso,
+          data_registro: row.data_atendimento,
+        }, {
+          onConflict: 'paciente_id, data_registro'
+        });
+      if (upsertErr) throw new MeasurementError(`Erro ao atualizar peso: ${upsertErr.message}`);
+    }
+
+    const domain = BodyMeasurementMapper.toDomain(row);
+    domain.peso = data.peso || null;
+    return domain;
   }
 
   async delete(id: string): Promise<void> {

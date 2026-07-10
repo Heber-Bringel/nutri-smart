@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Container } from '../../../di/container';
 import type { EvolutionChartData } from '../../../model/services/IAdesaoService';
-import { EvolutionChart } from '../../components/evolucao/EvolutionChart';
+import { EvolutionChart } from '../../components/charts/EvolutionChart';
 import type { Paciente } from '../../../model/entities/Paciente';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 
@@ -15,6 +15,7 @@ export function EvolutionChartPage() {
 
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     Container.getEvolutionChartDataUseCase.execute(paciente.id, 30)
@@ -51,7 +52,7 @@ export function EvolutionChartPage() {
           }}>
             Evolução de Peso (Últimos 30 dias)
           </h3>
-          <EvolutionChart data={data} />
+          <EvolutionChart data={data.map(d => ({ data: d.data, peso: d.peso || null, adesao: d.adesaoPercentual }))} />
           {data.length > 0 && data.every(d => !d.peso && d.adesaoPercentual === 0) && (
             <div style={{ textAlign: 'center', marginTop: 16 }}>
               <button

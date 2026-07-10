@@ -52,7 +52,7 @@ export function BodyMeasurementFormPage() {
   function editMeasurement(m: BodyMeasurement) {
     setEditId(m.id);
     setDataAtendimento(m.dataAtendimento);
-    setPeso('');
+    setPeso(m.peso?.toString() || '');
     setCircunferenciaCintura(m.circunferenciaCintura?.toString() || '');
     setCircunferenciaQuadril(m.circunferenciaQuadril?.toString() || '');
     setCircunferenciaBraco(m.circunferenciaBraco?.toString() || '');
@@ -82,6 +82,7 @@ export function BodyMeasurementFormPage() {
       if (editId) {
         await Container.updateMeasurementUseCase.execute(editId, data);
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await Container.registerMeasurementUseCase.execute(data as any);
       }
 
@@ -271,6 +272,7 @@ export function BodyMeasurementFormPage() {
             <thead>
               <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-bg)' }}>
                 <th style={thStyle}>Data</th>
+                <th style={thStyle}>Peso</th>
                 <th style={thStyle}>Cintura</th>
                 <th style={thStyle}>Quadril</th>
                 <th style={thStyle}>Braço</th>
@@ -286,6 +288,7 @@ export function BodyMeasurementFormPage() {
                   <td style={{ ...tdStyle, color: 'var(--color-ink-primary)' }}>
                     {new Date(m.dataAtendimento + 'T00:00:00').toLocaleDateString('pt-BR')}
                   </td>
+                  <td style={tdStyle}>{m.peso ? `${m.peso} kg` : '-'}</td>
                   <td style={tdStyle}>{m.circunferenciaCintura ?? '-'}</td>
                   <td style={tdStyle}>{m.circunferenciaQuadril ?? '-'}</td>
                   <td style={tdStyle}>{m.circunferenciaBraco ?? '-'}</td>

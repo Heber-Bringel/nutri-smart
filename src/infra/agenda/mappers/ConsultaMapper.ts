@@ -13,6 +13,7 @@ interface ConsultaRow {
   observacoes?: string | null;
   created_at: string;
   updated_at: string;
+  pacientes?: { nome_completo: string } | { nome_completo: string }[] | null;
 }
 
 export class ConsultaMapper {
@@ -21,7 +22,8 @@ export class ConsultaMapper {
       id: row.id,
       nutricionistaId: row.nutricionista_id,
       pacienteId: row.paciente_id,
-      pacienteNome: row.paciente_nome,
+      pacienteNome: row.paciente_nome || 
+        (Array.isArray(row.pacientes) ? row.pacientes[0]?.nome_completo : row.pacientes?.nome_completo),
       data: row.data,
       horarioInicio: row.horario_inicio,
       duracaoMinutos: row.duracao_minutos,

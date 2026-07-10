@@ -25,25 +25,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Busca usuário atual ao carregar
-    Container.getCurrentUserUseCase.execute()
-      .then((currentUser) => {
-        setUser(currentUser);
-      })
-      .catch(() => {
-        setUser(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    let active = true;
 
-    // Subscrição para alterações no estado de autenticação
-    const unsubscribe = Container.authService.onAuthStateChange((updatedUser) => {
-      setUser(updatedUser);
-      setLoading(false);
+    // Subscrição única e reativa para o estado de autenticação.
+    // Ela trata o carregamento inicial (INITIAL_SESSION) e mudanças de estado.
+    const unsubscribe = Container.subscribeAuthStateUseCase.execute((updatedUser) => {
+      if (active) {
+        setUser(updatedUser);
+        setLoading(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   const login = async (credentials: LoginCredentials): Promise<User> => {
@@ -84,15 +80,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async (): Promise<void> => {
     setLoading(true);
+    sessionStorage.setItem('logout_voluntario', 'true');
     try {
-      await Container.authService.logout();
+      await Container.logoutUseCase.execute();
       setUser(null);
+    } catch (err: unknown) {
+      sessionStorage.removeItem('logout_voluntario');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
   const clearError = () => setError(null);
+
 
   return createElement(
     AuthContext.Provider,
