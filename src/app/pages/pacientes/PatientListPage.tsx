@@ -193,89 +193,113 @@ export function PatientListPage() {
             backgroundColor: 'var(--color-surface)',
             minHeight: 400,
           }}>
-            {loading && pacientes.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <PatientSkeleton />
-                <PatientSkeleton />
-                <PatientSkeleton />
-                <PatientSkeleton />
-              </div>
-            ) : pacientesFiltrados.length === 0 ? (
-              <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--color-ink-tertiary)', fontSize: 14 }}>
-                Nenhum paciente encontrado
-              </div>
-            ) : (
-              pacientesFiltrados.map((p, i) => (
-                <div
-                  key={p.id}
-                  onClick={() => setSelecionado(p.id === selecionado ? null : p.id)}
-                  style={{
-                    padding: '14px 20px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    transition: 'background-color 150ms ease-out',
-                    borderBottom: i < pacientesFiltrados.length - 1 ? '1px solid var(--color-border-light)' : 'none',
-                    backgroundColor: selecionado === p.id ? 'var(--color-subtle)' : 'transparent',
-                  }}
-                  onMouseEnter={e => {
-                    if (selecionado !== p.id) e.currentTarget.style.backgroundColor = 'rgba(245, 245, 245, 0.5)';
-                  }}
-                  onMouseLeave={e => {
-                    if (selecionado !== p.id) e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
+            <AnimatePresence mode="wait">
+              {loading && pacientes.length === 0 ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  style={{ display: 'flex', flexDirection: 'column' }}
                 >
-                  <div style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--color-subtle)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: 'var(--color-ink-secondary)',
-                    flexShrink: 0,
-                  }}>
-                    {getInitials(p.nomeCompleto)}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      fontSize: 15,
-                      fontWeight: 500,
-                      color: 'var(--color-ink-primary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}>
-                      {p.nomeCompleto}
-                      <span style={{
-                        fontSize: 9,
-                        padding: '2px 6px',
-                        borderRadius: 4,
+                  <PatientSkeleton />
+                  <PatientSkeleton />
+                  <PatientSkeleton />
+                  <PatientSkeleton />
+                </motion.div>
+              ) : pacientesFiltrados.length === 0 ? (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  style={{ padding: '48px 0', textAlign: 'center', color: 'var(--color-ink-tertiary)', fontSize: 14 }}
+                >
+                  Nenhum paciente encontrado
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={`list-${filtro}`}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.12, ease: 'easeOut' }}
+                >
+                  {pacientesFiltrados.map((p, i) => (
+                    <div
+                      key={p.id}
+                      onClick={() => setSelecionado(p.id === selecionado ? null : p.id)}
+                      style={{
+                        padding: '14px 20px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        transition: 'background-color 150ms ease-out',
+                        borderBottom: i < pacientesFiltrados.length - 1 ? '1px solid var(--color-border-light)' : 'none',
+                        backgroundColor: selecionado === p.id ? 'var(--color-subtle)' : 'transparent',
+                      }}
+                      onMouseEnter={e => {
+                        if (selecionado !== p.id) e.currentTarget.style.backgroundColor = 'rgba(245, 245, 245, 0.5)';
+                      }}
+                      onMouseLeave={e => {
+                        if (selecionado !== p.id) e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                    >
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--color-subtle)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 11,
                         fontWeight: 600,
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase',
-                        backgroundColor: p.planoAtivo ? 'var(--color-primary-subtle)' : 'var(--color-subtle)',
-                        color: p.planoAtivo ? 'var(--color-primary-text)' : 'var(--color-ink-tertiary)',
+                        color: 'var(--color-ink-secondary)',
+                        flexShrink: 0,
                       }}>
-                        {p.planoAtivo ? 'ativo' : 'sem plano'}
-                      </span>
+                        {getInitials(p.nomeCompleto)}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontSize: 15,
+                          fontWeight: 500,
+                          color: 'var(--color-ink-primary)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                        }}>
+                          {p.nomeCompleto}
+                          <span style={{
+                            fontSize: 9,
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                            fontWeight: 600,
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            backgroundColor: p.planoAtivo ? 'var(--color-primary-subtle)' : 'var(--color-subtle)',
+                            color: p.planoAtivo ? 'var(--color-primary-text)' : 'var(--color-ink-tertiary)',
+                          }}>
+                            {p.planoAtivo ? 'ativo' : 'sem plano'}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 12, color: 'var(--color-ink-secondary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {p.email}
+                        </div>
+                      </div>
+                      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+                        <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--color-ink-secondary)' }}>
+                          atend. {formatDate(p.ultimoAtendimento)}
+                        </span>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--color-ink-secondary)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {p.email}
-                    </div>
-                  </div>
-                  <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
-                    <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--color-ink-secondary)' }}>
-                      atend. {formatDate(p.ultimoAtendimento)}
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Painel Lateral */}

@@ -1,17 +1,50 @@
 export function PatientSkeleton() {
   return (
-    <div className="flex items-center gap-3 p-3 border-b border-slate-100 animate-pulse bg-white">
+    <div
+      className="animate-pulse"
+      style={{
+        padding: '14px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        borderBottom: '1px solid var(--color-border-light)',
+        backgroundColor: 'transparent',
+      }}
+    >
       {/* Avatar Circular */}
-      <div className="w-7 h-7 rounded-full bg-slate-200 flex-shrink-0" />
+      <div style={{
+        width: 32,
+        height: 32,
+        borderRadius: '50%',
+        backgroundColor: 'var(--color-subtle)',
+        flexShrink: 0,
+      }} />
       
       {/* Nome e E-mail */}
-      <div className="flex-1 min-w-0">
-        <div className="h-3.5 bg-slate-200 rounded w-1/3 mb-2" />
-        <div className="h-2.5 bg-slate-100 rounded w-1/4" />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          height: 14,
+          backgroundColor: 'var(--color-subtle)',
+          borderRadius: 'var(--radius-sm)',
+          width: '35%',
+          marginBottom: 6,
+        }} />
+        <div style={{
+          height: 10,
+          backgroundColor: 'var(--color-subtle)',
+          borderRadius: 'var(--radius-sm)',
+          width: '50%',
+        }} />
       </div>
       
       {/* Data do último atendimento */}
-      <div className="w-20 h-2.5 bg-slate-100 rounded flex-shrink-0" />
+      <div style={{
+        width: 80,
+        height: 12,
+        backgroundColor: 'var(--color-subtle)',
+        borderRadius: 'var(--radius-sm)',
+        flexShrink: 0,
+      }} />
     </div>
   );
 }
