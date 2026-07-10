@@ -4,7 +4,7 @@ import { AuthError } from '../../model/errors/AuthError';
 import { supabase } from '../supabase/client';
 import { UserMapper } from './mappers/UserMapper';
 
-export class SupabaseAuthService implements IAuthService {
+export class SupabaseAuthAdapter implements IAuthService {
   async login(credentials: LoginCredentials): Promise<User> {
     if (!credentials.email || !credentials.password) {
       throw new AuthError('E-mail e senha são obrigatórios.');
