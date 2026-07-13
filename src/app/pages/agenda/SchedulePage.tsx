@@ -9,6 +9,8 @@ import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
 import { useAgendaViewModel } from '../../../viewmodel/agenda/AgendaViewModel';
 import { agendaSchema, AgendaFormData } from '../../../viewmodel/agenda/AgendaSchema';
 import { CalendarEvent } from '../../../model/services/ICalendarAdapter';
+import { PageTransition } from '../../components/shared/PageTransition';
+import { motion, AnimatePresence } from 'framer-motion';
 import './agenda.css';
 
 const locales = { 'pt-BR': ptBR };
@@ -99,9 +101,10 @@ export function SchedulePage() {
   }
 
   return (
-    <div style={{ maxWidth: 1024, margin: '0 auto', padding: '48px 40px' }}>
-      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
+    <PageTransition>
+      <div style={{ maxWidth: 1024, margin: '0 auto', padding: '48px 40px' }}>
+        <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
           <h1 style={{ margin: 0, fontSize: 24, fontWeight: 600, color: 'var(--color-ink-primary)', letterSpacing: '-0.02em' }}>Agenda</h1>
           <p style={{ margin: '4px 0 0', fontSize: 14, color: 'var(--color-ink-secondary)' }}>
             Gerencie suas consultas e horários de atendimento.
@@ -159,18 +162,31 @@ export function SchedulePage() {
         />
       </div>
 
-      {vm.showModal && vm.selectedSlot && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)',
-          display: 'flex', justifyContent: 'center', alignItems: 'center',
-          zIndex: 'var(--z-modal-backdrop, 300)',
-        }}>
-          <div style={{
-            background: 'var(--color-surface)', padding: '32px', borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--color-border)', maxWidth: '400px', width: '90%',
-            boxShadow: 'var(--shadow-modal)',
-          }}>
+      <AnimatePresence>
+        {vm.showModal && vm.selectedSlot && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)',
+              display: 'flex', justifyContent: 'center', alignItems: 'center',
+              zIndex: 'var(--z-modal-backdrop, 300)',
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              style={{
+                background: 'var(--color-surface)', padding: '32px', borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--color-border)', maxWidth: '400px', width: '90%',
+                boxShadow: 'var(--shadow-modal)',
+              }}
+            >
             <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 600, color: 'var(--color-ink-primary)' }}>
               {vm.editingConsulta ? 'Editar Consulta' : 'Agendar Consulta'}
             </h2>
@@ -247,9 +263,11 @@ export function SchedulePage() {
                 )}
               </div>
             </form>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+    </PageTransition>
   );
 }

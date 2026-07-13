@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePacientesViewModel } from '../../../viewmodel/pacientes/usePacientesViewModel';
+import { PageTransition } from '../../components/shared/PageTransition';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function getInitials(name: string) {
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
@@ -37,7 +39,8 @@ export function PatientListPage() {
   const pacienteSelecionado = pacientes.find((p) => p.id === selecionado);
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: '48px 40px' }}>
+    <PageTransition>
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: '48px 40px' }}>
       <div style={{ marginBottom: 24 }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 10,
@@ -174,77 +177,94 @@ export function PatientListPage() {
           ))}
         </div>
 
-        {pacienteSelecionado ? (
-          <div style={{
-            width: 240, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)',
-            background: 'var(--color-surface)', padding: '20px', flexShrink: 0,
-            position: 'sticky', top: 60,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%', background: 'var(--color-subtle)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 13, fontWeight: 600, color: 'var(--color-ink-secondary)',
-              }}>{getInitials(pacienteSelecionado.nomeCompleto)}</div>
-              <div style={{ minWidth: 0 }}>
+        <AnimatePresence mode="wait">
+          {pacienteSelecionado ? (
+            <motion.div
+              key="patient-details"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              style={{
+                width: 240, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)',
+                background: 'var(--color-surface)', padding: '20px', flexShrink: 0,
+                position: 'sticky', top: 60,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                 <div style={{
-                  fontSize: 13, fontWeight: 600, color: 'var(--color-ink-primary)',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  width: 140,
-                }}>
-                  {pacienteSelecionado.nomeCompleto}
+                  width: 36, height: 36, borderRadius: '50%', background: 'var(--color-subtle)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: 600, color: 'var(--color-ink-secondary)',
+                }}>{getInitials(pacienteSelecionado.nomeCompleto)}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{
+                    fontSize: 13, fontWeight: 600, color: 'var(--color-ink-primary)',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    width: 140,
+                  }}>
+                    {pacienteSelecionado.nomeCompleto}
+                  </div>
+                  <span style={{
+                    fontSize: 10, padding: '1px 5px', borderRadius: 2, fontWeight: 500,
+                    background: pacienteSelecionado.planoAtivo ? 'var(--color-primary-subtle)' : 'var(--color-subtle)',
+                    color: pacienteSelecionado.planoAtivo ? 'var(--color-primary-text)' : 'var(--color-ink-tertiary)',
+                  }}>
+                    {pacienteSelecionado.planoAtivo ? 'Plano ativo' : 'Sem plano'}
+                  </span>
                 </div>
-                <span style={{
-                  fontSize: 10, padding: '1px 5px', borderRadius: 2, fontWeight: 500,
-                  background: pacienteSelecionado.planoAtivo ? 'var(--color-primary-subtle)' : 'var(--color-subtle)',
-                  color: pacienteSelecionado.planoAtivo ? 'var(--color-primary-text)' : 'var(--color-ink-tertiary)',
-                }}>
-                  {pacienteSelecionado.planoAtivo ? 'Plano ativo' : 'Sem plano'}
-                </span>
               </div>
-            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email</span>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)' }}>{pacienteSelecionado.email || '--'}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)' }}>{pacienteSelecionado.email || '--'}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nasc.</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)', fontFamily: 'var(--font-mono)' }}>{formatDate(pacienteSelecionado.dataNascimento)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Últ. atend.</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)', fontFamily: 'var(--font-mono)' }}>{formatDate(pacienteSelecionado.ultimoAtendimento)}</span>
+                </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nasc.</span>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)', fontFamily: 'var(--font-mono)' }}>{formatDate(pacienteSelecionado.dataNascimento)}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: 'var(--color-ink-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Últ. atend.</span>
-                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--color-ink-primary)', fontFamily: 'var(--font-mono)' }}>{formatDate(pacienteSelecionado.ultimoAtendimento)}</span>
-              </div>
-            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <button
-                onClick={() => navigate(`/dashboard/pacientes/${pacienteSelecionado.id}`)}
-                style={{
-                  padding: '7px 0', fontSize: 12, fontWeight: 500, borderRadius: 'var(--radius-md)',
-                  background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer',
-                  transition: 'background 150ms ease-out',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-hover)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--color-primary)'; }}
-              >
-                Abrir ficha completa
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div style={{
-            width: 240, border: '1px dashed var(--color-border)', borderRadius: 'var(--radius-lg)',
-            padding: '32px 20px', textAlign: 'center', flexShrink: 0,
-          }}>
-            <div style={{ fontSize: 12, color: 'var(--color-ink-tertiary)' }}>
-              Selecione um paciente<br />para ver detalhes
-            </div>
-          </div>
-        )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <button
+                  onClick={() => navigate(`/dashboard/pacientes/${pacienteSelecionado.id}`)}
+                  style={{
+                    padding: '7px 0', fontSize: 12, fontWeight: 500, borderRadius: 'var(--radius-md)',
+                    background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer',
+                    transition: 'background 150ms ease-out',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-primary-hover)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--color-primary)'; }}
+                >
+                  Abrir ficha completa
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="empty-state"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              style={{
+                width: 240, border: '1px dashed var(--color-border)', borderRadius: 'var(--radius-lg)',
+                padding: '32px 20px', textAlign: 'center', flexShrink: 0,
+              }}
+            >
+              <div style={{ fontSize: 12, color: 'var(--color-ink-tertiary)' }}>
+                Selecione um paciente<br />para ver detalhes
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
+    </PageTransition>
   );
 }
