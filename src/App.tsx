@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { AuthProvider } from './viewmodel/auth/AuthViewModel';
 import { LoginPage } from './app/pages/auth/LoginPage';
 import { ProtectedRoute } from './app/components/ProtectedRoute';
@@ -15,56 +16,69 @@ import { PatientProfileLayout } from './app/components/layouts/PatientProfileLay
 import { PatientReportDashboard } from './app/pages/reports/PatientReportDashboard';
 import { PatientEvolutionView } from './app/pages/reports/PatientEvolutionView';
 
+// Componente interno para permitir o uso do useLocation dentro do BrowserRouter.
+// A `key` no <Routes> força o AnimatePresence a detectar a mudança de rota e
+// executar as animações de exit/enter das páginas envolvidas por PageTransition.
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRole="nutricionista">
+              <NutritionistLayout />
+            </ProtectedRoute>
+          }
+        >
+          {/* O redirect padrao pro dashboard */}
+          <Route index element={<Navigate to="/dashboard/pacientes" replace />} />
+          <Route path="pacientes" element={<PatientListPage />} />
+          <Route path="pacientes/novo" element={<PatientFormPage />} />
+          <Route path="pacientes/:id/editar" element={<PatientFormPage />} />
+          <Route path="agenda" element={<SchedulePage />} />
+
+          <Route path="pacientes/:id" element={<PatientProfileLayout />}>
+            <Route index element={<PatientProfilePage />} />
+            <Route path="plano-alimentar" element={<MealPlanPage />} />
+            <Route path="evolucao" element={<PatientReportDashboard />} />
+            <Route path="medidas" element={<BodyMeasurementFormPage />} />
+            <Route path="anotacoes" element={<ClinicalNotesPage />} />
+          </Route>
+        </Route>
+
+        <Route
+          path="/dieta"
+          element={<Navigate to="/paciente/meu-plano" replace />}
+        />
+        <Route path="/paciente/meu-plano"
+          element={
+            <ProtectedRoute allowedRole="paciente">
+              <PatientMealPlanPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/paciente/evolucao"
+          element={
+            <ProtectedRoute allowedRole="paciente">
+              <PatientEvolutionView />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
 export function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute allowedRole="nutricionista">
-                <NutritionistLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* O redirect padrao pro dashboard */}
-            <Route index element={<Navigate to="/dashboard/pacientes" replace />} />
-            <Route path="pacientes" element={<PatientListPage />} />
-            <Route path="pacientes/novo" element={<PatientFormPage />} />
-            <Route path="pacientes/:id/editar" element={<PatientFormPage />} />
-            <Route path="agenda" element={<SchedulePage />} />
-            
-            <Route path="pacientes/:id" element={<PatientProfileLayout />}>
-              <Route index element={<PatientProfilePage />} />
-              <Route path="plano-alimentar" element={<MealPlanPage />} />
-              <Route path="evolucao" element={<PatientReportDashboard />} />
-              <Route path="medidas" element={<BodyMeasurementFormPage />} />
-              <Route path="anotacoes" element={<ClinicalNotesPage />} />
-            </Route>
-          </Route>
-
-          <Route
-            path="/dieta"
-            element={<Navigate to="/paciente/meu-plano" replace />}
-          />
-          <Route path="/paciente/meu-plano"
-            element={
-              <ProtectedRoute allowedRole="paciente">
-                <PatientMealPlanPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/paciente/evolucao"
-            element={
-              <ProtectedRoute allowedRole="paciente">
-                <PatientEvolutionView />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
+        <AnimatedRoutes />
       </BrowserRouter>
     </AuthProvider>
   );
