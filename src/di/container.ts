@@ -5,6 +5,8 @@ import { RegisterUseCase } from '../usecase/auth/RegisterUseCase';
 import { GetCurrentUserUseCase } from '../usecase/auth/GetCurrentUserUseCase';
 import { LogoutUseCase } from '../usecase/auth/LogoutUseCase';
 import { SubscribeAuthStateUseCase } from '../usecase/auth/SubscribeAuthStateUseCase';
+import { RequestPasswordResetUseCase } from '../usecase/auth/RequestPasswordResetUseCase';
+import { UpdatePasswordUseCase } from '../usecase/auth/UpdatePasswordUseCase';
 import { SupabasePacienteService } from '../infra/pacientes/SupabasePacienteService';
 import { CreatePacienteUseCase } from '../usecase/pacientes/CreatePacienteUseCase';
 import { ListPacientesUseCase } from '../usecase/pacientes/ListPacientesUseCase';
@@ -110,6 +112,14 @@ class Container {
 
   static get subscribeAuthStateUseCase() {
     return new SubscribeAuthStateUseCase(this._authService);
+  }
+
+  static get requestPasswordResetUseCase() {
+    return new RequestPasswordResetUseCase(this._authService);
+  }
+
+  static get updatePasswordUseCase() {
+    return new UpdatePasswordUseCase(this._authService);
   }
 
   static get createPacienteUseCase() {

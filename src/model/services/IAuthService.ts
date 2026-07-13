@@ -18,4 +18,6 @@ export interface IAuthService {
   logout(): Promise<void>;
   getCurrentUser(): Promise<User | null>;
   onAuthStateChange(callback: (user: User | null) => void): () => void;
+  requestPasswordReset(email: string, redirectTo: string): Promise<void>;
+  updatePassword(newPassword: string): Promise<void>;
 }
