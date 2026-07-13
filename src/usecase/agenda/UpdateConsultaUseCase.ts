@@ -22,7 +22,10 @@ export class UpdateConsultaUseCase {
       data.data || existing.data
     );
 
-    await this.validator.validateUpdate(id, data, allOnDate);
+    // Consultas canceladas liberam o horário e não devem gerar conflito.
+    const ativas = allOnDate.filter(c => c.status !== 'cancelada');
+
+    await this.validator.validateUpdate(id, data, ativas);
 
     const updated = await this.consultaRepository.update(id, data);
     this.eventEmitter.emit('consulta:atualizada', updated);

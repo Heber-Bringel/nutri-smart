@@ -20,7 +20,10 @@ export class CreateConsultaUseCase {
       data.nutricionistaId, data.data, data.data
     );
 
-    await this.validator.validateCreate(data, existing);
+    // Consultas canceladas liberam o horário e não devem gerar conflito.
+    const ativas = existing.filter(c => c.status !== 'cancelada');
+
+    await this.validator.validateCreate(data, ativas);
 
     const consulta = await this.consultaRepository.create(data);
     this.eventEmitter.emit('consulta:criada', consulta);
