@@ -3,6 +3,8 @@
 > **Plataforma inteligente de gestão de clínicas de nutrição e acompanhamento de pacientes.**
 > Desenvolvimento integrado para as disciplinas de **Programação para Internet I** (Professor Jeferson Soares) e **Engenharia de Software II** (Professor Mayllon Veras) do Curso de Tecnologia em Análise e Desenvolvimento de Sistemas — IFPI Campus Piripiri.
 
+🔗 **Aplicação em produção:** [https://nutri-smart-kappa.vercel.app](https://nutri-smart-kappa.vercel.app)
+
 ---
 
 ## 👥 Integrantes da Equipe
