@@ -14,6 +14,8 @@ interface AuthState {
   login: (credentials: LoginCredentials) => Promise<User>;
   register: (data: RegisterData) => Promise<User>;
   logout: () => Promise<void>;
+  requestPasswordReset: (email: string, redirectTo: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -92,12 +94,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const requestPasswordReset = async (email: string, redirectTo: string): Promise<void> => {
+    setError(null);
+    try {
+      await Container.requestPasswordResetUseCase.execute(email, redirectTo);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Não foi possível enviar o e-mail de recuperação.';
+      setError(errorMessage);
+      const newErr = new Error(errorMessage) as ErrorWithCause;
+      newErr.cause = err;
+      throw newErr;
+    }
+  };
+
+  const updatePassword = async (newPassword: string): Promise<void> => {
+    setError(null);
+    try {
+      await Container.updatePasswordUseCase.execute(newPassword);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Não foi possível redefinir a senha.';
+      setError(errorMessage);
+      const newErr = new Error(errorMessage) as ErrorWithCause;
+      newErr.cause = err;
+      throw newErr;
+    }
+  };
+
   const clearError = () => setError(null);
 
 
   return createElement(
     AuthContext.Provider,
-    { value: { user, loading, error, login, register, logout, clearError } },
+    { value: { user, loading, error, login, register, logout, requestPasswordReset, updatePassword, clearError } },
     children
   );
 }
