@@ -81,6 +81,37 @@ export class SupabaseAuthAdapter implements IAuthService {
     }
   }
 
+  async requestPasswordReset(email: string, redirectTo: string): Promise<void> {
+    if (!email) {
+      throw new AuthError('Informe o e-mail para recuperação de senha.');
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+
+    // Nota de segurança: não diferenciamos e-mail existente de inexistente na
+    // mensagem exibida ao usuário, para evitar enumeração de contas. Um erro
+    // aqui indica falha de infraestrutura (ex.: SMTP indisponível).
+    if (error) {
+      throw new AuthError('Não foi possível enviar o e-mail de recuperação. Tente novamente.');
+    }
+  }
+
+  async updatePassword(newPassword: string): Promise<void> {
+    if (!newPassword) {
+      throw new AuthError('Informe a nova senha.');
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      throw new AuthError(error.message || 'Não foi possível redefinir a senha. O link pode ter expirado.');
+    }
+  }
+
   async getCurrentUser(): Promise<User | null> {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return null;

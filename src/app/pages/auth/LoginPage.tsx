@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
@@ -8,6 +8,7 @@ import { PageTransition } from '../../components/shared/PageTransition';
 
 export function LoginPage() {
   const [sessionExpiredMsg, setSessionExpiredMsg] = useState('');
+  const [resetSuccessMsg, setResetSuccessMsg] = useState('');
   // Estado local de submissão — independente do loading global do AuthViewModel,
   // garante que o botão fique travado desde o clique até a navegação completar.
   const [submitting, setSubmitting] = useState(false);
@@ -25,6 +26,9 @@ export function LoginPage() {
   useEffect(() => {
     if (searchParams.get('sessionExpired') === 'true') {
       setSessionExpiredMsg('Sua sessão expirou. Faça login novamente.');
+    }
+    if (searchParams.get('resetSuccess') === 'true') {
+      setResetSuccessMsg('Senha redefinida com sucesso! Faça login com sua nova senha.');
     }
   }, [searchParams]);
 
@@ -44,6 +48,7 @@ export function LoginPage() {
     if (submitting) return; // Proteção extra contra duplo clique
     clearError();
     setSessionExpiredMsg('');
+    setResetSuccessMsg('');
     setSubmitting(true);
     try {
       const user = await login(data);
@@ -116,6 +121,20 @@ export function LoginPage() {
         <p style={{ textAlign: 'center', color: 'var(--color-ink-secondary)', fontSize: 13, marginBottom: 28, marginTop: 0 }}>
           Acesse sua conta
         </p>
+
+        {resetSuccessMsg && (
+          <div style={{
+            padding: '10px 14px',
+            marginBottom: 20,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--color-success-subtle, #ecfdf5)',
+            border: '1px solid var(--color-success-border, #a7f3d0)',
+            color: 'var(--color-success, #047857)',
+            fontSize: 12,
+          }}>
+            {resetSuccessMsg}
+          </div>
+        )}
 
         {(error || sessionExpiredMsg) && (
           <div style={{
@@ -224,6 +243,21 @@ export function LoginPage() {
             {submitting ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
+
+        <Link
+          to="/esqueci-senha"
+          style={{
+            display: 'block',
+            textAlign: 'center',
+            marginTop: 20,
+            fontSize: 12,
+            color: 'var(--color-primary)',
+            textDecoration: 'none',
+            fontWeight: 500,
+          }}
+        >
+          Esqueci minha senha
+        </Link>
       </div>
 
       {/* Keyframe do spinner via style tag inline */}

@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import { AnimatePresence } from 'framer-motion';
 import { AuthProvider } from './viewmodel/auth/AuthViewModel';
 import { LoginPage } from './app/pages/auth/LoginPage';
+import { ForgotPasswordPage } from './app/pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './app/pages/auth/ResetPasswordPage';
 import { ProtectedRoute } from './app/components/ProtectedRoute';
 import { PatientListPage } from './app/pages/pacientes/PatientListPage';
 import { PatientFormPage } from './app/pages/pacientes/PatientFormPage';
@@ -26,6 +28,8 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+        <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
         <Route
           path="/dashboard"
           element={
