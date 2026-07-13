@@ -74,15 +74,12 @@ export function useAgendaViewModel(): AgendaViewModelState & AgendaViewModelActi
   }
 
   async function handleSave(nutricionistaId: string, formData: AgendaFormData) {
-    if (!selectedSlot) return;
     setError(null);
 
     try {
-      const dataStr = selectedSlot.start.toISOString().split('T')[0];
-      const horarioInicio = selectedSlot.start.toTimeString().slice(0, 5);
-      const duracaoMinutos = Math.round(
-        (selectedSlot.end.getTime() - selectedSlot.start.getTime()) / 60000
-      );
+      const dataStr = formData.data;
+      const horarioInicio = formData.horario;
+      const duracaoMinutos = formData.duracaoMinutos;
 
       if (editingConsulta) {
         await Container.updateConsultaUseCase.execute(editingConsulta.id, {
