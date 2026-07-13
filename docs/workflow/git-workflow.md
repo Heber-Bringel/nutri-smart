@@ -262,7 +262,7 @@ Estrutura mínima esperada (raiz do repo):
 # NutriSmart
 
 ## Tecnologias
-React 18, Supabase (Postgres + Auth + RLS), Tailwind CSS, jsPDF
+React 19+ com TypeScript, Supabase (Postgres + Auth + RLS), Tailwind CSS, jsPDF
 
 ## Como instalar
 ## Como executar

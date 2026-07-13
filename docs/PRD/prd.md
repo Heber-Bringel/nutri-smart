@@ -20,7 +20,7 @@ A segurança e o isolamento de dados são garantidos pelo uso de autenticação 
 4. **Como um** nutricionista, **eu quero** visualizar a lista completa dos meus pacientes com nome, data do último atendimento e status do plano alimentar ativo, **para que** eu possa acessar rapidamente a ficha de qualquer paciente e priorizar os atendimentos.
 5. **Como um** nutricionista, **eu quero** excluir permanentemente o registro de um paciente (incluindo todos os seus dados clínicos e planos alimentares), **para que** eu possa manter a base de dados limpa e exercer o direito de remoção do paciente conforme o Art. 18 da LGPD.
 6. **Como um** nutricionista, **eu quero** que o sistema calcule automaticamente o IMC, a TMB e o Gasto Energético Total (GET) ao cadastrar ou editar as medidas de peso/altura de um paciente, **para que** eu possa eliminar erros manuais nos cálculos e reduzir o tempo administrativo por consulta.
-7. **Como um** nutricionista, **eu quero** criar um plano alimentar personalizado para o paciente, contendo refeições estruturadas, alimentos, quantidades e calorias automáticas por refeição, **para que** eu possa prescrever uma dieta adequada às metas energéticas do paciente.
+7. **Como um** nutricionista, **eu quero** criar um plano alimentar personalizado para o paciente, contendo refeições estruturadas e alimentos (escolhidos de uma base do sistema ou criados manualmente), quantidades e calorias automáticas por refeição, **para que** eu possa prescrever uma dieta adequada e agilizar o processo.
 8. **Como um** nutricionista, **eu quero** visualizar gráficos de evolução de peso e medidas do paciente ao longo do tempo, **para que** eu possa avaliar a efetividade do tratamento e readequar a dieta.
 9. **Como um** paciente, **eu quero** visualizar o plano alimentar planejado para o dia atual com os alimentos, quantidades e calorias totais por refeição, **para que** eu saiba exatamente o que consumir ao longo do dia.
 10. **Como um** paciente, **eu quero** marcar cada refeição do dia como concluída em até dois toques na tela, **para que** eu registre minha adesão de forma ágil e intuitiva.
@@ -35,6 +35,7 @@ A segurança e o isolamento de dados são garantidos pelo uso de autenticação 
 19. **Como um** nutricionista, **eu quero** visualizar minha agenda de consultas no formato de calendário diário e semanal, **para que** eu tenha uma visão organizada da minha semana de trabalho.
 20. **Como um** nutricionista, **eu quero** reagendar ou cancelar uma consulta, **para que** eu possa acomodar imprevistos e remarcações.
 21. **Como um** paciente, **eu quero** visualizar a data e hora da minha próxima consulta agendada em minha área exclusiva, **para que** eu me organize e evite faltas.
+22. **Como um** nutricionista, **eu quero** selecionar alimentos a partir de uma base cadastrada no sistema ou criá-los manualmente durante a montagem do plano alimentar, **para que** eu tenha flexibilidade e rapidez na prescrição dietética.
 
 ## Decisões de Implementação
 

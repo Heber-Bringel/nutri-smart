@@ -17,7 +17,7 @@
  | **Domínio** | Saúde e Nutrição Digital |
  | **Usuários-Alvo** | Nutricionistas e seus pacientes |
  | **Objetivo Principal** | Automatizar cálculos nutricionais, centralizar prontuário clínico (medidas e anotações), gerenciar consultas e engajar pacientes. |
- | **Stack Tecnológica** | React 18, Node.js, Supabase Free Tier (Auth + RLS), Biblioteca Client-Side PDF (jsPDF) |
+ | **Stack Tecnológica** | React 19+ com TypeScript, Node.js, Supabase Free Tier (Auth + RLS), Biblioteca Client-Side PDF (jsPDF) |
  | **Decisão Final Esperada** | GO — Aprovado para Continuidade do Desenvolvimento do MVP Ampliado |
 
  ---
@@ -41,7 +41,7 @@
 
  | Tecnologia | Finalidade | Expertise do Time | Estabilidade |
  | :--- | :--- | :--- | :--- |
- | **React 18** | Interface do usuário (SPA reativa) | Média-Alta | Alta |
+ | **React 19+ com TypeScript** | Interface do usuário (SPA reativa e type-safe) | Média-Alta | Alta |
  | **Supabase Free** | Persistência em nuvem e PostgreSQL | Média | Alta |
  | **Supabase Auth** | Autenticação e Controle via RLS | Média | Alta |
  | **Tailwind CSS** | Estilização responsiva mobile-first | Média | Alta |

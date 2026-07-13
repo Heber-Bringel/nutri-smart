@@ -15,7 +15,7 @@ Do ponto de vista técnico, o sistema exige uma interface altamente reativa para
 ## Decisão
 Decidimos adotar a seguinte stack tecnológica para a construção, persistência e publicação do MVP do NutriSmart:
 
-*   **Frontend (Interface do Usuário):** **React 18** construído sobre o ecossistema **Vite** e estilizado com **Tailwind CSS**. O React garante a reatividade necessária para o gerenciamento de estados dos indicadores clínicos e dashboards, enquanto o Tailwind CSS acelera a prototipação de telas responsivas para os perfis de usuários do sistema.
+*   **Frontend (Interface do Usuário):** **React 19+** com **TypeScript** construído sobre o ecossistema **Vite** e estilizado com **Tailwind CSS**. O React garante a reatividade necessária para o gerenciamento de estados dos indicadores clínicos e dashboards, enquanto o TypeScript proporciona segurança de tipos e melhor experiência de desenvolvimento. O Tailwind CSS acelera a prototipação de telas responsivas para os perfis de usuários do sistema.
 *   **Backend as a Service (BaaS) e Banco de Dados:** **Supabase Free Tier** (baseado em banco de dados relacional **PostgreSQL**). O Supabase atuará como mecanismo de persistência em nuvem e fornecedor de APIs automáticas, eliminando a necessidade de estruturar um backend tradicional próprio nesta primeira fase (ficando o uso de Node.js + Express postergado para o planejamento da versão v2).
 *   **Hospedagem e Governança:** **Vercel** para o deploy contínuo da aplicação frontend de forma gratuita, integrada diretamente ao controle de versão e repositório central no **GitHub**.
 
