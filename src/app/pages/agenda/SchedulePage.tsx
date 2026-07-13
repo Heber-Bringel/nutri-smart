@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Calendar, dateFnsLocalizer, SlotInfo } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -48,9 +48,81 @@ const btnPrimary: React.CSSProperties = {
   transition: 'background 150ms ease-out',
 };
 
+function CalendarSkeleton() {
+  return (
+    <motion.div
+      key="loading-calendar"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
+      style={{
+        background: 'var(--color-surface)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 'var(--radius-lg)',
+        padding: 24,
+        height: 700,
+        display: 'flex',
+        flexDirection: 'column',
+        boxSizing: 'border-box',
+      }}
+      className="animate-pulse"
+    >
+      {/* Simulação do cabeçalho da agenda */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ width: 50, height: 32, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-md)' }} />
+          <div style={{ width: 70, height: 32, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-md)' }} />
+          <div style={{ width: 70, height: 32, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-md)' }} />
+        </div>
+        <div style={{ width: 120, height: 24, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-sm)' }} />
+        <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ width: 45, height: 32, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-md)' }} />
+          <div style={{ width: 65, height: 32, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-md)' }} />
+          <div style={{ width: 45, height: 32, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-md)' }} />
+          <div style={{ width: 65, height: 32, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-md)' }} />
+        </div>
+      </div>
+
+      {/* Simulação dos dias da semana (cabeçalho da tabela) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8, marginBottom: 12 }}>
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div key={i} style={{ height: 16, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-sm)', width: '60%', margin: '0 auto' }} />
+        ))}
+      </div>
+
+      {/* Simulação da grade de dias do mês (5 semanas x 7 dias) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gridTemplateRows: 'repeat(5, 1fr)', gap: 8, flex: 1 }}>
+        {Array.from({ length: 35 }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              border: '1px solid var(--color-border-light)',
+              borderRadius: 'var(--radius-sm)',
+              padding: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: 80,
+            }}
+          >
+            <div style={{ width: 20, height: 14, backgroundColor: 'var(--color-subtle)', borderRadius: 'var(--radius-sm)' }} />
+            {/* Ocasionalmente adiciona um bloco simulando uma consulta */}
+            {i === 12 && (
+              <div style={{ height: 20, backgroundColor: 'var(--color-primary-subtle)', border: '1px solid var(--color-primary)', borderRadius: 'var(--radius-sm)', marginTop: 4 }} />
+            )}
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 export function SchedulePage() {
   const { user } = useAuth();
   const vm = useAgendaViewModel();
+  const [currentView, setCurrentView] = useState('month');
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const {
     register,
@@ -92,13 +164,7 @@ export function SchedulePage() {
     }
   };
 
-  if (vm.loading && vm.events.length === 0) {
-    return (
-      <div style={{ maxWidth: 1024, margin: '0 auto', padding: '48px 40px' }}>
-        <p style={{ color: 'var(--color-ink-secondary)', fontSize: 14 }}>Carregando agenda...</p>
-      </div>
-    );
-  }
+
 
   return (
     <PageTransition>
@@ -122,45 +188,65 @@ export function SchedulePage() {
         </div>
       )}
 
-      <div className="rbc-tech-theme" style={{
-        background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-lg)', padding: 24, height: 700,
-      }}>
-        <Calendar
-          localizer={localizer}
-          events={vm.events}
-          startAccessor="start"
-          endAccessor="end"
-          culture="pt-BR"
-          selectable
-          onSelectSlot={onSelectSlot}
-          onSelectEvent={onSelectEvent}
-          messages={{
-            next: "Próximo", previous: "Anterior", today: "Hoje",
-            month: "Mês", week: "Semana", day: "Dia", agenda: "Agenda",
-            date: "Data", time: "Hora", event: "Evento",
-            noEventsInRange: "Não há consultas neste período.",
-            showMore: (total: number) => `+ ${total} mais`,
-          }}
-          eventPropGetter={(event) => {
-            const c = (event as CalendarEvent).consulta;
-            const isCancelada = c?.status === 'cancelada';
-            const isRealizada = c?.status === 'realizada';
-            return {
-              style: {
-                backgroundColor: isCancelada ? 'var(--color-bg)' : isRealizada ? 'var(--color-success-subtle)' : 'var(--color-primary-subtle)',
-                color: isCancelada ? 'var(--color-ink-tertiary)' : isRealizada ? 'var(--color-success-text)' : 'var(--color-primary-text)',
-                border: isCancelada ? '1px solid var(--color-border)' : isRealizada ? '1px solid var(--color-success-border)' : '1px solid var(--color-primary)',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: 12,
-                fontWeight: 500,
-                textDecoration: isCancelada ? 'line-through' : 'none',
-                opacity: isCancelada ? 0.6 : 1,
-              }
-            };
-          }}
-        />
-      </div>
+      <AnimatePresence mode="wait">
+        {vm.loading && vm.events.length === 0 ? (
+          <CalendarSkeleton />
+        ) : (
+          <motion.div
+            key={`calendar-${currentView}-${currentDate.getTime()}`}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="rbc-tech-theme"
+            style={{
+              background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-lg)', padding: 24, height: 700,
+            }}
+          >
+            <Calendar
+              localizer={localizer}
+              events={vm.events}
+              startAccessor="start"
+              endAccessor="end"
+              culture="pt-BR"
+              selectable
+              date={currentDate}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              view={currentView as any}
+              onNavigate={(d) => setCurrentDate(d)}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onView={(v) => setCurrentView(v as any)}
+              onSelectSlot={onSelectSlot}
+              onSelectEvent={onSelectEvent}
+              messages={{
+                next: "Próximo", previous: "Anterior", today: "Hoje",
+                month: "Mês", week: "Semana", day: "Dia", agenda: "Agenda",
+                date: "Data", time: "Hora", event: "Evento",
+                noEventsInRange: "Não há consultas neste período.",
+                showMore: (total: number) => `+ ${total} mais`,
+              }}
+              eventPropGetter={(event) => {
+                const c = (event as CalendarEvent).consulta;
+                const isCancelada = c?.status === 'cancelada';
+                const isRealizada = c?.status === 'realizada';
+                return {
+                  style: {
+                    backgroundColor: isCancelada ? 'var(--color-bg)' : isRealizada ? 'var(--color-success-subtle)' : 'var(--color-primary-subtle)',
+                    color: isCancelada ? 'var(--color-ink-tertiary)' : isRealizada ? 'var(--color-success-text)' : 'var(--color-primary-text)',
+                    border: isCancelada ? '1px solid var(--color-border)' : isRealizada ? '1px solid var(--color-success-border)' : '1px solid var(--color-primary)',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    textDecoration: isCancelada ? 'line-through' : 'none',
+                    opacity: isCancelada ? 0.6 : 1,
+                  }
+                };
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {vm.showModal && vm.selectedSlot && (
