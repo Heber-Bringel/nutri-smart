@@ -133,6 +133,9 @@ export function SchedulePage() {
     resolver: zodResolver(agendaSchema),
     defaultValues: {
       pacienteId: '',
+      data: '',
+      horario: '',
+      duracaoMinutos: 60,
       observacoes: '',
     },
   });
@@ -143,12 +146,21 @@ export function SchedulePage() {
 
   useEffect(() => {
     if (vm.showModal) {
+      const slotStart = vm.selectedSlot?.start;
+      const defaultData = vm.editingConsulta?.data
+        || (slotStart ? format(slotStart, 'yyyy-MM-dd') : '');
+      const defaultHorario = vm.editingConsulta?.horarioInicio
+        || (slotStart ? format(slotStart, 'HH:mm') : '');
+      const defaultDuracao = vm.editingConsulta?.duracaoMinutos ?? 60;
       reset({
         pacienteId: vm.editingConsulta?.pacienteId || '',
+        data: defaultData,
+        horario: defaultHorario,
+        duracaoMinutos: defaultDuracao,
         observacoes: vm.editingConsulta?.observacoes || '',
       });
     }
-  }, [vm.showModal, vm.editingConsulta, reset]);
+  }, [vm.showModal, vm.editingConsulta, vm.selectedSlot, reset]);
 
   function onSelectSlot(slotInfo: SlotInfo) {
     vm.openCreateModal({ start: slotInfo.start, end: slotInfo.end });
@@ -273,16 +285,9 @@ export function SchedulePage() {
                 boxShadow: 'var(--shadow-modal)',
               }}
             >
-            <h2 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 600, color: 'var(--color-ink-primary)' }}>
+            <h2 style={{ margin: '0 0 24px', fontSize: 16, fontWeight: 600, color: 'var(--color-ink-primary)' }}>
               {vm.editingConsulta ? 'Editar Consulta' : 'Agendar Consulta'}
             </h2>
-
-            <p style={{
-              margin: '0 0 24px', fontSize: 13, color: 'var(--color-ink-secondary)',
-              fontFamily: 'var(--font-mono)',
-            }}>
-              {format(vm.selectedSlot.start, "dd/MM/yyyy HH:mm")} - {format(vm.selectedSlot.end, "HH:mm")}
-            </p>
 
             <form onSubmit={handleSubmit(onSubmit)}>
               {vm.editingConsulta ? (
@@ -314,6 +319,60 @@ export function SchedulePage() {
                   )}
                 </div>
               )}
+
+              <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>Data</label>
+                  <input
+                    type="date"
+                    {...register('data')}
+                    style={{ ...inputStyle, borderColor: errors.data ? 'var(--color-danger)' : 'var(--color-border)' }}
+                    onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+                    onBlur={e => e.target.style.borderColor = errors.data ? 'var(--color-danger)' : 'var(--color-border)'}
+                  />
+                  {errors.data && (
+                    <span style={{ color: 'var(--color-danger)', fontSize: 11, marginTop: 4, display: 'block' }}>
+                      {errors.data.message}
+                    </span>
+                  )}
+                </div>
+                <div style={{ width: 120 }}>
+                  <label style={labelStyle}>Horário</label>
+                  <input
+                    type="time"
+                    {...register('horario')}
+                    style={{ ...inputStyle, borderColor: errors.horario ? 'var(--color-danger)' : 'var(--color-border)' }}
+                    onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+                    onBlur={e => e.target.style.borderColor = errors.horario ? 'var(--color-danger)' : 'var(--color-border)'}
+                  />
+                  {errors.horario && (
+                    <span style={{ color: 'var(--color-danger)', fontSize: 11, marginTop: 4, display: 'block' }}>
+                      {errors.horario.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <label style={labelStyle}>Duração</label>
+                <select
+                  {...register('duracaoMinutos', { valueAsNumber: true })}
+                  style={{ ...inputStyle, borderColor: errors.duracaoMinutos ? 'var(--color-danger)' : 'var(--color-border)' }}
+                  onFocus={e => e.target.style.borderColor = 'var(--color-primary)'}
+                  onBlur={e => e.target.style.borderColor = errors.duracaoMinutos ? 'var(--color-danger)' : 'var(--color-border)'}
+                >
+                  <option value={30}>30 minutos</option>
+                  <option value={45}>45 minutos</option>
+                  <option value={60}>1 hora</option>
+                  <option value={90}>1 hora e 30 minutos</option>
+                  <option value={120}>2 horas</option>
+                </select>
+                {errors.duracaoMinutos && (
+                  <span style={{ color: 'var(--color-danger)', fontSize: 11, marginTop: 4, display: 'block' }}>
+                    {errors.duracaoMinutos.message}
+                  </span>
+                )}
+              </div>
 
               <div style={{ marginBottom: 24 }}>
                 <label style={labelStyle}>Observações</label>
