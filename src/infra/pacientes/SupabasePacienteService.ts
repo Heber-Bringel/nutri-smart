@@ -114,10 +114,7 @@ export class SupabasePacienteService implements IPacienteService {
   }
 
   async softDelete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('pacientes')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id);
+    const { error } = await supabase.rpc('soft_delete_paciente', { p_id: id });
 
     if (error) throw new PacienteError('Erro ao excluir paciente.');
   }
