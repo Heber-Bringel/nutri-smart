@@ -72,9 +72,11 @@ export class SupabasePacienteService implements IPacienteService {
   }
 
   async findById(id: string): Promise<Paciente> {
+    // Otimização: busca o paciente + estado do plano ativo + última anotação em uma
+    // única query aninhada, eliminando os 2 roundtrips do enriquecimento posterior.
     const { data: row, error } = await supabase
       .from('pacientes')
-      .select('*')
+      .select('*, planos_alimentares(ativo), anotacoes_clinicas(data_atendimento)')
       .eq('id', id)
       .is('deleted_at', null)
       .single();
@@ -83,7 +85,22 @@ export class SupabasePacienteService implements IPacienteService {
       throw new PacienteError('Paciente não encontrado.');
     }
 
-    return this.enrichWithPlanAndLastNote(PacienteMapper.toDomain(row));
+    const planos = (row.planos_alimentares as { ativo: boolean }[]) || [];
+    const notas = (row.anotacoes_clinicas as { data_atendimento: string }[]) || [];
+
+    let ultimoAtendimento: string | undefined;
+    for (const n of notas) {
+      if (!ultimoAtendimento || n.data_atendimento > ultimoAtendimento) {
+        ultimoAtendimento = n.data_atendimento;
+      }
+    }
+
+    const paciente = PacienteMapper.toDomain(row);
+    return {
+      ...paciente,
+      planoAtivo: planos.some(p => p.ativo),
+      ultimoAtendimento: ultimoAtendimento ?? paciente.ultimoAtendimento,
+    };
   }
 
   async update(id: string, data: Partial<CreatePacienteData>): Promise<Paciente> {

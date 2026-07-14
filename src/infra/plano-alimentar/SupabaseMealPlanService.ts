@@ -149,52 +149,50 @@ export class SupabaseMealPlanService implements IMealPlanService {
   }
 
   async findByPatientId(pacienteId: string): Promise<MealPlan | null> {
-    const { data: planos } = await supabase
+    // Otimização: busca plano + refeições + alimentos em uma única query aninhada,
+    // eliminando os 2 roundtrips sequenciais anteriores.
+    const { data: planos, error } = await supabase
       .from('planos_alimentares')
-      .select('*')
+      .select('*, refeicoes(*, alimentos(*))')
       .eq('paciente_id', pacienteId)
       .eq('ativo', true)
       .order('created_at', { ascending: false })
       .limit(1);
 
+    if (error) throw new PlanoAlimentarError(error.message);
     if (!planos || planos.length === 0) return null;
 
-    const plano = planos[0];
-
-    const { data: refeicoes } = await supabase
-      .from('refeicoes')
-      .select('*')
-      .eq('plano_alimentar_id', plano.id)
-      .order('ordem', { ascending: true });
-
-    const { data: alimentos } = await supabase
-      .from('alimentos')
-      .select('*')
-      .in('refeicao_id', (refeicoes || []).map(r => r.id));
-
-    return MealPlanMapper.toDomain(plano, refeicoes || [], alimentos || []);
+    return this.toDomainFromNested(planos[0]);
   }
 
   async findById(id: string): Promise<MealPlan> {
+    // Otimização: busca plano + refeições + alimentos em uma única query aninhada.
     const { data: plano, error } = await supabase
       .from('planos_alimentares')
-      .select('*')
+      .select('*, refeicoes(*, alimentos(*))')
       .eq('id', id)
       .single();
 
     if (error) throw new PlanoAlimentarError('Plano alimentar não encontrado.');
 
-    const { data: refeicoes } = await supabase
-      .from('refeicoes')
-      .select('*')
-      .eq('plano_alimentar_id', id)
-      .order('ordem', { ascending: true });
+    return this.toDomainFromNested(plano);
+  }
 
-    const { data: alimentos } = await supabase
-      .from('alimentos')
-      .select('*')
-      .in('refeicao_id', (refeicoes || []).map(r => r.id));
+  // Achata o resultado aninhado (plano -> refeicoes -> alimentos) para o formato
+  // esperado pelo MealPlanMapper, ordenando as refeições por `ordem`.
+  private toDomainFromNested(plano: Record<string, unknown>): MealPlan {
+    const refeicoesRows = ((plano.refeicoes as Record<string, unknown>[]) || [])
+      .slice()
+      .sort((a, b) => (a.ordem as number) - (b.ordem as number));
 
-    return MealPlanMapper.toDomain(plano, refeicoes || [], alimentos || []);
+    const alimentosRows = refeicoesRows.flatMap(
+      r => (r.alimentos as Record<string, unknown>[]) || []
+    );
+
+    return MealPlanMapper.toDomain(
+      plano as never,
+      refeicoesRows as never,
+      alimentosRows as never
+    );
   }
 }
