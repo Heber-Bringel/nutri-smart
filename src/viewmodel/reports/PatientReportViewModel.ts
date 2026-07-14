@@ -33,10 +33,15 @@ export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow
 
     async function loadData() {
       try {
-        const paciente = await Container.getPacienteUseCase.execute(pacienteId as string);
-        const mealPlan = await Container.getMealPlanUseCase.execute(pacienteId as string).catch(() => null);
-        const medidasRaw = await Container.listMeasurementsUseCase.execute(pacienteId as string).catch(() => []);
-        const evolucaoAdesaoRaw = await Container.getEvolutionChartDataUseCase.execute(pacienteId as string, 365).catch(() => []);
+        // Otimização: as 4 consultas são independentes entre si e agora rodam em
+        // paralelo, eliminando o empilhamento de latência sequencial que tornava
+        // a aba de evolução lenta.
+        const [paciente, mealPlan, medidasRaw, evolucaoAdesaoRaw] = await Promise.all([
+          Container.getPacienteUseCase.execute(pacienteId as string),
+          Container.getMealPlanUseCase.execute(pacienteId as string).catch(() => null),
+          Container.listMeasurementsUseCase.execute(pacienteId as string).catch(() => []),
+          Container.getEvolutionChartDataUseCase.execute(pacienteId as string, 365).catch(() => []),
+        ]);
 
         // Sort by date ascending to show chart properly
         const medidas = [...medidasRaw].sort((a, b) => new Date(a.dataAtendimento).getTime() - new Date(b.dataAtendimento).getTime());

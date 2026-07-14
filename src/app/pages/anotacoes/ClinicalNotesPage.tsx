@@ -6,6 +6,7 @@ import type { Paciente } from '../../../model/entities/Paciente';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { getTodayLocal } from '../../../shared/utils/date';
 import { NotesSkeleton } from '../../components/shared/Skeleton';
+import { FadeIn } from '../../components/shared/FadeIn';
 
 export function ClinicalNotesPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -83,6 +84,7 @@ export function ClinicalNotesPage() {
   if (loading) return <NotesSkeleton />;
 
   return (
+    <FadeIn>
     <div style={{ paddingBottom: 64 }}>
       {error && (
         <div style={{
@@ -274,5 +276,6 @@ export function ClinicalNotesPage() {
         onCancel={() => setDeleteTarget(null)}
       />
     </div>
+    </FadeIn>
   );
 }

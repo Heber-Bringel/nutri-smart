@@ -7,6 +7,7 @@ import { MeasurementChart } from '../../components/medidas/MeasurementChart';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { getTodayLocal } from '../../../shared/utils/date';
 import { MeasurementSkeleton } from '../../components/shared/Skeleton';
+import { FadeIn } from '../../components/shared/FadeIn';
 
 export function BodyMeasurementFormPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -141,6 +142,7 @@ export function BodyMeasurementFormPage() {
   };
 
   return (
+    <FadeIn>
     <div style={{ paddingBottom: 64 }}>
       {error && (
         <div style={{
@@ -327,5 +329,6 @@ export function BodyMeasurementFormPage() {
         onCancel={() => setDeleteTarget(null)}
       />
     </div>
+    </FadeIn>
   );
 }

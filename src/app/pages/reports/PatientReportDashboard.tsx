@@ -4,6 +4,7 @@ import { EvolutionChart } from '../../components/charts/EvolutionChart';
 import { useOutletContext } from 'react-router-dom';
 import { Paciente } from '../../../model/entities/Paciente';
 import { EvolutionSkeleton } from '../../components/shared/Skeleton';
+import { FadeIn } from '../../components/shared/FadeIn';
 
 export const PatientReportDashboard: React.FC = () => {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -23,7 +24,8 @@ export const PatientReportDashboard: React.FC = () => {
   if (error) return <div style={{ color: 'var(--color-danger)' }}>{error}</div>;
 
   return (
-    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+    <FadeIn>
+    <div>
       <header style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
         borderBottom: '1px solid var(--color-border)', paddingBottom: 20, marginBottom: 24
@@ -93,5 +95,6 @@ export const PatientReportDashboard: React.FC = () => {
         )}
       </section>
     </div>
+    </FadeIn>
   );
 };

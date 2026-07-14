@@ -4,6 +4,7 @@ import { Container } from '../../../di/container';
 import type { Paciente } from '../../../model/entities/Paciente';
 import { MealPlanForm } from '../../components/plano-alimentar/MealPlanForm';
 import { MealPlanSkeleton } from '../../components/shared/Skeleton';
+import { FadeIn } from '../../components/shared/FadeIn';
 
 interface RefeicaoForm {
   nome: string;
@@ -91,6 +92,7 @@ export function MealPlanPage() {
   }
 
   return (
+    <FadeIn>
     <div style={{ paddingBottom: 64 }}>
       {paciente.imc !== undefined && (
         <div style={{
@@ -164,5 +166,6 @@ export function MealPlanPage() {
         erro={error}
       />
     </div>
+    </FadeIn>
   );
 }
