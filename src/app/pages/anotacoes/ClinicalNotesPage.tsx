@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Container } from '../../../di/container';
 import type { ClinicalNote } from '../../../model/entities/ClinicalNote';
-import type { Paciente } from '../../../model/entities/Paciente';
+import type { PatientProfileOutletContext } from '../../components/layouts/PatientProfileLayout';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { getTodayLocal } from '../../../shared/utils/date';
-import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
+import { NotesSkeleton } from '../../components/shared/Skeleton';
+import { FadeIn } from '../../components/shared/FadeIn';
 
 export function ClinicalNotesPage() {
-  const { paciente } = useOutletContext<{ paciente: Paciente }>();
+  const { paciente, cacheDadosPaciente } = useOutletContext<PatientProfileOutletContext>();
   const [notes, setNotes] = useState<ClinicalNote[]>([]);
   const [conteudo, setConteudo] = useState('');
   const [dataAtendimento, setDataAtendimento] = useState(getTodayLocal());
@@ -22,13 +23,13 @@ export function ClinicalNotesPage() {
   useEffect(() => {
     let cancelled = false;
 
-    Container.listClinicalNotesUseCase.execute(paciente.id)
+    cacheDadosPaciente.carregarAnotacoes()
       .then(result => { if (!cancelled) setNotes(result); })
       .catch(() => { if (!cancelled) setError('Erro ao carregar anotações.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [paciente.id]);
+  }, [paciente.id, cacheDadosPaciente]);
 
   function resetForm() {
     setConteudo('');
@@ -54,7 +55,8 @@ export function ClinicalNotesPage() {
         await Container.createClinicalNoteUseCase.execute({ pacienteId: paciente.id, conteudo, dataAtendimento });
       }
 
-      const updated = await Container.listClinicalNotesUseCase.execute(paciente.id);
+      cacheDadosPaciente.invalidar('anotacoes');
+      const updated = await cacheDadosPaciente.carregarAnotacoes();
       setNotes(updated);
       resetForm();
     } catch (err: unknown) {
@@ -72,6 +74,7 @@ export function ClinicalNotesPage() {
     if (!deleteTarget) return;
     try {
       await Container.deleteClinicalNoteUseCase.execute(deleteTarget);
+      cacheDadosPaciente.invalidar('anotacoes');
       setNotes(notes.filter(n => n.id !== deleteTarget));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao excluir anotação.');
@@ -80,9 +83,10 @@ export function ClinicalNotesPage() {
     }
   }
 
-  if (loading) return <LoadingSkeleton lines={3} />;
+  if (loading) return <NotesSkeleton />;
 
   return (
+    <FadeIn>
     <div style={{ paddingBottom: 64 }}>
       {error && (
         <div style={{
@@ -274,5 +278,6 @@ export function ClinicalNotesPage() {
         onCancel={() => setDeleteTarget(null)}
       />
     </div>
+    </FadeIn>
   );
 }

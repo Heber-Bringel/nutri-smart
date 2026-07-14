@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Container } from '../../../di/container';
 import type { BodyMeasurement } from '../../../model/entities/BodyMeasurement';
-import type { Paciente } from '../../../model/entities/Paciente';
+import type { PatientProfileOutletContext } from '../../components/layouts/PatientProfileLayout';
 import { MeasurementChart } from '../../components/medidas/MeasurementChart';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { getTodayLocal } from '../../../shared/utils/date';
+import { MeasurementSkeleton } from '../../components/shared/Skeleton';
+import { FadeIn } from '../../components/shared/FadeIn';
 
 export function BodyMeasurementFormPage() {
-  const { paciente } = useOutletContext<{ paciente: Paciente }>();
+  const { paciente, cacheDadosPaciente } = useOutletContext<PatientProfileOutletContext>();
   const [medidas, setMedidas] = useState<BodyMeasurement[]>([]);
   const [dataAtendimento, setDataAtendimento] = useState(getTodayLocal());
   const [peso, setPeso] = useState('');
@@ -27,7 +29,7 @@ export function BodyMeasurementFormPage() {
   useEffect(() => {
     let cancelled = false;
 
-    Container.listMeasurementsUseCase.execute(paciente.id)
+    cacheDadosPaciente.carregarMedidas()
       .then((m) => {
         if (!cancelled) { setMedidas(m); }
       })
@@ -35,7 +37,7 @@ export function BodyMeasurementFormPage() {
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [paciente.id]);
+  }, [paciente.id, cacheDadosPaciente]);
 
   function resetForm() {
     setDataAtendimento(getTodayLocal());
@@ -86,7 +88,8 @@ export function BodyMeasurementFormPage() {
         await Container.registerMeasurementUseCase.execute(data as any);
       }
 
-      const updated = await Container.listMeasurementsUseCase.execute(paciente.id);
+      cacheDadosPaciente.invalidar('medidas', 'evolucao');
+      const updated = await cacheDadosPaciente.carregarMedidas();
       setMedidas(updated);
       resetForm();
     } catch (err: unknown) {
@@ -104,7 +107,8 @@ export function BodyMeasurementFormPage() {
     if (!deleteTarget) return;
     try {
       await Container.deleteMeasurementUseCase.execute(deleteTarget);
-      const updated = await Container.listMeasurementsUseCase.execute(paciente.id);
+      cacheDadosPaciente.invalidar('medidas', 'evolucao');
+      const updated = await cacheDadosPaciente.carregarMedidas();
       setMedidas(updated);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao excluir medida.');
@@ -113,7 +117,7 @@ export function BodyMeasurementFormPage() {
     }
   }
 
-  if (loading) return <div style={{ color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando medidas...</div>;
+  if (loading) return <MeasurementSkeleton />;
 
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
@@ -140,6 +144,7 @@ export function BodyMeasurementFormPage() {
   };
 
   return (
+    <FadeIn>
     <div style={{ paddingBottom: 64 }}>
       {error && (
         <div style={{
@@ -326,5 +331,6 @@ export function BodyMeasurementFormPage() {
         onCancel={() => setDeleteTarget(null)}
       />
     </div>
+    </FadeIn>
   );
 }
