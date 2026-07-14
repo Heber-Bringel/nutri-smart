@@ -5,7 +5,6 @@ import type { Paciente } from '../../../model/entities/Paciente';
 import { Container } from '../../../di/container';
 import { PatientInfoCard } from '../../components/pacientes/PatientInfoCard';
 import { DeletePatientDialog } from '../../components/pacientes/DeletePatientDialog';
-import { PageTransition } from '../../components/shared/PageTransition';
 
 export function PatientProfilePage() {
   const navigate = useNavigate();
@@ -38,9 +37,8 @@ export function PatientProfilePage() {
   }
 
   return (
-    <PageTransition>
-      <div style={{ paddingBottom: 64 }}>
-        {error && (
+    <div style={{ paddingBottom: 64 }}>
+      {error && (
           <div style={{
             padding: '10px 14px', background: 'var(--color-danger-subtle)',
             border: '1px solid var(--color-danger-border)',
@@ -128,7 +126,6 @@ export function PatientProfilePage() {
             />
           )}
         </AnimatePresence>
-      </div>
-    </PageTransition>
+    </div>
   );
 }

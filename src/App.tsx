@@ -21,12 +21,28 @@ import { PatientEvolutionView } from './app/pages/reports/PatientEvolutionView';
 // Componente interno para permitir o uso do useLocation dentro do BrowserRouter.
 // A `key` no <Routes> força o AnimatePresence a detectar a mudança de rota e
 // executar as animações de exit/enter das páginas envolvidas por PageTransition.
+//
+// Importante: usamos `getRouteKey` (e não `location.pathname` puro) para que a
+// navegação entre as ABAS do perfil do paciente (visão geral, plano alimentar,
+// evolução, medidas, anotações) NÃO remonte o PatientProfileLayout. Isso evita
+// refazer o fetch do paciente e o flash de skeleton a cada troca de aba — a
+// transição visual entre abas fica a cargo de um AnimatePresence local no layout.
+function getRouteKey(pathname: string): string {
+  const match = pathname.match(
+    /^(\/dashboard\/pacientes\/[^/]+)(\/(plano-alimentar|evolucao|medidas|anotacoes))?\/?$/
+  );
+  if (match && match[1] !== '/dashboard/pacientes/novo') {
+    return match[1];
+  }
+  return pathname;
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location} key={getRouteKey(location.pathname)}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
         <Route path="/redefinir-senha" element={<ResetPasswordPage />} />

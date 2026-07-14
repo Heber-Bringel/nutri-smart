@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation, Outlet } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Paciente } from '../../../model/entities/Paciente';
 import { Container } from '../../../di/container';
 import { PatientLayoutSkeleton } from '../shared/Skeleton';
@@ -128,7 +129,17 @@ export function PatientProfileLayout() {
         <TabItem label="Anotações" to={`/dashboard/pacientes/${id}/anotacoes`} active={location.pathname.includes('/anotacoes')} />
       </div>
 
-      <Outlet context={{ paciente }} />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+        >
+          <Outlet context={{ paciente }} />
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
