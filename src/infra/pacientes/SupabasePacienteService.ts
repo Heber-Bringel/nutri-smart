@@ -38,8 +38,12 @@ export class SupabasePacienteService implements IPacienteService {
   }
 
   async findAll(filters: PacienteFilters = {}): Promise<PaginatedResult<Paciente>> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new PacienteError('Usuário não autenticado.');
+    // A sessão já fica armazenada localmente pelo Supabase. Para obter o ID do
+    // nutricionista em uma leitura, getSession evita o roundtrip extra que
+    // getUser faz ao endpoint de autenticação. A RLS continua validando o JWT
+    // no banco e é a barreira de autorização efetiva.
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) throw new PacienteError('Usuário não autenticado.');
 
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 20;
@@ -50,7 +54,7 @@ export class SupabasePacienteService implements IPacienteService {
       .from('pacientes')
       .select('*', { count: 'exact' })
       .is('deleted_at', null)
-      .eq('nutricionista_id', user.id)
+      .eq('nutricionista_id', session.user.id)
       .order('created_at', { ascending: false })
       .range(from, to);
 

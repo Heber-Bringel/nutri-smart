@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { usePatientReportViewModel, TimeWindow } from '../../../viewmodel/reports/PatientReportViewModel';
 import { EvolutionChart } from '../../components/charts/EvolutionChart';
 import { useOutletContext } from 'react-router-dom';
-import { Paciente } from '../../../model/entities/Paciente';
+import type { PatientProfileOutletContext } from '../../components/layouts/PatientProfileLayout';
 import { EvolutionSkeleton } from '../../components/shared/Skeleton';
 import { FadeIn } from '../../components/shared/FadeIn';
 
 export const PatientReportDashboard: React.FC = () => {
-  const { paciente } = useOutletContext<{ paciente: Paciente }>();
+  const { paciente, cacheDadosPaciente } = useOutletContext<PatientProfileOutletContext>();
   const {
     timeWindow,
     setTimeWindow,
@@ -16,7 +16,7 @@ export const PatientReportDashboard: React.FC = () => {
     isGenerating,
     isLoading,
     error
-  } = usePatientReportViewModel(paciente?.id);
+  } = usePatientReportViewModel(paciente.id, 30, paciente, cacheDadosPaciente);
 
   const [chartImage, setChartImage] = useState<string | undefined>();
 
