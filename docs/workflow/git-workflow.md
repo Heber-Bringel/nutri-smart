@@ -50,6 +50,7 @@ feature/clinical-measurements
 feature/scheduling
 feature/patient-adherence
 feature/reports
+feature/envio-email-boas-vindas-paciente
 
 bugfix/<descrição-curta>
 hotfix/<descrição-curta>
@@ -230,8 +231,8 @@ Sprint 5 — Polimento e Entrega
 
 | Pessoa | Épico(s) que é dona | Sprint | RF/HU |
 |---|---|---|---|
-| **Héber** | Épico 0 — Auth | Sprint 1 | RF000, RF015–019 |
-| **Mikaelle** | Épico 1 — Patients | Sprint 1 (paralelo ao Héber) | RF001–003, RF009 |
+| **Héber** | Épico 0 — Auth | Sprint 1 / apoio ao RF035 | RF000, RF015–019, RF035 |
+| **Mikaelle** | Épico 1 — Patients | Sprint 1 / Sprint 5 | RF001–003, RF009, RF035 / HU-22 |
 | **Maria Clara** | Épico 2 — Nutritional-assessment | Sprint 2 | RF004–010 |
 | **Alisson** | Épico 4 — Clinical-measurements | Sprint 2 (paralelo à Maria Clara) | RF020–025 |
 | **Alisson** | Épico 6 — Scheduling | Sprint 3 | RF029–033 |

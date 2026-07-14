@@ -2,7 +2,7 @@
 
 
 
-## Versão 1.2 — MVP Acadêmico (Implementação Plano Alimentar)
+## Versão 1.3 — MVP Acadêmico (Convite de Acesso do Paciente)
 
 
 
@@ -20,11 +20,11 @@
 
 | Semestre | 2026.1 |
 
-| Versão do Documento | 1.1 — MVP com escopo ampliado |
+| Versão do Documento | 1.3 — MVP com convite seguro de acesso |
 
-| Versão Anterior | 1.0 — Entregue em 29/04/2025 |
+| Versão Anterior | 1.2 — Atualizada em 07/07/2026 |
 
-| Data desta Revisão | 21/06/2026 |
+| Data desta Revisão | 14/07/2026 |
 
 
 
@@ -36,7 +36,7 @@
 
 
 
-Esta seção resume as alterações desta versão (1.1) em relação à versão 1.0 da ERS, consolidando o contexto registrado no Relatório de Status do Projeto e na Atividade Prática (v1.1).
+Esta seção consolida as alterações do MVP até a versão 1.3 da ERS, incluindo o convite seguro de acesso aprovado na issue #53.
 
 
 
@@ -49,6 +49,7 @@ Esta seção resume as alterações desta versão (1.1) em relação à versão 
 | **1.1** | 21/06/2026 | Correção da inconsistência entre a stack tecnológica (Supabase Auth) e a Seção 5.1, que classificava a autenticação como fora do MVP. Inclusão de quatro novas funcionalidades: Registro de Medidas Corporais, Anotações Clínicas, Emissão de Relatórios e Agenda de Consultas. Atualização da matriz de rastreabilidade e dos requisitos não funcionais. |
 
 | **1.2** | 07/07/2026 | Implementação completa do módulo Plano Alimentar (RF007-RF008), Adesão do Paciente (RF011-RF013), Medidas Corporais (RF020-RF022), Anotações Clínicas (RF023-RF025), Base de Alimentos (RF034) e Gráfico de Evolução (RF010/RF014). Adicionados componentes de UI (ConfirmDialog, LoadingSkeleton, gráficos interativos). Correções de timezone nas datas do sistema. |
+| **1.3** | 14/07/2026 | Inclusão do e-mail obrigatório no cadastro do paciente e do convite seguro para definição de senha (RF035, HU-22), com link de uso único válido por 24 horas, envio pelo Supabase Auth e tratamento não bloqueante de falhas (RNF014). |
 
 
 
@@ -72,7 +73,7 @@ O MVP contempla dois perfis de usuário distintos com funcionalidades específic
 
 
 
-Esta versão amplia o escopo original com acompanhamento clínico mais completo (medidas corporais e anotações), geração de relatórios e gestão de agenda de consultas.
+Esta versão amplia o escopo original com acompanhamento clínico, relatórios, agenda de consultas e ativação segura da conta do paciente por convite de e-mail.
 
 
 
@@ -90,7 +91,7 @@ Esta versão amplia o escopo original com acompanhamento clínico mais completo 
 
 | **Nutricionista** | Usuário Primário | Cadastrar pacientes, gerar indicadores clínicos (IMC, TMB), registrar medidas corporais e anotações clínicas, criar e gerenciar planos alimentares personalizados, emitir relatórios e gerenciar a agenda de consultas. |
 
-| **Paciente** | Usuário Secundário | Acessar plano alimentar, marcar refeições como concluídas, acompanhar evolução ao longo do tempo e visualizar suas consultas agendadas. |
+| **Paciente** | Usuário Secundário | Receber convite para definir a própria senha, acessar o plano alimentar, marcar refeições como concluídas, acompanhar evolução ao longo do tempo e visualizar suas consultas agendadas. |
 
 
 
@@ -124,6 +125,8 @@ Esta versão amplia o escopo original com acompanhamento clínico mais completo 
 
 - **Organização da rotina clínica:** agenda de consultas integrada, reduzindo conflitos de horário e esquecimentos. *(Novo na versão 1.1).*
 
+- **Onboarding seguro:** convite por e-mail permite que o paciente defina a própria senha sem transmissão de credenciais previsíveis ou em texto aberto. *(Novo na versão 1.3).*
+
 
 
 ---
@@ -138,7 +141,7 @@ Esta versão amplia o escopo original com acompanhamento clínico mais completo 
 
 
 
-- **Persistência e Autenticação:** Supabase Free Tier + Supabase Auth.
+- **Persistência e Autenticação:** Supabase Free Tier + Supabase Auth, com Supabase Edge Function para o convite administrativo de pacientes.
 
 
 
@@ -199,6 +202,8 @@ O sistema deve permitir que o nutricionista cadastre um novo paciente informando
 
 
 - Nome completo;
+
+- E-mail válido;
 
 - Data de nascimento;
 
@@ -1035,6 +1040,24 @@ O sistema deve permitir que o paciente visualize, em sua área autenticada:
 O sistema deve permitir que o nutricionista selecione alimentos a partir de uma base cadastrada ou adicione alimentos manualmente (texto livre) durante a montagem de um plano alimentar.
 Para alimentos da base, o sistema deve carregar automaticamente a proporção de calorias e macros, se disponíveis.
 
+### RF035 — Convite de Acesso do Paciente por E-mail
+
+**Prioridade:** Alta
+
+Após o cadastro bem-sucedido do paciente, o sistema deve solicitar ao Supabase Auth o envio de um convite para o e-mail informado.
+
+O convite deve:
+
+- conter mensagem de boas-vindas e instruções sobre os próximos passos;
+- apresentar link individual, de uso único e válido por 24 horas;
+- permitir que o paciente defina sua própria senha;
+- ser enviado somente depois da persistência do cadastro clínico;
+- nunca conter senha temporária, data de nascimento usada como senha ou token armazenado em tabela pública.
+
+Falhas no envio devem ser registradas sem desfazer o cadastro do paciente e sem retornar erro ao nutricionista responsável pelo cadastro.
+
+---
+
 # 3. Requisitos Não Funcionais (RNF)
 
 
@@ -1043,7 +1066,7 @@ Os requisitos não funcionais estão baseados na norma **ISO/IEC 25010** e são 
 
 
 
-Os requisitos **RNF011 a RNF013** foram adicionados nesta versão em função dos módulos de **Relatórios** e **Agenda de Consultas**.
+Os requisitos **RNF011 a RNF013** foram adicionados em função dos módulos de **Relatórios** e **Agenda de Consultas**. O **RNF014** foi adicionado na versão 1.3 para o convite de acesso do paciente.
 
 
 
@@ -1341,6 +1364,20 @@ O sistema deve garantir a integridade da agenda de consultas.
 
 - **0% de consultas sobrepostas** criadas com sucesso em cenários de agendamentos simultâneos.
 
+### RNF014 — Confiabilidade e Segurança do Convite de Acesso *(Novo — v1.3)*
+
+O convite de acesso deve ser processado como efeito posterior ao cadastro clínico, sem comprometer a operação principal em caso de indisponibilidade do serviço de e-mail.
+
+**Critérios de verificação**
+
+- 100% das falhas conhecidas de solicitação do convite são registradas com paciente, estado, data e mensagem técnica sanitizada;
+- falha no convite não desfaz um cadastro de paciente concluído;
+- nenhum registro público, log ou e-mail contém senha ou token de autenticação;
+- o link de convite é individual, de uso único e expira em 24 horas;
+- apenas o nutricionista responsável pode consultar o estado do convite, por RLS; o envio administrativo ocorre exclusivamente na Edge Function.
+
+---
+
 # 4. Matriz de Rastreabilidade
 
 
@@ -1384,6 +1421,16 @@ O símbolo **●** indica impacto direto.
 | RNF013 | – | – | – | – | – | – | – | ● | – |
 
 
+
+### Rastreabilidade da versão 1.3
+
+| Requisito | Relacionamentos | Impacto |
+|-----------|-----------------|---------|
+| RF001 | RF035, HU-02 | E-mail válido e obrigatório no cadastro clínico. |
+| RF015 | RF035, HU-22 | Conta do paciente criada/convidada pelo Supabase Auth. |
+| RF019 | RF035, HU-22 | Recuperação posterior de senha permanece disponível. |
+| RF035 | HU-22, RNF006, RNF007, RNF014 | Convite seguro e não bloqueante para definição de senha. |
+| RNF014 | RF001, RF035 | Confiabilidade, expiração, log e não exposição de credenciais. |
 
 ## Legenda
 
@@ -1475,7 +1522,8 @@ O banco de dados utiliza o plano gratuito do Supabase, que possui limitações d
 
 - capacidade computacional;
 
-- número de usuários simultâneos.
+- número de usuários simultâneos;
+- taxa e disponibilidade do serviço nativo de e-mails do Supabase Auth.
 
 
 
@@ -1513,7 +1561,7 @@ Não existe dependência de APIs externas.
 
 
 
-Qualquer funcionalidade que não esteja listada nesta versão **1.1** será considerada fora do MVP.
+Qualquer funcionalidade que não esteja listada nesta versão **1.3** (RF001–RF035) será considerada fora do MVP.
 
 
 
@@ -1533,7 +1581,7 @@ Novas funcionalidades deverão ser registradas como candidatas à **versão 2**,
 
 
 
-- O paciente acessa preferencialmente o sistema por smartphone conectado à internet.
+- O paciente possui um endereço de e-mail válido e acessa preferencialmente o sistema por smartphone conectado à internet.
 
 
 
@@ -1565,7 +1613,7 @@ Todos os requisitos presentes neste documento foram elaborados seguindo critéri
 
 | **Verificabilidade** | Deve ser possível comprovar objetivamente se o requisito foi atendido. | Todos os RNFs possuem métricas mensuráveis (ex.: relatório em até 3 segundos; 0% de consultas sobrepostas). Os RFs descrevem comportamentos diretamente verificáveis. |
 
-| **Clareza** | Os requisitos devem evitar termos subjetivos e utilizar critérios objetivos e mensuráveis. | Foram eliminados termos vagos como "rápido", "eficiente" ou "fácil", substituindo-os por métricas quantitativas em todos os requisitos não funcionais, inclusive os adicionados na versão 1.1. |
+| **Clareza** | Os requisitos devem evitar termos subjetivos e utilizar critérios objetivos e mensuráveis. | Foram eliminados termos vagos como "rápido", "eficiente" ou "fácil", substituindo-os por métricas quantitativas em todos os requisitos não funcionais, inclusive o RNF014 adicionado na versão 1.3. |
 
 
 

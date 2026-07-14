@@ -2,13 +2,13 @@
 
 ## Declaração do Problema
 
-Nutricionistas enfrentam uma sobrecarga administrativa significativa em sua rotina diária. O processo manual de cadastrar pacientes, realizar cálculos antropométricos e energéticos (como IMC, TMB e GET), organizar agendas de consultas e elaborar relatórios consome um tempo precioso que poderia ser direcionado ao atendimento clínico. Além disso, a falta de uma ferramenta integrada de fácil acesso para os pacientes visualizarem seus planos alimentares e registrarem sua adesão diária diminui o engajamento com o tratamento nutricional e dificulta o acompanhamento longitudinal da evolução do paciente.
+Nutricionistas enfrentam uma sobrecarga administrativa significativa em sua rotina diária. O processo manual de cadastrar pacientes, realizar cálculos antropométricos e energéticos (como IMC, TMB e GET), organizar agendas de consultas e elaborar relatórios consome um tempo precioso que poderia ser direcionado ao atendimento clínico. Além disso, a falta de uma ferramenta integrada de fácil acesso para os pacientes visualizarem seus planos alimentares e registrarem sua adesão diária e a ausência de um fluxo seguro de ativação da conta diminuem o engajamento com o tratamento nutricional e dificulta o acompanhamento longitudinal da evolução do paciente.
 
 ## Solução
 
 O **NutriSmart** é uma plataforma web responsiva voltada para a prática clínica nutricional que resolve essas dores conectando o profissional e o paciente em um ecossistema único. 
 - **Para o Nutricionista:** automatiza cálculos clínicos instantaneamente (IMC via classificação OMS, TMB/GET via Mifflin-St Jeor), centraliza o prontuário (com registro de circunferências, dobras cutâneas e anotações clínicas privadas), organiza a rotina através de uma agenda inteligente com prevenção de conflitos de horários e gera relatórios consolidados em PDF com um clique.
-- **Para o Paciente:** oferece uma área autenticada responsiva para visualização do plano alimentar diário, indicação visual de progresso diário e registro rápido de adesão (marcação de refeições concluídas), além de visualização da data da próxima consulta.
+- **Para o Paciente:** oferece uma área autenticada responsiva para visualização do plano alimentar diário, indicação visual de progresso diário e registro rápido de adesão (marcação de refeições concluídas), além de visualização da data da próxima consulta e recebimento de convite seguro por e-mail para definir sua própria senha.
 
 A segurança e o isolamento de dados são garantidos pelo uso de autenticação robusta e políticas de segurança em nível de linha (RLS), atendendo aos preceitos da LGPD para dados sensíveis de saúde.
 
@@ -16,7 +16,7 @@ A segurança e o isolamento de dados são garantidos pelo uso de autenticação 
 
 1. **Como um** usuário (nutricionista ou paciente), **eu quero** realizar login no sistema utilizando meu e-mail e senha, **para que** eu possa acessar as funcionalidades correspondentes ao meu perfil de forma segura e isolada.
 2. **Como um** usuário (nutricionista ou paciente), **eu quero** recuperar minha senha por meio de um link enviado ao meu e-mail cadastrado, **para que** eu possa voltar a acessar minha conta mesmo que esqueça a senha, sem depender de suporte manual.
-3. **Como um** nutricionista, **eu quero** cadastrar um novo paciente informando nome completo, data de nascimento, sexo biológico, peso (kg), altura (cm) e nível de atividade física, **para que** eu possa registrar suas informações clínicas no sistema e gerar os indicadores nutricionais automaticamente.
+3. **Como um** nutricionista, **eu quero** cadastrar um novo paciente informando nome completo, e-mail, data de nascimento, sexo biológico, peso (kg), altura (cm) e nível de atividade física, **para que** eu possa registrar suas informações clínicas no sistema e gerar os indicadores nutricionais automaticamente.
 4. **Como um** nutricionista, **eu quero** visualizar a lista completa dos meus pacientes com nome, data do último atendimento e status do plano alimentar ativo, **para que** eu possa acessar rapidamente a ficha de qualquer paciente e priorizar os atendimentos.
 5. **Como um** nutricionista, **eu quero** excluir permanentemente o registro de um paciente (incluindo todos os seus dados clínicos e planos alimentares), **para que** eu possa manter a base de dados limpa e exercer o direito de remoção do paciente conforme o Art. 18 da LGPD.
 6. **Como um** nutricionista, **eu quero** que o sistema calcule automaticamente o IMC, a TMB e o Gasto Energético Total (GET) ao cadastrar ou editar as medidas de peso/altura de um paciente, **para que** eu possa eliminar erros manuais nos cálculos e reduzir o tempo administrativo por consulta.
@@ -36,6 +36,7 @@ A segurança e o isolamento de dados são garantidos pelo uso de autenticação 
 20. **Como um** nutricionista, **eu quero** reagendar ou cancelar uma consulta, **para que** eu possa acomodar imprevistos e remarcações.
 21. **Como um** paciente, **eu quero** visualizar a data e hora da minha próxima consulta agendada em minha área exclusiva, **para que** eu me organize e evite faltas.
 22. **Como um** nutricionista, **eu quero** selecionar alimentos a partir de uma base cadastrada no sistema ou criá-los manualmente durante a montagem do plano alimentar, **para que** eu tenha flexibilidade e rapidez na prescrição dietética.
+23. **Como um** paciente cadastrado por um nutricionista, **eu quero** receber um convite seguro por e-mail para definir minha própria senha, **para que** eu possa ativar minha conta e acessar minha área no NutriSmart sem receber credenciais previsíveis ou expostas.
 
 ## Decisões de Implementação
 
@@ -44,13 +45,15 @@ A segurança e o isolamento de dados são garantidos pelo uso de autenticação 
   - **Módulo de Prontuário e Medidas Corporais:** Gerenciamento de circunferências, dobras cutâneas e anotações. As anotações de texto livre são tratadas como dados sensíveis de saúde (Art. 11 da LGPD) e protegidas rigorosamente via Row Level Security (RLS) no Supabase (invisíveis para o paciente).
   - **Módulo de Relatórios:** Implementação da biblioteca **jsPDF** no client-side (`JsPdfReportAdapter` sob a interface `ReportGenerator`). O PDF é gerado a partir do estado da aplicação no navegador, economizando recursos de infraestrutura e banda (ADR 0005).
   - **Módulo de Agenda:** Calendário interativo baseado em React Big Calendar (`ReactBigCalendarAdapter`). Implementa validação estrita de sobreposição de horários.
+  - **Módulo de Convite de Acesso:** Após o cadastro clínico, uma Supabase Edge Function utiliza o Supabase Auth para enviar um link individual de uso único, válido por 24 horas, pelo qual o paciente define sua própria senha. A integração é encapsulada por `SupabasePatientInvitationAdapter`, que implementa `IPatientInvitationService` (ADR 0006).
 - **Padrões GoF Adotados (ADR 0005):**
-  - **Adapter + Factory:** Abstração de bibliotecas externas (Supabase, jsPDF, calendário).
+  - **Adapter + Factory:** Abstração de bibliotecas externas (Supabase, jsPDF, calendário e convite de acesso).
   - **Strategy:** Lógica de validação de consultas separada por papéis de usuário (Nutricionista, Administrador, Paciente) através de `IAgendamentoValidator`.
   - **Observer:** Efeitos colaterais da agenda (ex.: disparar notificações de lembrete, atualizar cache) gerenciados via `ConsultaEventEmitter`, separando a lógica de agendamento de outras responsabilidades secundárias.
 - **Modelo de Dados e Segurança:**
   - Banco de dados PostgreSQL hospedado no Supabase.
-  - Implementação rigorosa de **Row Level Security (RLS)** nas tabelas de pacientes, consultas, medidas e anotações para garantir isolamento absoluto de dados entre nutricionistas e pacientes.
+  - Implementação rigorosa de **Row Level Security (RLS)** nas tabelas de pacientes, convites, consultas, medidas e anotações para garantir isolamento absoluto de dados entre nutricionistas e pacientes.
+  - Senhas e tokens de convite nunca são armazenados nas tabelas públicas nem enviados em texto aberto; as credenciais permanecem sob responsabilidade exclusiva do Supabase Auth.
 
 
 ## Fora de Escopo

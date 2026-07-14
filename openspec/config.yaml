@@ -7,11 +7,12 @@ context: |
   Dois perfis de usuário: nutricionista (primário) e paciente (secundário)
   Cálculos nutricionais (IMC, TMB via Mifflin-St Jeor, GET) são 100% locais — sem API externa
   Relatórios em PDF são gerados no client-side a partir dos dados já carregados do Supabase
-  Escopo está CONGELADO na ERS v1.1 — qualquer funcionalidade fora do RF001–RF033 é v2, não MVP
+  Escopo está CONGELADO na ERS v1.3 — qualquer funcionalidade fora do RF001–RF035 é v2, não MVP
 
   Arquitetura (PRD — Decisões de Implementação):
   Bibliotecas externas SEMPRE acessadas via Adapter, nunca direto no domínio:
     - Supabase Auth  → SupabaseAuthAdapter implementa IAuthService (ADR 0004)
+    - Convite de paciente → SupabasePatientInvitationAdapter implementa IPatientInvitationService (ADR 0006)
     - jsPDF          → JsPdfReportAdapter implementa ReportGenerator (ADR 0005)
     - React Big Calendar → ReactBigCalendarAdapter
   Strategy: validação de agendamento por papel de usuário via IAgendamentoValidator
@@ -28,7 +29,7 @@ context: |
 
 rules:
   proposal:
-    - 'Referenciar o(s) RF e HU correspondente(s) da Atividade Prática v1.2 (ex: "Implementa RF020, HU-11")'
+    - 'Referenciar o(s) RF e HU correspondente(s) da Atividade Prática v1.3 (ex: "Implementa RF020, HU-11")'
     - 'Conferir a lista "Fora de escopo" do PRD antes de propor — se a ideia cair nela, marcar como candidata a v2 e parar (mitigação do risco R1)'
     - Se a ideia não corresponder a nenhum RF existente, marcar explicitamente como candidata a v2 e parar — não expandir escopo
   specs:
@@ -38,4 +39,4 @@ rules:
     - Se a change tocar na tabela de anotações clínicas ou dados de paciente, o design.md deve incluir a policy de RLS proposta
     - Se a change envolver Supabase, jsPDF ou o calendário, o design.md deve nomear o Adapter e a interface de domínio que ele implementa (nunca acoplar o use case direto ao SDK externo)
     - Se a change tocar agenda, indicar onde entra o Strategy (IAgendamentoValidator) e o Observer (ConsultaEventEmitter)
-    - Referenciar o ADR correspondente quando existir (ADR 0004 — auth; ADR 0005 — GoF/relatórios)
+    - Referenciar o ADR correspondente quando existir (ADR 0004 — auth; ADR 0005 — GoF/relatórios; ADR 0006 — convite de acesso)

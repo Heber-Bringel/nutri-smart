@@ -37,3 +37,8 @@ Para manter a conformidade com a Clean Architecture e o MVVM definidos na ADR 00
 * Esforço Extra de Desenvolvimento: Exigirá a criação de novas telas (Login/Cadastro), novos ViewModels e novos Casos de Uso, pressionando o cronograma restante das semanas letivas.
 * Aumento de Boilerplate na Infra: Para manter o desacoplamento, será necessário mapear os objetos de usuário nativos do Supabase para as entidades internas de domínio do projeto.
 * Gerenciamento de Estado Global: Introduz a complexidade de gerenciar um estado global de sessão (usuário logado vs. deslogado) que impactará o fluxo de rotas no Frontend (React).
+
+
+## Complemento Posterior
+
+O convite administrativo de pacientes para definição da própria senha é disciplinado pelo **ADR 0006 — Convite de Acesso do Paciente**. Essa decisão complementa, sem substituir, o uso do Supabase Auth e mantém operações administrativas fora do navegador.

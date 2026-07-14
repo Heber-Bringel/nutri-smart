@@ -316,8 +316,8 @@ O NutriSmart segue a escola de design de produtos como **Linear**, **Vercel** e 
 
 ### TELA 03 — Formulário de Paciente (`/dashboard/pacientes/novo`)
 
-**RF:** RF001, RF004, RF005, RF006
-**HU:** HU-3, HU-6
+**RF:** RF001, RF004, RF005, RF006, RF035
+**HU:** HU-3, HU-6, HU-22
 
 #### Layout
 
@@ -328,6 +328,9 @@ O NutriSmart segue a escola de design de produtos como **Linear**, **Vercel** e 
 │  ┌── Dados Pessoais ──────────────────────────────┐ │
 │  │  Nome completo *         Data de nascimento *  │ │
 │  │  [_____________________] [____________________]│ │
+│  │                                                │ │
+│  │  E-mail para convite *                         │ │
+│  │  [___________________________________________] │ │
 │  │                                                │ │
 │  │  Sexo biológico *                              │ │
 │  │  ○ Masculino  ○ Feminino                       │ │
@@ -355,6 +358,7 @@ O NutriSmart segue a escola de design de produtos como **Linear**, **Vercel** e 
 | ID | Tipo | Label | Validação |
 |---|---|---|---|
 | `input-nome` | Input (text) | Nome completo | Obrigatório, mín. 3 chars |
+| `input-email-paciente` | Input (email) | E-mail para convite | Obrigatório, formato válido e normalizado |
 | `input-data-nascimento` | Input (date) | Data de nascimento | Obrigatório, data passada |
 | `radio-sexo` | RadioGroup | Sexo biológico | Obrigatório |
 | `input-peso` | Input (number) | Peso (kg) | Obrigatório, > 0, ≤ 300 |
@@ -370,6 +374,13 @@ O NutriSmart segue a escola de design de produtos como **Linear**, **Vercel** e 
 | `moderado` | Moderadamente ativo (fator 1,55) |
 | `muito_ativo` | Muito ativo (fator 1,725) |
 | `extremamente_ativo` | Extremamente ativo (fator 1,9) |
+
+#### Comportamento após o cadastro
+
+- O salvamento clínico é concluído antes da solicitação do convite.
+- O sistema informa apenas que o paciente foi cadastrado e que o convite foi solicitado.
+- Falhas técnicas no envio são registradas silenciosamente e não transformam o cadastro em erro.
+- Nenhuma senha temporária ou baseada em data de nascimento é exibida.
 
 #### Indicadores Calculados (Preview em Tempo Real)
 
@@ -431,7 +442,7 @@ O NutriSmart segue a escola de design de produtos como **Linear**, **Vercel** e 
 ### TELA 05 — Plano Alimentar (`/dashboard/pacientes/:id/plano-alimentar`)
 
 **RF:** RF007, RF008, RF034
-**HU:** HU-7, HU-22
+**HU:** HU-6, HU-21
 
 #### Layout
 
@@ -648,7 +659,7 @@ O NutriSmart segue a escola de design de produtos como **Linear**, **Vercel** e 
 ### TELA 10 — Plano Alimentar do Paciente (`/paciente/meu-plano`)
 
 **RF:** RF011, RF012, RF013, RF033
-**HU:** HU-9, HU-10, HU-11, HU-21
+**HU:** HU-8, HU-9, HU-10, HU-20
 
 #### Layout (Mobile-First)
 
@@ -709,6 +720,33 @@ O NutriSmart segue a escola de design de produtos como **Linear**, **Vercel** e 
 │  └───────────────────────────────────┘  │
 └─────────────────────────────────────────┘
 ```
+
+---
+
+### TELA 12 — Definição de Senha (`/definir-senha`)
+
+**RF:** RF015, RF019, RF035
+**HU:** HU-22
+
+#### Objetivo
+
+Permitir que o paciente, após abrir o link individual enviado pelo Supabase Auth, defina sua própria senha sem receber credenciais em texto aberto.
+
+#### Elementos
+
+| ID | Tipo | Label | Validação |
+|---|---|---|---|
+| `input-new-password` | Input (password) | Nova senha | Obrigatória; política vigente do Supabase Auth |
+| `input-confirm-password` | Input (password) | Confirmar senha | Deve ser idêntica à nova senha |
+| `btn-set-password` | Button (primary) | Criar minha senha | Desabilitado enquanto inválido |
+
+#### Estados
+
+- **Link válido:** formulário de definição de senha disponível.
+- **Processando:** botão bloqueado e indicador de carregamento.
+- **Sucesso:** confirmação da ativação e redirecionamento para `/login`.
+- **Link expirado ou utilizado:** mensagem neutra informando que o convite não é mais válido.
+- **Erro:** nenhuma informação interna, token ou existência de outra conta é exposta.
 
 ---
 
@@ -783,7 +821,9 @@ Rota /*            → Redireciona para /login
 
 | Evento | Tipo | Mensagem |
 |---|---|---|
-| Paciente salvo | Success | "Paciente cadastrado com sucesso." |
+| Paciente salvo | Success | "Paciente cadastrado com sucesso. O convite de acesso foi solicitado." |
+| Senha definida | Success | "Senha criada com sucesso. Você já pode entrar." |
+| Convite inválido | Warning | "Este convite expirou ou já foi utilizado." |
 | Paciente excluído | Success | "Paciente removido permanentemente." |
 | Erro de rede | Error | "Erro ao carregar dados. Tente novamente." |
 | Conflito de agenda | Warning | "Conflito de horário detectado." |
@@ -801,7 +841,8 @@ As seguintes rotas estão previstas na ERS mas ainda não possuem componentes cr
 |---|---|---|---|
 | `/dashboard/agenda` | Agenda de Consultas | RF029–RF032, HU-18–20 | Alta |
 | `/paciente/evolucao` | Evolução do Paciente | RF014, HU-8 | Média |
-| `/paciente/consulta` | Próxima Consulta | RF033, HU-21 | Média |
+| `/paciente/consulta` | Próxima Consulta | RF033, HU-20 | Média |
+| `/definir-senha` | Definição de senha por convite | RF035, HU-22 | Alta |
 | `/dashboard/pacientes/:id/editar` | Edição de Paciente | RF001, HU-3 | Alta |
 
 ---

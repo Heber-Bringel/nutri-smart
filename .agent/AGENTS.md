@@ -16,7 +16,7 @@
 
 ## 2. Regras de Escopo
 
-- O escopo do MVP está **CONGELADO** na ERS v1.1. Os requisitos válidos são **RF001–RF033** e as **HU 1–21**.
+- O escopo do MVP está **CONGELADO** na ERS v1.3. Os requisitos válidos são **RF001–RF035** e as **HU-00–HU-22**. A issue #53 foi incorporada formalmente como RF035/HU-22.
 - Antes de propor qualquer funcionalidade, confira a seção **"Fora de Escopo"** do [PRD](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/PRD/prd.md). Se a ideia estiver lá, marque como **candidata a v2** e pare.
 - Se a ideia não corresponder a nenhum RF existente, marque como **candidata a v2** e pare — não expanda o escopo.
 - Toda proposta deve referenciar o(s) **RF** e **HU** correspondentes (ex.: "Implementa RF020, HU-12").
@@ -70,7 +70,7 @@ Antes de iniciar qualquer tarefa, o agente **deve consultar** os seguintes docum
 | Documento | Caminho | Quando consultar |
 |---|---|---|
 | **PRD** | [prd.md](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/PRD/prd.md) | Escopo, decisões de implementação, padrões GoF, fora de escopo |
-| **ERS** | [ERS.md](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/Context/ERS.md) | Requisitos funcionais (RF001–RF033) e não-funcionais |
+| **ERS** | [ERS.md](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/Context/ERS.md) | Requisitos funcionais (RF001–RF035) e não-funcionais |
 | **Casos de Uso** | [USE_CASES.md](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/Context/USE_CASES.md) | Fluxos detalhados de cada funcionalidade |
 | **ADR 0002** | [0002](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/ADRs/0002-escolha-do-estilo-e-organizacao-de-codigo.md) | Arquitetura (Clean Architecture + MVVM), estrutura de pastas |
 | **ADR 0003** | [0003](file:///C:/Users/heber%20bringel/Documents/workspaces/engenharia_de_software/nutri-smart-trabalho-final/nutri-smart/docs/ADRs/0003-definicao-da-stack-tecnologica-do-mvp.md) | Stack tecnológica (React 19+ com TypeScript, Supabase, Tailwind, jsPDF) |

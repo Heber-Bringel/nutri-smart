@@ -40,6 +40,8 @@ Exemplos:
 
 * `CalendarAdapter` → `ReactBigCalendarAdapter`
 
+* `IPatientInvitationService` → `SupabasePatientInvitationAdapter` (ADR 0006)
+
 ### Strategy
 
 As regras de validação de agendamento serão encapsuladas em estratégias específicas para cada perfil de usuário.

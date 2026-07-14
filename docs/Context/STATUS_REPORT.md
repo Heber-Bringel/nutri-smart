@@ -22,11 +22,11 @@
 
 
 
-**Período de Referência:** Junho de 2026
+**Período de Referência:** Julho de 2026
 
 
 
-**Versão do Relatório:** 1.0
+**Versão do Relatório:** 1.1
 
 
 
@@ -50,7 +50,7 @@ Este relatório consolida o estado atual do projeto NutriSmart a partir das vers
 
 
 
-O destaque do período é a incorporação formal de **Autenticação e Controle de Acesso** ao escopo do MVP, antes tratada de forma inconsistente entre os documentos do projeto.
+O destaque do período é a incorporação formal do **Convite Seguro de Acesso do Paciente** (RF035/HU-22), aprovado na issue #53, mantendo a autenticação pelo Supabase Auth e rejeitando o envio de senhas por e-mail.
 
 
 
@@ -172,6 +172,14 @@ Essa lacuna foi corrigida nas versões atuais dos dois documentos, com o **Épic
 
 
 
+# 4.1 Mudança de Escopo Aprovada — Convite de Acesso do Paciente
+
+Em 14/07/2026, a issue #53 foi aprovada como exceção formal ao congelamento anterior. A ERS v1.3 inclui o e-mail obrigatório no RF001 e cria o RF035/HU-22 para que o paciente receba um link de uso único, válido por 24 horas, e defina sua própria senha.
+
+A decisão rejeita senhas aleatórias, previsíveis ou baseadas em data de nascimento. O cadastro clínico permanece concluído quando o serviço de convite falha; o erro é registrado sem ser retornado ao nutricionista. A funcionalidade está **planejada** e não implementada na data deste relatório.
+
+---
+
 # 5. Status por Épico
 
 
@@ -182,7 +190,7 @@ Essa lacuna foi corrigida nas versões atuais dos dois documentos, com o **Épic
 
 | **Épico 0 — Autenticação e Controle de Acesso** | RF000, RF000a | HU-00, HU-01 (2) | Sprint 1 | Especificado |
 
-| **Épico 1 — Gestão de Pacientes** | RF001, RF002, RF003, RF009 | HU-02, HU-03, HU-04 (3) | Sprint 1 | Especificado |
+| **Épico 1 — Gestão de Pacientes** | RF001, RF002, RF003, RF009, RF035 | HU-02, HU-03, HU-04, HU-22 (4) | Sprint 1 / Sprint 5 | RF035 planejado |
 
 | **Épico 2 — Avaliação e Planejamento Nutricional** | RF004–RF008, RF010 | HU-05, HU-06, HU-07 (3) | Sprint 2–3 | Especificado |
 
@@ -210,7 +218,7 @@ Essa lacuna foi corrigida nas versões atuais dos dois documentos, com o **Épic
 
 | **Sprint 4 — Evolução e Polimento** | 9–10 | Gráfico de evolução, ajustes de UX e validação do fluxo de autenticação | Planejado |
 
-| **Sprint 5 — Entrega Final** | 11–12 | Correção de bugs, documentação, preparação da apresentação | Planejado |
+| **Sprint 5 — Entrega Final** | 11–12 | Convite seguro do paciente (RF035), correção de bugs, documentação e preparação da apresentação | Planejado |
 
 
 
@@ -230,13 +238,16 @@ Essa lacuna foi corrigida nas versões atuais dos dois documentos, com o **Épic
 
 |----|--------|---------------|----------|-------------------|
 
-| **R1** | Escopo mal definido gerando retrabalho: funcionalidades novas podem ser inseridas durante o desenvolvimento, comprometendo o prazo do MVP. | Alta | Alto | Congelar o escopo do MVP após aprovação do RVS. Utilizar um backlog versionado no GitHub Projects. Qualquer nova funcionalidade é registrada como v2. |
+| **R1** | Escopo mal definido gerando retrabalho: funcionalidades novas podem ser inseridas durante o desenvolvimento, comprometendo o prazo do MVP. | Alta | Alto | A issue #53 é exceção formal incorporada como RF035/HU-22; após a ERS v1.3, qualquer funcionalidade sem RF é registrada como v2. |
 
 | **R2** | Limitação técnica de autenticação: integração do Supabase Auth com Row Level Security (RLS) pode exigir configuração cuidadosa para garantir isolamento de dados entre pacientes e nutricionistas. | Baixa | Alto | Implementar e validar as políticas de RLS no Sprint 1 antes de desenvolver as demais funcionalidades. Documentar as regras de acesso no README do repositório. |
 
 | **R3** | Disponibilidade do time: conflito com outras disciplinas, provas ou compromissos pessoais pode reduzir a capacidade produtiva em semanas críticas. | Média | Alto | Distribuir tarefas com responsáveis claros desde o Sprint 0. Manter buffer de 2 semanas no cronograma (Sprints 11–12). Realizar reunião semanal de sincronização de 30 minutos. |
 
 
+
+| **R4** | Falha ou limite do serviço nativo de e-mail impedir o convite imediato. | Média | Médio | Cadastro não bloqueante, estado persistido e erro sanitizado; SMTP externo permanece alternativa futura. |
+| **R5** | Exposição de senha, token ou chave administrativa no cliente. | Baixa | Alto | Link de uso único, senha definida pelo paciente e operação administrativa exclusiva em Edge Function. |
 
 > **Atualização do Risco R2:** com a incorporação da autenticação ao escopo formal do MVP e o planejamento de implementação e validação de RLS já no Sprint 1, a probabilidade do risco foi revista de **Média** para **Baixa** em relação à versão anterior da RVS.
 
@@ -416,7 +427,7 @@ O projeto NutriSmart, com Autenticação e Controle de Acesso incorporados ao es
 
 
 
-- Manter o backlog congelado: qualquer nova funcionalidade proposta após este relatório deve ser registrada como v2, conforme ação de mitigação do risco R1.
+- Manter o backlog congelado após a ERS v1.3: qualquer nova funcionalidade sem RF/HU aprovado deve ser registrada como v2, conforme ação de mitigação do risco R1.
 
 
 

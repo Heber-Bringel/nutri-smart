@@ -1,6 +1,6 @@
 # NutriSmart — Atividade Prática (Épicos, Histórias de Usuário e Casos de Uso)
 
-**Versão 1.2 — Escopo ampliado: Medidas Corporais, Anotações Clínicas, Relatórios e Agenda de Consultas**
+**Versão 1.3 — Escopo ampliado: Convite Seguro de Acesso do Paciente**
 
 | Campo | Descrição |
 |-------|-----------|
@@ -8,25 +8,25 @@
 | Professor | Mayllon Veras |
 | Semestre | 2026.1 |
 | Documento | Atividade Prática — MVP NutriSmart |
-| Versão | 1.2 (alinhada à ERS v1.1 — escopo ampliado) |
-| Versão Anterior | 1.1 (Autenticação incluída no MVP) |
+| Versão | 1.3 (alinhada à ERS v1.3 — convite seguro de acesso) |
+| Versão Anterior | 1.2 (módulos clínicos, relatórios e agenda) |
 
 Esta revisão (1.2) incorpora ao backlog os quatro módulos adicionados na ERS v1.1: Registro de Medidas Corporais, Anotações Clínicas, Emissão de Relatórios e Agenda de Consultas (RF020–RF033).
 
-Foram criados três novos épicos (Épico 4, 5 e 6) e dez novas histórias de usuário (HU-11 a HU-20).
+A versão 1.3 formaliza a Base de Alimentos como HU-21 e adiciona a HU-22 para o convite seguro de acesso do paciente após seu cadastro clínico.
 
-Os épicos e histórias da versão anterior (Épico 0 a 3, HU-00 a HU-10) permanecem inalterados e são reproduzidos integralmente abaixo para manter o documento autocontido.
+Os épicos e histórias anteriores permanecem reproduzidos para manter o documento autocontido; a HU-02 foi atualizada para exigir o e-mail necessário ao convite.
 
 ---
 
 # 1. Épicos Principais do MVP
 
-Com base na análise da ERS NutriSmart (versão atual 1.1), foram identificados sete épicos que organizam todas as funcionalidades do MVP em grupos de valor coerentes.
+Com base na análise da ERS NutriSmart (versão atual 1.3), foram identificados sete épicos que organizam todas as funcionalidades do MVP em grupos de valor coerentes.
 
 | Épico | Nome | Requisitos | Descrição Resumida |
 |-------|------|------------|--------------------|
 | Épico 0 | Autenticação e Controle de Acesso | RF000 (RF015–RF019) | Garante que apenas usuários cadastrados acessem o sistema, com perfis distintos para nutricionista e paciente. Base de segurança para todos os demais épicos. |
-| Épico 1 | Gestão de Pacientes | RF001, RF002, RF003, RF009 | Concentra todas as operações relacionadas ao ciclo de vida do registro de um paciente no sistema: criação, consulta, listagem e exclusão. |
+| Épico 1 | Gestão de Pacientes | RF001, RF002, RF003, RF009, RF035 | Concentra o ciclo de vida do paciente: criação, convite seguro de acesso, consulta, listagem e exclusão. |
 | Épico 2 | Avaliação e Planejamento Nutricional | RF004–RF008, RF010 | Engloba os cálculos clínicos automáticos (IMC, TMB, GET) e toda a gestão do plano alimentar criado pelo nutricionista. |
 | Épico 3 | Adesão e Acompanhamento pelo Paciente | RF011–RF014 | Agrupa as funcionalidades voltadas ao paciente: visualização do plano diário, marcação de refeições concluídas e acompanhamento do progresso. |
 | Épico 4 | Avaliação Clínica Avançada | RF020–RF025 | Amplia o acompanhamento clínico além do peso isolado: registro e histórico de medidas corporais e anotações clínicas de consulta. |
@@ -43,7 +43,7 @@ Este épico é pré-requisito de todos os demais.
 
 ## Épico 1 — Gestão de Pacientes
 
-Concentra todas as operações relacionadas ao ciclo de vida do registro de um paciente no sistema: criação, consulta, listagem e exclusão.
+Concentra todas as operações relacionadas ao ciclo de vida do registro de um paciente no sistema: criação, convite para definição de senha, consulta, listagem e exclusão.
 
 É o épico base, pois sem pacientes cadastrados nenhuma outra funcionalidade pode ser utilizada.
 
@@ -153,12 +153,13 @@ Como usuário (nutricionista ou paciente), quero recuperar minha senha por meio 
 
 ## HU-02 — Prioridade: Alta
 
-Como nutricionista, quero cadastrar um novo paciente informando nome completo, data de nascimento, sexo biológico, peso (kg), altura (cm) e nível de atividade física, para que eu possa registrar suas informações clínicas no sistema e gerar os indicadores nutricionais automaticamente.
+Como nutricionista, quero cadastrar um novo paciente informando nome completo, e-mail, data de nascimento, sexo biológico, peso (kg), altura (cm) e nível de atividade física, para que eu possa registrar suas informações clínicas no sistema e gerar os indicadores nutricionais automaticamente.
 
 ### Critérios de Aceitação
 
-- Todos os campos são obrigatórios; formulário bloqueia submissão com campos vazios (RF001).
+- Todos os campos são obrigatórios, incluindo e-mail em formato válido; o formulário bloqueia submissão com campos vazios (RF001).
 - Após o cadastro, o paciente aparece imediatamente na listagem (RF002).
+- A persistência bem-sucedida inicia o fluxo independente de convite de acesso (RF035), sem atrasar ou desfazer o cadastro clínico.
 - Os dados são persistidos no Supabase com RLS vinculando o paciente ao nutricionista autenticado (RNF005).
 
 **Requisitos:** RF001, RF002, RNF005
@@ -432,12 +433,43 @@ Como paciente, quero visualizar a data e o horário da minha próxima consulta a
 
 ---
 
+## HU-21 — Prioridade: Alta
+
+Como nutricionista, quero selecionar alimentos a partir de uma base cadastrada ou criá-los manualmente durante a montagem do plano alimentar, para que eu tenha flexibilidade e rapidez na prescrição dietética.
+
+### Critérios de Aceitação
+
+- A base permite buscar e selecionar alimentos cadastrados (RF034).
+- Alimentos da base carregam calorias e macronutrientes disponíveis proporcionalmente à quantidade informada.
+- O nutricionista pode registrar um alimento manual sem depender da base.
+
+**Requisitos:** RF034
+
+---
+
+## HU-22 — Prioridade: Alta
+
+Como paciente cadastrado por um nutricionista, quero receber um convite seguro por e-mail para definir minha própria senha, para que eu possa ativar minha conta e acessar minha área no NutriSmart.
+
+### Critérios de Aceitação
+
+- **Given** que o nutricionista autenticado cadastrou um paciente com e-mail válido, **when** a persistência clínica for concluída, **then** o sistema solicita o envio de um convite pelo Supabase Auth (RF035).
+- **Given** que o convite foi entregue, **when** o paciente abrir o link em até 24 horas, **then** ele pode definir sua própria senha sem receber senha temporária.
+- **Given** que o serviço de convite falhou, **when** o cadastro clínico já estiver persistido, **then** o paciente permanece cadastrado, a falha é registrada e nenhum erro é retornado ao nutricionista (RNF014).
+- **Given** um convite expirado ou já utilizado, **when** o paciente abrir o link, **then** o sistema informa que o convite não é mais válido, sem expor dados da conta.
+- **Given** os registros de convite, **when** houver tentativa de leitura, **then** a RLS permite acesso apenas ao nutricionista responsável; o paciente não acessa mensagens técnicas de falha.
+
+**Requisitos:** RF001, RF015, RF019, RF035, RNF006, RNF007, RNF014
+
+---
+
 # 3. Casos de Uso Detalhados
 
-O MVP do NutriSmart possui dois casos de uso de alta complexidade que foram detalhados na versão 1.1 da Atividade Prática:
+O MVP do NutriSmart possui três casos de uso de alta complexidade que foram detalhados na versão 1.3 da Atividade Prática:
 
 - **HU-00 — Autenticação (RF000)**, por ser pré-requisito de todo o sistema.
 - **HU-06 — Criar Plano Alimentar (RF007)**, por envolver o maior número de passos, validações e integrações entre módulos.
+- **HU-22 — Receber convite de acesso (RF035)**, por envolver criação de identidade, e-mail transacional, expiração e tratamento não bloqueante de falhas.
 
 Os fluxos completos são reproduzidos abaixo.
 
@@ -451,13 +483,14 @@ O diagrama abaixo representa os casos de uso do NutriSmart MVP, com os atores en
 
 Os casos de uso dos Épicos 4, 5 e 6 (medidas corporais, anotações clínicas, relatórios e agenda) foram incorporados como extensões do fluxo do nutricionista, todos dependentes de **UC-00 — Realizar Login**.
 
-### Sistema NutriSmart — MVP Completo (v1.2)
+### Sistema NutriSmart — MVP Completo (v1.3)
 
 #### Nutricionista
 
 - (Realizar login) <<include>> ← UC-00 [Épico 0]
 - (Recuperar senha) <<extend>>
 - (Cadastrar paciente) <<include>> ← UC-01 [Épico 1]
+- (Enviar convite para definir senha) <<extend>> ← UC-03 [Épicos 0 e 1]
 - (Listar pacientes) <<include>>
 - (Excluir paciente) <<extend>>
 - (Calcular IMC/TMB/GET) <<include>> ← UC-02 [Épico 2]
@@ -612,15 +645,56 @@ No passo 3 do fluxo principal, o sistema detecta que o paciente já possui um pl
 
 ---
 
+# 3.4 UC-03 — Convidar Paciente para Definir Senha (RF035) [Épicos 0 e 1]
+
+## Pré-condições
+
+- Nutricionista autenticado com sessão válida.
+- Cadastro clínico do paciente persistido com nome e e-mail válido.
+
+## Pós-condições
+
+- Convite solicitado ao Supabase Auth e estado registrado como `enviado`; ou
+- falha técnica registrada como `falhou`, sem desfazer o cadastro clínico.
+
+## Fluxo Principal
+
+| Passo | Descrição |
+|-------|-----------|
+| 1 | Após persistir o paciente, o caso de uso publica a solicitação de convite sem acoplar o cadastro ao resultado do e-mail. |
+| 2 | `SupabasePatientInvitationAdapter`, por meio de uma Edge Function autenticada, valida se o usuário solicitante é o nutricionista responsável. |
+| 3 | A Edge Function solicita ao Supabase Auth o convite do e-mail, com metadados mínimos de nome, papel e paciente. |
+| 4 | O Supabase Auth envia a mensagem de boas-vindas com link individual, de uso único e válido por 24 horas. |
+| 5 | O paciente abre o link, acessa `/definir-senha` e informa a própria senha. |
+| 6 | O Supabase Auth cria/confirma a credencial e o sistema vincula `pacientes.usuario_id` ao perfil autenticado. |
+
+## Fluxos de Exceção
+
+| Exceção | Tratamento |
+|---------|------------|
+| Falha de envio | Registrar estado `falhou` e mensagem técnica sanitizada; manter o paciente cadastrado e não retornar erro ao nutricionista. |
+| Link expirado ou utilizado | Exibir mensagem neutra de convite inválido; nenhuma credencial ou dado interno é revelado. |
+| E-mail já associado a usuário | Vincular somente após validação segura da identidade; nunca sobrescrever outro vínculo automaticamente. |
+| Sessão do solicitante inválida | A Edge Function rejeita a operação sem expor a chave administrativa. |
+
+## Segurança e RLS
+
+- Somente o nutricionista responsável pode consultar os estados dos convites vinculados aos seus pacientes.
+- A criação de usuário e o envio administrativo usam credencial de serviço apenas dentro da Edge Function.
+- Pacientes não podem ler logs, mensagens técnicas ou registros de outros usuários.
+- Senhas e tokens de convite não são persistidos nas tabelas públicas.
+
+---
+
 # 4. Rastreabilidade — HUs × Requisitos × Épicos
 
-Tabela consolidada com todas as histórias de usuário do projeto, incluindo as dez novas histórias (HU-11 a HU-20) introduzidas nesta versão.
+Tabela consolidada com todas as histórias de usuário do projeto, incluindo HU-21 (Base de Alimentos) e HU-22 (Convite de Acesso).
 
 | História | Requisitos | Épico | Depende de |
 |----------|------------|--------|------------|
 | HU-00 — Login | RF000, RNF005 | Épico 0 | — |
 | HU-01 — Recuperar senha | RF000a | Épico 0 | HU-00 |
-| HU-02 — Cadastrar paciente | RF001, RF002, RNF005 | Épico 1 | HU-00 |
+| HU-02 — Cadastrar paciente | RF001, RF002, RF035, RNF005 | Épico 1 | HU-00 |
 | HU-03 — Listar pacientes | RF002, RF003, RNF001 | Épico 1 | HU-00 |
 | HU-04 — Excluir paciente | RF009, LGPD Art. 18 | Épico 1 | HU-00, HU-02 |
 | HU-05 — Calcular IMC/TMB/GET | RF004, RF005, RF006, RNF002 | Épico 2 | HU-02 |
@@ -639,3 +713,5 @@ Tabela consolidada com todas as histórias de usuário do projeto, incluindo as 
 | HU-18 — Visualizar agenda | RF030, RNF012 | Épico 6 | HU-17 |
 | HU-19 — Editar/cancelar consulta | RF031, RF032 | Épico 6 | HU-17 |
 | HU-20 — Paciente visualiza próxima consulta | RF033, Épico 0 | Épico 6 | HU-00, HU-17 |
+| HU-21 — Selecionar alimento da base | RF034 | Épico 2 | HU-06 |
+| HU-22 — Receber convite de acesso | RF001, RF015, RF019, RF035, RNF014 | Épicos 0 e 1 | HU-00, HU-02 |

@@ -188,7 +188,7 @@ Cadastros de pacientes associados ao nutricionista responsável.
 - `nutricionista_id` (`uuid`, NOT NULL, FK → `profiles.id` ON DELETE CASCADE)
 - `usuario_id` (`uuid`, NULL, FK → `profiles.id` ON DELETE SET NULL) -- Vinculo com o perfil de login do paciente
 - `nome_completo` (`text`, NOT NULL)
-- `email` (`varchar(255)`, NULL) -- E-mail do paciente para vinculação/convite
+- `email` (`varchar(255)`, NOT NULL) -- E-mail normalizado usado no convite e vínculo da conta
 - `data_nascimento` (`date`, NOT NULL)
 - `sexo_biologico` (`text`, NOT NULL, CHECK: `'masculino'`, `'feminino'`)
 - `peso_inicial` (`numeric(5,2)`, NOT NULL, CHECK > 0)
@@ -197,7 +197,20 @@ Cadastros de pacientes associados ao nutricionista responsável.
 - `created_at` (`timestamptz`, DEFAULT `now()`)
 - `updated_at` (`timestamptz`, DEFAULT `now()`)
 
-### 6.3 `planos_alimentares`
+### 6.3 `convites_paciente`
+Registra apenas o estado operacional do convite; tokens e senhas permanecem exclusivamente no Supabase Auth.
+- `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
+- `paciente_id` (`uuid`, NOT NULL, FK → `pacientes.id` ON DELETE CASCADE)
+- `nutricionista_id` (`uuid`, NOT NULL, FK → `profiles.id` ON DELETE CASCADE)
+- `email` (`varchar(255)`, NOT NULL)
+- `status` (`text`, NOT NULL, CHECK: `'pendente'`, `'enviado'`, `'falhou'`, `'aceito'`)
+- `mensagem_erro` (`text`, NULL) -- mensagem técnica sanitizada, sem tokens ou credenciais
+- `solicitado_em` (`timestamptz`, DEFAULT `now()`)
+- `enviado_em` (`timestamptz`, NULL)
+- `aceito_em` (`timestamptz`, NULL)
+- `updated_at` (`timestamptz`, DEFAULT `now()`)
+
+### 6.4 `planos_alimentares`
 Planos de alimentação elaborados para o paciente.
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `paciente_id` (`uuid`, NOT NULL, FK → `pacientes.id` ON DELETE CASCADE)
@@ -207,7 +220,7 @@ Planos de alimentação elaborados para o paciente.
 - `created_at` (`timestamptz`, DEFAULT `now()`)
 - `updated_at` (`timestamptz`, DEFAULT `now()`)
 
-### 6.4 `refeicoes`
+### 6.5 `refeicoes`
 Refeições que integram um plano alimentar.
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `plano_alimentar_id` (`uuid`, NOT NULL, FK → `planos_alimentares.id` ON DELETE CASCADE)
@@ -216,7 +229,7 @@ Refeições que integram um plano alimentar.
 - `horario_sugerido` (`time`)
 - `created_at` (`timestamptz`, DEFAULT `now()`)
 
-### 6.5 `alimentos`
+### 6.6 `alimentos`
 Itens alimentares pertencentes a cada refeição.
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `refeicao_id` (`uuid`, NOT NULL, FK → `refeicoes.id` ON DELETE CASCADE)
@@ -228,7 +241,7 @@ Itens alimentares pertencentes a cada refeição.
 - `proteinas` (`numeric(6,2)`, DEFAULT 0, CHECK >= 0)
 - `gorduras` (`numeric(6,2)`, DEFAULT 0, CHECK >= 0)
 
-### 6.6 `adesao_refeicoes`
+### 6.7 `adesao_refeicoes`
 Registros diários efetuados pelo paciente sobre o cumprimento das refeições.
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `refeicao_id` (`uuid`, NOT NULL, FK → `refeicoes.id` ON DELETE CASCADE)
@@ -238,7 +251,7 @@ Registros diários efetuados pelo paciente sobre o cumprimento das refeições.
 - `created_at` (`timestamptz`, DEFAULT `now()`)
 - Restrição UNIQUE (`refeicao_id`, `data`)
 
-### 6.7 `historico_peso`
+### 6.8 `historico_peso`
 Acompanhamento temporal de peso do paciente.
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `paciente_id` (`uuid`, NOT NULL, FK → `pacientes.id` ON DELETE CASCADE)
@@ -246,7 +259,7 @@ Acompanhamento temporal de peso do paciente.
 - `data_registro` (`date`, NOT NULL DEFAULT `CURRENT_DATE`)
 - `created_at` (`timestamptz`, DEFAULT `now()`)
 
-### 6.8 `medidas_corporais`
+### 6.9 `medidas_corporais`
 Registro de antropometria coletada durante atendimentos presenciais/online.
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `paciente_id` (`uuid`, NOT NULL, FK → `pacientes.id` ON DELETE CASCADE)
@@ -260,7 +273,7 @@ Registro de antropometria coletada durante atendimentos presenciais/online.
 - `dobras_cutaneas_mm` (`numeric(5,2)`, CHECK >= 0)
 - `created_at` (`timestamptz`, DEFAULT `now()`)
 
-### 6.9 `anotacoes_clinicas`
+### 6.10 `anotacoes_clinicas`
 Prontuário clínico restrito do nutricionista sobre o paciente (dados sensíveis LGPD Art. 11).
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `paciente_id` (`uuid`, NOT NULL, FK → `pacientes.id` ON DELETE CASCADE)
@@ -270,7 +283,7 @@ Prontuário clínico restrito do nutricionista sobre o paciente (dados sensívei
 - `created_at` (`timestamptz`, DEFAULT `now()`)
 - `updated_at` (`timestamptz`, DEFAULT `now()`)
 
-### 6.10 `consultas`
+### 6.11 `consultas`
 Agendamento e histórico de consultas nutricionais.
 - `id` (`uuid`, PK, DEFAULT `gen_random_uuid()`)
 - `nutricionista_id` (`uuid`, NOT NULL, FK → `profiles.id` ON DELETE CASCADE)
@@ -309,7 +322,7 @@ CREATE TABLE public.pacientes (
     nutricionista_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
     usuario_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     nome_completo TEXT NOT NULL,
-    email VARCHAR(255),
+    email VARCHAR(255) NOT NULL,
     data_nascimento DATE NOT NULL,
     sexo_biologico TEXT NOT NULL CONSTRAINT chk_pacientes_sexo CHECK (sexo_biologico IN ('masculino', 'feminino')),
     peso_inicial NUMERIC(5,2) NOT NULL CONSTRAINT chk_pacientes_peso CHECK (peso_inicial > 0),
@@ -326,6 +339,23 @@ CREATE TABLE public.pacientes (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- 2.1 Tabela convites_paciente (estado operacional; nunca armazena token ou senha)
+CREATE TABLE public.convites_paciente (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    paciente_id UUID NOT NULL REFERENCES public.pacientes(id) ON DELETE CASCADE,
+    nutricionista_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    email VARCHAR(255) NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pendente' CONSTRAINT chk_convites_status CHECK (status IN ('pendente', 'enviado', 'falhou', 'aceito')),
+    mensagem_erro TEXT,
+    solicitado_em TIMESTAMPTZ NOT NULL DEFAULT now(),
+    enviado_em TIMESTAMPTZ,
+    aceito_em TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_convites_paciente ON public.convites_paciente(paciente_id);
+CREATE INDEX idx_convites_status ON public.convites_paciente(status, solicitado_em DESC);
 
 -- 3. Tabela planos_alimentares
 CREATE TABLE public.planos_alimentares (
@@ -444,7 +474,8 @@ CREATE TABLE public.consultas (
 1. **Validação de Enums via `CHECK`:** Todos os campos de opção pré-definida (`role`, `sexo_biologico`, `nivel_atividade_fisica`, `status`) utilizam restrições `CHECK` SQL para garantir integridade sem dependência de tipos de enum customizados no SGBD.
 2. **Exclusão LGPD (`ON DELETE CASCADE`):** Todas as chaves estrangeiras que ligam registros a `pacientes` ou `profiles` utilizam remoção em cascata, garantindo cumprimento do direito ao esquecimento (Art. 18 LGPD).
 3. **Unicidade de Adesão Diária:** Constraint `UNIQUE (refeicao_id, data)` na tabela `adesao_refeicoes` previne que o paciente registre duplicidade de conclusão para a mesma refeição no mesmo dia.
-4. **Prevenção de Conflitos na Agenda (RF032):** Na camada de aplicação/serviço (via `IAgendamentoValidator` / Strategy GoF) e/ou trigger PostgreSQL, valida-se se o intervalo `[horario_inicio, horario_fim]` de uma nova consulta não se sobrepõe a uma consulta existente com `status = 'agendada'` para o mesmo `nutricionista_id` no mesmo dia.
+4. **Convite Seguro (RF035):** O e-mail é obrigatório e normalizado antes da persistência. `convites_paciente` registra somente estado e erro sanitizado; senha e token nunca são persistidos. O vínculo `usuario_id` só é preenchido após confirmação segura da identidade.
+5. **Prevenção de Conflitos na Agenda (RF032):** Na camada de aplicação/serviço (via `IAgendamentoValidator` / Strategy GoF) e/ou trigger PostgreSQL, valida-se se o intervalo `[horario_inicio, horario_fim]` de uma nova consulta não se sobrepõe a uma consulta existente com `status = 'agendada'` para o mesmo `nutricionista_id` no mesmo dia.
 
 ---
 
@@ -456,6 +487,7 @@ Para atender ao **RF018** e ao **ADR 0004**, o Row Level Security é ativado em 
 -- Habilita RLS em todas as tabelas
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pacientes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.convites_paciente ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.planos_alimentares ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.refeicoes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.alimentos ENABLE ROW LEVEL SECURITY;
@@ -493,6 +525,11 @@ CREATE POLICY "pacientes_nutricionista_all" ON public.pacientes
     FOR ALL USING (auth.uid() = nutricionista_id);
 CREATE POLICY "pacientes_self_select" ON public.pacientes 
     FOR SELECT USING (auth.uid() = usuario_id);
+
+-- POLÍTICAS: convites_paciente
+-- O nutricionista responsável pode consultar o estado; criação e atualização são feitas pela Edge Function com service role.
+CREATE POLICY "convites_nutricionista_select" ON public.convites_paciente
+    FOR SELECT USING (auth.uid() = nutricionista_id);
 
 -- POLÍTICAS: planos_alimentares
 CREATE POLICY "planos_nutricionista_all" ON public.planos_alimentares 
@@ -614,8 +651,12 @@ CREATE INDEX idx_consultas_paciente ON public.consultas(paciente_id);
 ## 11. Fluxos Importantes
 
 ### 11.1 Cadastro de Paciente e Cálculo Clínico Instantâneo
-1. O nutricionista cadastra o paciente informando `peso_inicial`, `altura`, `data_nascimento`, `sexo_biologico` e `nivel_atividade_fisica`.
-2. A aplicação calcula na camada domain/usecase:
+1. O nutricionista cadastra o paciente informando `nome_completo`, `email`, `peso_inicial`, `altura`, `data_nascimento`, `sexo_biologico` e `nivel_atividade_fisica`.
+2. Após persistir o cadastro clínico, a aplicação solicita o convite por `IPatientInvitationService`; a Edge Function chama o Supabase Auth sem expor credenciais administrativas ao navegador.
+3. O estado é registrado em `convites_paciente`. Falha de envio não desfaz o paciente e não retorna erro ao nutricionista.
+4. O paciente usa o link de uso único, válido por 24 horas, para definir a senha; após confirmação, `pacientes.usuario_id` é vinculado ao perfil.
+5. A aplicação calcula na camada domain/usecase:
+
    - **IMC:** $\text{peso} / (\text{altura in m})^2$
    - **TMB (Mifflin-St Jeor):**
      - Homem: $10 \times \text{peso} + 6.25 \times \text{altura(cm)} - 5 \times \text{idade} + 5$
@@ -627,7 +668,7 @@ Ao executar `DELETE FROM pacientes WHERE id = :id;`, as restrições `ON DELETE 
 - Planos alimentares, refeições e alimentos
 - Histórico de peso e medições corporais
 - Anotações clínicas e prontuário
-- Consultas agendadas e adesões
+- Consultas agendadas, adesões e estados de convite
 
 ---
 
