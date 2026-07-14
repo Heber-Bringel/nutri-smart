@@ -3,6 +3,7 @@ import { useOutletContext } from 'react-router-dom';
 import { Container } from '../../../di/container';
 import type { Paciente } from '../../../model/entities/Paciente';
 import { MealPlanForm } from '../../components/plano-alimentar/MealPlanForm';
+import { MealPlanSkeleton } from '../../components/shared/Skeleton';
 
 interface RefeicaoForm {
   nome: string;
@@ -22,6 +23,7 @@ export function MealPlanPage() {
 
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     Container.getMealPlanUseCase.execute(paciente.id)
@@ -85,7 +87,7 @@ export function MealPlanPage() {
   }
 
   if (loading) {
-    return <div style={{ color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando plano alimentar...</div>;
+    return <MealPlanSkeleton />;
   }
 
   return (

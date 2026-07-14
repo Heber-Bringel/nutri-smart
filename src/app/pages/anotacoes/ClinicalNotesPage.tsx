@@ -5,7 +5,7 @@ import type { ClinicalNote } from '../../../model/entities/ClinicalNote';
 import type { Paciente } from '../../../model/entities/Paciente';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { getTodayLocal } from '../../../shared/utils/date';
-import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
+import { NotesSkeleton } from '../../components/shared/Skeleton';
 
 export function ClinicalNotesPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -80,7 +80,7 @@ export function ClinicalNotesPage() {
     }
   }
 
-  if (loading) return <LoadingSkeleton lines={3} />;
+  if (loading) return <NotesSkeleton />;
 
   return (
     <div style={{ paddingBottom: 64 }}>

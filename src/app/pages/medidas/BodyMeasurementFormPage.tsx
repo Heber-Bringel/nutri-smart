@@ -6,6 +6,7 @@ import type { Paciente } from '../../../model/entities/Paciente';
 import { MeasurementChart } from '../../components/medidas/MeasurementChart';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { getTodayLocal } from '../../../shared/utils/date';
+import { MeasurementSkeleton } from '../../components/shared/Skeleton';
 
 export function BodyMeasurementFormPage() {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -113,7 +114,7 @@ export function BodyMeasurementFormPage() {
     }
   }
 
-  if (loading) return <div style={{ color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando medidas...</div>;
+  if (loading) return <MeasurementSkeleton />;
 
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',

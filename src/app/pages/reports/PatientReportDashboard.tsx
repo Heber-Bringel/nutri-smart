@@ -3,7 +3,7 @@ import { usePatientReportViewModel, TimeWindow } from '../../../viewmodel/report
 import { EvolutionChart } from '../../components/charts/EvolutionChart';
 import { useOutletContext } from 'react-router-dom';
 import { Paciente } from '../../../model/entities/Paciente';
-import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
+import { EvolutionSkeleton } from '../../components/shared/Skeleton';
 
 export const PatientReportDashboard: React.FC = () => {
   const { paciente } = useOutletContext<{ paciente: Paciente }>();
@@ -19,7 +19,7 @@ export const PatientReportDashboard: React.FC = () => {
 
   const [chartImage, setChartImage] = useState<string | undefined>();
 
-  if (isLoading) return <LoadingSkeleton lines={4} />;
+  if (isLoading) return <EvolutionSkeleton />;
   if (error) return <div style={{ color: 'var(--color-danger)' }}>{error}</div>;
 
   return (

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation, Outlet } from 'react-router-dom';
 import { Paciente } from '../../../model/entities/Paciente';
 import { Container } from '../../../di/container';
+import { PatientLayoutSkeleton } from '../shared/Skeleton';
 
 function TabItem({ label, to, active }: { label: string; to: string; active: boolean }) {
   return (
@@ -50,7 +51,7 @@ export function PatientProfileLayout() {
   }, [id]);
 
   if (loading) {
-    return <div style={{ padding: '48px 40px', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando dados do paciente...</div>;
+    return <PatientLayoutSkeleton />;
   }
 
   if (error || !paciente) {
