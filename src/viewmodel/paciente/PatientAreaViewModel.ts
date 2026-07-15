@@ -76,14 +76,15 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
     // 1. Atualização Otimista: Feedback imediato na UI
     setAdesaoMap(prev => new Map(prev).set(refeicaoId, concluida));
 
-    if (progress && mealPlan) {
-      const totalCount = mealPlan.refeicoes.length;
-      let concluidasCount = progress.concluidas;
-      if (concluida) concluidasCount++;
-      else concluidasCount = Math.max(0, concluidasCount - 1);
-      
+    if (mealPlan) {
       setProgress(prev => {
         if (!prev) return prev;
+        const totalCount = mealPlan.refeicoes.length;
+        let concluidasCount = prev.concluidas;
+        
+        if (concluida) concluidasCount++;
+        else concluidasCount = Math.max(0, concluidasCount - 1);
+
         const percentual = totalCount > 0 ? Math.round((concluidasCount / totalCount) * 100) : 0;
         return { data: prev.data, concluidas: concluidasCount, totalRefeicoes: totalCount, percentual };
       });
