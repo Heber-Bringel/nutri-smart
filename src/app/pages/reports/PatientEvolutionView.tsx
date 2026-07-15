@@ -174,7 +174,12 @@ export const PatientEvolutionView: React.FC = () => {
           borderRadius: 'var(--radius-lg)', padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
         }}
       >
-        <h3 style={{ margin: '0 0 16px 0', fontSize: 16, fontWeight: 600, color: 'var(--color-ink-primary)' }}>Histórico Detalhado</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: 'var(--color-ink-primary)' }}>Histórico Detalhado</h3>
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--color-ink-tertiary)' }}>
+            * Seu peso é atualizado no sistema a cada nova consulta com o nutricionista.
+          </p>
+        </div>
         {historyTable.length === 0 ? (
            <p style={{ margin: 0, fontSize: 13, color: 'var(--color-ink-tertiary)' }}>Nenhum registro de evolução neste período.</p>
         ) : (
