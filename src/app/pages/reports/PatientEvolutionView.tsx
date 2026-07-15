@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { usePatientReportViewModel } from '../../../viewmodel/reports/PatientReportViewModel';
 import {
   LineChart,
@@ -20,11 +20,33 @@ export const PatientEvolutionView: React.FC = () => {
   const { chartData, isLoading, error } = usePatientReportViewModel(user?.pacienteId, 30);
 
   // Filtramos os dados para garantir que apenas o peso e adesão sejam exibidos
-  const patientData = chartData.map(d => ({
-    data: d.data,
-    peso: d.peso,
-    adesao: d.adesao // Valor real vindo do viewmodel
-  }));
+  const patientData = useMemo(() => {
+    return chartData.map(d => ({
+      data: d.data,
+      peso: d.peso,
+      adesao: d.adesao // Valor real vindo do viewmodel
+    }));
+  }, [chartData]);
+
+  // Cálculos para o Painel de Resumo
+  const stats = useMemo(() => {
+    const pesosValidos = patientData.filter(d => d.peso != null && d.peso > 0);
+    const pesoAtual = pesosValidos.length > 0 ? pesosValidos[pesosValidos.length - 1].peso : 0;
+    const pesoInicial = pesosValidos.length > 0 ? pesosValidos[0].peso : 0;
+    
+    const variacaoPeso = (pesoAtual && pesoInicial) ? Number((pesoAtual - pesoInicial).toFixed(1)) : 0;
+    
+    const adesoesValidas = patientData.filter(d => d.adesao != null && d.adesao > 0);
+    const adesaoMedia = adesoesValidas.length > 0 
+      ? Math.round(adesoesValidas.reduce((acc, curr) => acc + (curr.adesao as number), 0) / adesoesValidas.length) 
+      : 0;
+
+    return { pesoAtual, variacaoPeso, adesaoMedia };
+  }, [patientData]);
+
+  const historyTable = useMemo(() => {
+    return [...patientData].reverse().filter(d => (d.peso && d.peso > 0) || (d.adesao && d.adesao > 0));
+  }, [patientData]);
 
   if (isLoading) {
     return (
@@ -42,21 +64,71 @@ export const PatientEvolutionView: React.FC = () => {
     );
   }
 
+  const cardStyle: React.CSSProperties = {
+    flex: 1, padding: 20, background: 'var(--color-surface)',
+    border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column', gap: 4
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: 12, color: 'var(--color-ink-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500
+  };
+
+  const valueStyle: React.CSSProperties = {
+    fontSize: 24, fontWeight: 700, color: 'var(--color-ink-primary)', fontFamily: 'var(--font-mono)'
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
       transition={{ duration: 0.3 }}
+      style={{ display: 'flex', flexDirection: 'column', gap: 24 }}
     >
+      {/* PAINEL DE RESUMO (WIDGETS) */}
+      <motion.div 
+        initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 24, delay: 0.05 }}
+        style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}
+      >
+        <div style={cardStyle}>
+          <span style={labelStyle}>Peso Atual</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={valueStyle}>{stats.pesoAtual ? `${stats.pesoAtual} kg` : '--'}</span>
+          </div>
+        </div>
 
+        <div style={cardStyle}>
+          <span style={labelStyle}>Variação no Mês</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={valueStyle}>{stats.variacaoPeso > 0 ? `+${stats.variacaoPeso}` : stats.variacaoPeso} kg</span>
+            {stats.variacaoPeso !== 0 && (
+              <span style={{ fontSize: 13, fontWeight: 600, color: stats.variacaoPeso <= 0 ? 'var(--color-primary)' : 'var(--color-danger)' }}>
+                {stats.variacaoPeso <= 0 ? '↓ Ótimo' : '↑ Cuidado'}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div style={cardStyle}>
+          <span style={labelStyle}>Média de Adesão</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={valueStyle}>{stats.adesaoMedia}%</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: stats.adesaoMedia >= 80 ? 'var(--color-primary)' : 'var(--color-warning)' }}>
+              {stats.adesaoMedia >= 80 ? '★ Excelente' : 'Abaixo da meta'}
+            </span>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* GRÁFICO */}
       <motion.section 
         initial={{ y: 15, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 24, delay: 0.1 }}
         style={{
           background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-lg)', padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-          height: 400
+          borderRadius: 'var(--radius-lg)', padding: '24px 24px 16px 0', boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+          height: 380
         }}
       >
         {patientData.length === 0 ? (
@@ -78,6 +150,41 @@ export const PatientEvolutionView: React.FC = () => {
             <Line connectNulls={true} yAxisId="right" type="monotone" dataKey="adesao" name="Adesão ao Plano (%)" stroke="#3b82f6" strokeWidth={3} isAnimationActive={true} dot={{ r: 4, strokeWidth: 0, fill: '#3b82f6' }} />
           </LineChart>
         </ResponsiveContainer>
+        )}
+      </motion.section>
+
+      {/* TABELA DE HISTÓRICO */}
+      <motion.section
+        initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', damping: 24, delay: 0.15 }}
+        style={{
+          background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-lg)', padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+        }}
+      >
+        <h3 style={{ margin: '0 0 16px 0', fontSize: 16, fontWeight: 600, color: 'var(--color-ink-primary)' }}>Histórico Detalhado</h3>
+        {historyTable.length === 0 ? (
+           <p style={{ margin: 0, fontSize: 13, color: 'var(--color-ink-tertiary)' }}>Nenhum registro de evolução neste período.</p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: 'var(--color-bg)' }}>
+                  <th style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 500, color: 'var(--color-ink-secondary)', borderBottom: '2px solid var(--color-border)' }}>DATA</th>
+                  <th style={{ textAlign: 'right', padding: '10px 12px', fontWeight: 500, color: 'var(--color-ink-secondary)', borderBottom: '2px solid var(--color-border)' }}>PESO</th>
+                  <th style={{ textAlign: 'right', padding: '10px 12px', fontWeight: 500, color: 'var(--color-ink-secondary)', borderBottom: '2px solid var(--color-border)' }}>ADESÃO</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historyTable.map((row, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+                    <td style={{ padding: '10px 12px', color: 'var(--color-ink-primary)' }}>{row.data}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--color-ink-primary)', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{row.peso ? `${row.peso} kg` : '--'}</td>
+                    <td style={{ padding: '10px 12px', color: 'var(--color-ink-primary)', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>{row.adesao ? `${row.adesao}%` : '--'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </motion.section>
     </motion.div>
