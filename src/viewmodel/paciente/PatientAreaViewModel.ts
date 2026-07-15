@@ -77,15 +77,15 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
     setAdesaoMap(prev => new Map(prev).set(refeicaoId, concluida));
 
     if (progress && mealPlan) {
-      const total = mealPlan.refeicoes.length;
-      let concluidas = progress.concluidas;
-      if (concluida) concluidas++;
-      else concluidas = Math.max(0, concluidas - 1);
+      const totalCount = mealPlan.refeicoes.length;
+      let concluidasCount = progress.concluidas;
+      if (concluida) concluidasCount++;
+      else concluidasCount = Math.max(0, concluidasCount - 1);
       
-      setProgress({
-        concluidas,
-        totalRefeicoes: total,
-        percentual: total > 0 ? Math.round((concluidas / total) * 100) : 0
+      setProgress(prev => {
+        if (!prev) return prev;
+        const percentual = totalCount > 0 ? Math.round((concluidasCount / totalCount) * 100) : 0;
+        return { data: prev.data, concluidas: concluidasCount, totalRefeicoes: totalCount, percentual };
       });
     }
 

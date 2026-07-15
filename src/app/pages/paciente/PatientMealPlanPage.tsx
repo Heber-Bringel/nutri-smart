@@ -3,7 +3,7 @@ import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
 import { AdherenceToggle } from '../../components/paciente/AdherenceToggle';
 import { ProgressBar } from '../../components/paciente/ProgressBar';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 export function PatientMealPlanPage() {
   const { user } = useAuth();
@@ -25,9 +25,13 @@ export function PatientMealPlanPage() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: 'spring', stiffness: 300, damping: 24 }
+    }
   };
 
   return (
