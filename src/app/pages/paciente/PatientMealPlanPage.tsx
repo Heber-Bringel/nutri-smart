@@ -4,6 +4,7 @@ import { usePatientAreaViewModel } from '../../../viewmodel/paciente/PatientArea
 import { AdherenceToggle } from '../../components/paciente/AdherenceToggle';
 import { ProgressBar } from '../../components/paciente/ProgressBar';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
+import { motion } from 'framer-motion';
 
 export function PatientMealPlanPage() {
   const { user, logout } = useAuth();
@@ -11,7 +12,11 @@ export function PatientMealPlanPage() {
   const vm = usePatientAreaViewModel(user?.pacienteId);
 
   if (vm.loading) {
-    return <LoadingSkeleton lines={4} />;
+    return (
+      <div style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
+        <LoadingSkeleton lines={4} />
+      </div>
+    );
   }
 
   const headerBtn = {
@@ -20,8 +25,24 @@ export function PatientMealPlanPage() {
     color: 'var(--color-ink-primary)', fontSize: 13, fontWeight: 500,
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
+      style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: 'var(--color-ink-primary)' }}>Meu Plano Alimentar</h1>
@@ -130,11 +151,12 @@ export function PatientMealPlanPage() {
           <p style={{ fontSize: 13 }}>Seu nutricionista ainda não cadastrou um plano para você.</p>
         </div>
       ) : (
-        <div>
+        <motion.div variants={containerVariants} initial="hidden" animate="show">
           {vm.mealPlan.refeicoes
             .sort((a, b) => a.ordem - b.ordem)
             .map(refeicao => (
-              <div
+              <motion.div
+                variants={itemVariants}
                 key={refeicao.id}
                 style={{
                   border: '1px solid var(--color-border)',
@@ -185,11 +207,11 @@ export function PatientMealPlanPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </motion.div>
             ))}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
