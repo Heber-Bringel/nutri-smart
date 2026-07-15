@@ -12,6 +12,8 @@ import {
 } from 'recharts';
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
 import { useNavigate } from 'react-router-dom';
+import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
+import { motion } from 'framer-motion';
 
 export const PatientEvolutionView: React.FC = () => {
   const navigate = useNavigate();
@@ -32,11 +34,29 @@ export const PatientEvolutionView: React.FC = () => {
     color: 'var(--color-ink-primary)', fontSize: 13, fontWeight: 500,
   };
 
-  if (isLoading) return <div style={{ padding: 32 }}>Carregando evolução...</div>;
-  if (error) return <div style={{ padding: 32, color: 'var(--color-danger)' }}>{error}</div>;
+  if (isLoading) {
+    return (
+      <div style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
+        <LoadingSkeleton lines={6} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: 32, maxWidth: 800, margin: '0 auto', color: 'var(--color-danger)' }}>
+        {error}
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: 32, maxWidth: 800, margin: '0 auto', animation: 'fadeIn 0.4s ease-out' }}>
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      transition={{ duration: 0.3 }}
+      style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: 'var(--color-ink-primary)' }}>Minha Evolução</h1>
@@ -54,11 +74,16 @@ export const PatientEvolutionView: React.FC = () => {
         </div>
       </div>
 
-      <section style={{
-        background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-lg)', padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-        height: 400
-      }}>
+      <motion.section 
+        initial={{ y: 15, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 24, delay: 0.1 }}
+        style={{
+          background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-lg)', padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+          height: 400
+        }}
+      >
         {patientData.length === 0 ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>
             Nenhum dado encontrado para gerar o gráfico.
@@ -74,12 +99,12 @@ export const PatientEvolutionView: React.FC = () => {
               contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 13 }}
             />
             <Legend wrapperStyle={{ paddingTop: 20, fontSize: 13, color: 'var(--color-ink-primary)' }} />
-            <Line yAxisId="left" type="monotone" dataKey="peso" name="Peso (kg)" stroke="var(--color-primary)" strokeWidth={3} isAnimationActive={false} activeDot={{ r: 6, strokeWidth: 0 }} dot={{ r: 4, strokeWidth: 0, fill: 'var(--color-primary)' }} />
-            <Line yAxisId="right" type="monotone" dataKey="adesao" name="Adesão ao Plano (%)" stroke="#3b82f6" strokeWidth={3} isAnimationActive={false} dot={{ r: 4, strokeWidth: 0, fill: '#3b82f6' }} />
+            <Line yAxisId="left" type="monotone" dataKey="peso" name="Peso (kg)" stroke="var(--color-primary)" strokeWidth={3} isAnimationActive={true} activeDot={{ r: 6, strokeWidth: 0 }} dot={{ r: 4, strokeWidth: 0, fill: 'var(--color-primary)' }} />
+            <Line yAxisId="right" type="monotone" dataKey="adesao" name="Adesão ao Plano (%)" stroke="#3b82f6" strokeWidth={3} isAnimationActive={true} dot={{ r: 4, strokeWidth: 0, fill: '#3b82f6' }} />
           </LineChart>
         </ResponsiveContainer>
         )}
-      </section>
-    </div>
+      </motion.section>
+    </motion.div>
   );
 };
