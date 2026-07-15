@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface AdherenceToggleProps {
   refeicaoId: string;
@@ -8,39 +9,39 @@ interface AdherenceToggleProps {
 
 export function AdherenceToggle({ refeicaoId, concluida: initial, onToggle }: AdherenceToggleProps) {
   const [loading, setLoading] = useState(false);
-  const [isConcluida, setIsConcluida] = useState(initial);
 
   async function handleClick() {
+    if (loading) return;
     setLoading(true);
-    const newVal = !isConcluida;
-    setIsConcluida(newVal);
-
     try {
-      await onToggle(refeicaoId, newVal);
-    } catch {
-      setIsConcluida(!newVal);
+      await onToggle(refeicaoId, !initial);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.95 }}
       onClick={handleClick}
       disabled={loading}
+      animate={{
+        background: initial ? 'var(--color-primary-subtle)' : 'var(--color-surface)',
+        borderColor: initial ? 'var(--color-primary)' : 'var(--color-border)',
+        color: initial ? 'var(--color-primary-text)' : 'var(--color-ink-secondary)',
+      }}
+      transition={{ duration: 0.15 }}
       style={{
         padding: '6px 14px',
         borderRadius: 20,
-        border: `2px solid ${isConcluida ? 'var(--color-primary)' : 'var(--color-border)'}`,
-        background: isConcluida ? 'var(--color-primary-subtle)' : 'var(--color-surface)',
-        color: isConcluida ? 'var(--color-primary-text)' : 'var(--color-ink-secondary)',
+        borderWidth: 2,
+        borderStyle: 'solid',
         cursor: loading ? 'wait' : 'pointer',
         fontWeight: 600,
         fontSize: 13,
-        transition: 'all 150ms ease-out',
       }}
     >
-      {isConcluida ? '✓ Concluída' : 'Marcar'}
-    </button>
+      {initial ? '✓ Concluída' : 'Marcar'}
+    </motion.button>
   );
 }

@@ -17,6 +17,7 @@ import { NutritionistLayout } from './app/components/layouts/NutritionistLayout'
 import { PatientProfileLayout } from './app/components/layouts/PatientProfileLayout';
 import { PatientReportDashboard } from './app/pages/reports/PatientReportDashboard';
 import { PatientEvolutionView } from './app/pages/reports/PatientEvolutionView';
+import { PatientLayout } from './app/components/layouts/PatientLayout';
 
 // Componente interno para permitir o uso do useLocation dentro do BrowserRouter.
 // A `key` no <Routes> força o AnimatePresence a detectar a mudança de rota e
@@ -28,6 +29,9 @@ import { PatientEvolutionView } from './app/pages/reports/PatientEvolutionView';
 // refazer o fetch do paciente e o flash de skeleton a cada troca de aba — a
 // transição visual entre abas fica a cargo de um AnimatePresence local no layout.
 function getRouteKey(pathname: string): string {
+  const matchPaciente = pathname.match(/^\/paciente(\/(meu-plano|evolucao))?\/?$/);
+  if (matchPaciente) return '/paciente';
+
   const match = pathname.match(
     /^(\/dashboard\/pacientes\/[^/]+)(\/(plano-alimentar|evolucao|medidas|anotacoes))?\/?$/
   );
@@ -74,20 +78,15 @@ function AnimatedRoutes() {
           path="/dieta"
           element={<Navigate to="/paciente/meu-plano" replace />}
         />
-        <Route path="/paciente/meu-plano"
-          element={
-            <ProtectedRoute allowedRole="paciente">
-              <PatientMealPlanPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/paciente/evolucao"
-          element={
-            <ProtectedRoute allowedRole="paciente">
-              <PatientEvolutionView />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/paciente" element={
+          <ProtectedRoute allowedRole="paciente">
+            <PatientLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Navigate to="meu-plano" replace />} />
+          <Route path="meu-plano" element={<PatientMealPlanPage />} />
+          <Route path="evolucao" element={<PatientEvolutionView />} />
+        </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </AnimatePresence>

@@ -69,22 +69,37 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
   async function handleToggle(refeicaoId: string, concluida: boolean, pacienteId: string) {
     if (!pacienteId) return;
 
-    try {
-      await Container.markMealAsCompletedUseCase.execute(refeicaoId, pacienteId, concluida, selectedDate);
-      setAdesaoMap(prev => new Map(prev).set(refeicaoId, concluida));
+    // Snapshot do estado atual para possível rollback
+    const previousMap = new Map(adesaoMap);
+    const previousProgress = progress;
 
-      const [prog, estadosRaw] = await Promise.all([
-        Container.getDailyProgressUseCase.execute(pacienteId, selectedDate),
-        Container.getDailyAdesaoStatesUseCase.execute(pacienteId, selectedDate),
-      ]);
-      setProgress(prog);
-      const estados = Array.isArray(estadosRaw) ? estadosRaw : [];
-      const map = new Map<string, boolean>();
-      for (const e of estados) {
-        map.set(e.refeicaoId, e.concluida);
-      }
-      setAdesaoMap(map);
+    // 1. Atualização Otimista: Feedback imediato na UI
+    setAdesaoMap(prev => new Map(prev).set(refeicaoId, concluida));
+
+    if (mealPlan) {
+      setProgress(prev => {
+        if (!prev) return prev;
+        const totalCount = mealPlan.refeicoes.length;
+        let concluidasCount = prev.concluidas;
+        
+        if (concluida) concluidasCount++;
+        else concluidasCount = Math.max(0, concluidasCount - 1);
+
+        const percentual = totalCount > 0 ? Math.round((concluidasCount / totalCount) * 100) : 0;
+        return { data: prev.data, concluidas: concluidasCount, totalRefeicoes: totalCount, percentual };
+      });
+    }
+
+    try {
+      // 2. Persiste em background
+      await Container.markMealAsCompletedUseCase.execute(refeicaoId, pacienteId, concluida, selectedDate);
+      
+      // Sem re-fetch cego: A Atualização Otimista atômica já garantiu o estado local perfeito!
+      // (O rollback no catch lida com qualquer falha).
     } catch (err: unknown) {
+      // Em caso de erro de rede, faz rollback suave
+      setAdesaoMap(previousMap);
+      setProgress(previousProgress);
       setError(err instanceof Error ? err.message : 'Erro ao salvar. Tente novamente.');
     }
   }
