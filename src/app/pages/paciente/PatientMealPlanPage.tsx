@@ -1,4 +1,5 @@
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
+import { useNavigate } from 'react-router-dom';
 import { usePatientAreaViewModel } from '../../../viewmodel/paciente/PatientAreaViewModel';
 import { AdherenceToggle } from '../../components/paciente/AdherenceToggle';
 import { ProgressBar } from '../../components/paciente/ProgressBar';
@@ -6,6 +7,7 @@ import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 
 export function PatientMealPlanPage() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const vm = usePatientAreaViewModel(user?.pacienteId);
 
   if (vm.loading) {
@@ -27,9 +29,14 @@ export function PatientMealPlanPage() {
             Bem-vindo(a), {user?.nomeCompleto}
           </p>
         </div>
-        <button onClick={logout} style={headerBtn}>
-          Sair
-        </button>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={() => navigate('/paciente/evolucao')} style={headerBtn}>
+            Evolução
+          </button>
+          <button onClick={logout} style={{...headerBtn, background: 'var(--color-bg)'}}>
+            Sair
+          </button>
+        </div>
       </div>
 
       {vm.error && (
@@ -60,10 +67,9 @@ export function PatientMealPlanPage() {
               Proxima Consulta
             </p>
             <p style={{ margin: '2px 0 0', fontSize: 14, fontWeight: 600, color: 'var(--color-ink-primary)' }}>
-              {new Date(vm.nextConsulta.data + 'T' + vm.nextConsulta.horarioInicio).toLocaleDateString('pt-BR', {
-                day: '2-digit', month: 'long', year: 'numeric',
-                hour: '2-digit', minute: '2-digit',
-              })}
+              {new Date(vm.nextConsulta.data + 'T00:00:00').toLocaleDateString('pt-BR', {
+                day: '2-digit', month: 'long', year: 'numeric'
+              })} • {vm.nextConsulta.horarioInicio.slice(0, 5)} às {vm.nextConsulta.horarioFim.slice(0, 5)}
             </p>
             {vm.nextConsulta.observacoes && (
               <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-ink-secondary)' }}>

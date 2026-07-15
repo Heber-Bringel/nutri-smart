@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -83,6 +85,18 @@ input, select, textarea, button {
 a {
   color: var(--color-primary);
   text-decoration: none;
+}
+
+/* Animação base dos skeletons de carregamento (loading states). */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.85; }
+}
+
+.skeleton-box {
+  background: var(--color-border-light);
+  border-radius: var(--radius-md);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

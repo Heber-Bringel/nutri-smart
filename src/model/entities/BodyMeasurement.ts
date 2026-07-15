@@ -3,6 +3,7 @@ export interface BodyMeasurement {
   pacienteId: string;
   nutricionistaId: string;
   dataAtendimento: string;
+  peso?: number | null;
   circunferenciaCintura?: number | null;
   circunferenciaQuadril?: number | null;
   circunferenciaBraco?: number | null;

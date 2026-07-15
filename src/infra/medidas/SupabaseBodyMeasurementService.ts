@@ -29,26 +29,66 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
     if (error) throw new MeasurementError(error.message);
 
     if (data.peso != null && data.peso > 0) {
-      await supabase.from('historico_peso').upsert({
-        paciente_id: data.pacienteId,
-        peso: data.peso,
-        data_registro: data.dataAtendimento ?? getTodayLocal(),
-      }, { onConflict: 'paciente_id, data_registro', ignoreDuplicates: false });
+      const dataRegistro = data.dataAtendimento ?? getTodayLocal();
+      const { data: existingPeso } = await supabase
+        .from('historico_peso')
+        .select('id')
+        .eq('paciente_id', data.pacienteId)
+        .eq('data_registro', dataRegistro)
+        .maybeSingle();
+
+      if (existingPeso) {
+        const { error: updateErr } = await supabase
+          .from('historico_peso')
+          .update({ peso: data.peso })
+          .eq('id', existingPeso.id);
+        if (updateErr) throw new MeasurementError(`Erro ao atualizar peso: ${updateErr.message}`);
+      } else {
+        const { error: insertErr } = await supabase
+          .from('historico_peso')
+          .insert({
+            paciente_id: data.pacienteId,
+            peso: data.peso,
+            data_registro: dataRegistro,
+          });
+        if (insertErr) throw new MeasurementError(`Erro ao registrar peso: ${insertErr.message}`);
+      }
     }
 
     return BodyMeasurementMapper.toDomain(row);
   }
 
   async findByPatientId(pacienteId: string): Promise<BodyMeasurement[]> {
-    const { data: rows, error } = await supabase
-      .from('medidas_corporais')
-      .select('*')
-      .eq('paciente_id', pacienteId)
-      .order('data_atendimento', { ascending: false });
+    const [{ data: rows, error }, { data: pesos, error: pesosError }] = await Promise.all([
+      supabase
+        .from('medidas_corporais')
+        .select('*')
+        .eq('paciente_id', pacienteId)
+        .order('data_atendimento', { ascending: false }),
+      supabase
+        .from('historico_peso')
+        .select('*')
+        .eq('paciente_id', pacienteId)
+        .order('data_registro', { ascending: false })
+    ]);
 
     if (error) throw new MeasurementError(error.message);
+    if (pesosError) throw new MeasurementError(pesosError.message);
 
-    return (rows || []).map(BodyMeasurementMapper.toDomain);
+    const pesoMap = new Map<string, number>();
+    pesos?.forEach(p => {
+      if (p.data_registro) {
+        pesoMap.set(p.data_registro.substring(0, 10), p.peso);
+      }
+    });
+
+    return (rows || []).map(row => {
+      const domain = BodyMeasurementMapper.toDomain(row);
+      if (domain.dataAtendimento) {
+        domain.peso = pesoMap.get(domain.dataAtendimento.substring(0, 10)) || null;
+      }
+      return domain;
+    });
   }
 
   async update(id: string, data: UpdateMeasurementData): Promise<BodyMeasurement> {
@@ -69,7 +109,36 @@ export class SupabaseBodyMeasurementService implements IBodyMeasurementService {
 
     if (error) throw new MeasurementError(error.message);
 
-    return BodyMeasurementMapper.toDomain(row);
+    if (data.peso != null && data.peso > 0) {
+      const dataRegistro = row.data_atendimento;
+      const { data: existingPeso } = await supabase
+        .from('historico_peso')
+        .select('id')
+        .eq('paciente_id', row.paciente_id)
+        .eq('data_registro', dataRegistro)
+        .maybeSingle();
+
+      if (existingPeso) {
+        const { error: updateErr } = await supabase
+          .from('historico_peso')
+          .update({ peso: data.peso })
+          .eq('id', existingPeso.id);
+        if (updateErr) throw new MeasurementError(`Erro ao atualizar peso: ${updateErr.message}`);
+      } else {
+        const { error: insertErr } = await supabase
+          .from('historico_peso')
+          .insert({
+            paciente_id: row.paciente_id,
+            peso: data.peso,
+            data_registro: dataRegistro,
+          });
+        if (insertErr) throw new MeasurementError(`Erro ao registrar peso: ${insertErr.message}`);
+      }
+    }
+
+    const domain = BodyMeasurementMapper.toDomain(row);
+    domain.peso = data.peso || null;
+    return domain;
   }
 
   async delete(id: string): Promise<void> {

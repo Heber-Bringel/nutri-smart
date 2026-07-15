@@ -38,8 +38,12 @@ export class SupabasePacienteService implements IPacienteService {
   }
 
   async findAll(filters: PacienteFilters = {}): Promise<PaginatedResult<Paciente>> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new PacienteError('Usuário não autenticado.');
+    // A sessão já fica armazenada localmente pelo Supabase. Para obter o ID do
+    // nutricionista em uma leitura, getSession evita o roundtrip extra que
+    // getUser faz ao endpoint de autenticação. A RLS continua validando o JWT
+    // no banco e é a barreira de autorização efetiva.
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) throw new PacienteError('Usuário não autenticado.');
 
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 20;
@@ -50,7 +54,7 @@ export class SupabasePacienteService implements IPacienteService {
       .from('pacientes')
       .select('*', { count: 'exact' })
       .is('deleted_at', null)
-      .eq('nutricionista_id', user.id)
+      .eq('nutricionista_id', session.user.id)
       .order('created_at', { ascending: false })
       .range(from, to);
 
@@ -72,9 +76,11 @@ export class SupabasePacienteService implements IPacienteService {
   }
 
   async findById(id: string): Promise<Paciente> {
+    // Otimização: busca o paciente + estado do plano ativo + última anotação em uma
+    // única query aninhada, eliminando os 2 roundtrips do enriquecimento posterior.
     const { data: row, error } = await supabase
       .from('pacientes')
-      .select('*')
+      .select('*, planos_alimentares(ativo), anotacoes_clinicas(data_atendimento)')
       .eq('id', id)
       .is('deleted_at', null)
       .single();
@@ -83,7 +89,22 @@ export class SupabasePacienteService implements IPacienteService {
       throw new PacienteError('Paciente não encontrado.');
     }
 
-    return this.enrichWithPlanAndLastNote(PacienteMapper.toDomain(row));
+    const planos = (row.planos_alimentares as { ativo: boolean }[]) || [];
+    const notas = (row.anotacoes_clinicas as { data_atendimento: string }[]) || [];
+
+    let ultimoAtendimento: string | undefined;
+    for (const n of notas) {
+      if (!ultimoAtendimento || n.data_atendimento > ultimoAtendimento) {
+        ultimoAtendimento = n.data_atendimento;
+      }
+    }
+
+    const paciente = PacienteMapper.toDomain(row);
+    return {
+      ...paciente,
+      planoAtivo: planos.some(p => p.ativo),
+      ultimoAtendimento: ultimoAtendimento ?? paciente.ultimoAtendimento,
+    };
   }
 
   async update(id: string, data: Partial<CreatePacienteData>): Promise<Paciente> {
@@ -114,10 +135,7 @@ export class SupabasePacienteService implements IPacienteService {
   }
 
   async softDelete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('pacientes')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id);
+    const { error } = await supabase.rpc('soft_delete_paciente', { p_id: id });
 
     if (error) throw new PacienteError('Erro ao excluir paciente.');
   }

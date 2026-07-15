@@ -14,6 +14,8 @@ interface AuthState {
   login: (credentials: LoginCredentials) => Promise<User>;
   register: (data: RegisterData) => Promise<User>;
   logout: () => Promise<void>;
+  requestPasswordReset: (email: string, redirectTo: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -25,25 +27,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Busca usuário atual ao carregar
-    Container.getCurrentUserUseCase.execute()
-      .then((currentUser) => {
-        setUser(currentUser);
-      })
-      .catch(() => {
-        setUser(null);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    let active = true;
 
-    // Subscrição para alterações no estado de autenticação
-    const unsubscribe = Container.authService.onAuthStateChange((updatedUser) => {
-      setUser(updatedUser);
-      setLoading(false);
+    // Subscrição única e reativa para o estado de autenticação.
+    // Ela trata o carregamento inicial (INITIAL_SESSION) e mudanças de estado.
+    const unsubscribe = Container.subscribeAuthStateUseCase.execute((updatedUser) => {
+      if (active) {
+        setUser(updatedUser);
+        setLoading(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   const login = async (credentials: LoginCredentials): Promise<User> => {
@@ -84,19 +82,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async (): Promise<void> => {
     setLoading(true);
+    sessionStorage.setItem('logout_voluntario', 'true');
     try {
-      await Container.authService.logout();
+      await Container.logoutUseCase.execute();
       setUser(null);
+    } catch (err: unknown) {
+      sessionStorage.removeItem('logout_voluntario');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
+  const requestPasswordReset = async (email: string, redirectTo: string): Promise<void> => {
+    setError(null);
+    try {
+      await Container.requestPasswordResetUseCase.execute(email, redirectTo);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Não foi possível enviar o e-mail de recuperação.';
+      setError(errorMessage);
+      const newErr = new Error(errorMessage) as ErrorWithCause;
+      newErr.cause = err;
+      throw newErr;
+    }
+  };
+
+  const updatePassword = async (newPassword: string): Promise<void> => {
+    setError(null);
+    try {
+      await Container.updatePasswordUseCase.execute(newPassword);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Não foi possível redefinir a senha.';
+      setError(errorMessage);
+      const newErr = new Error(errorMessage) as ErrorWithCause;
+      newErr.cause = err;
+      throw newErr;
+    }
+  };
+
   const clearError = () => setError(null);
+
 
   return createElement(
     AuthContext.Provider,
-    { value: { user, loading, error, login, register, logout, clearError } },
+    { value: { user, loading, error, login, register, logout, requestPasswordReset, updatePassword, clearError } },
     children
   );
 }

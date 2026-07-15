@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation, Outlet } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Paciente } from '../../../model/entities/Paciente';
 import { Container } from '../../../di/container';
+import { PatientModuleCache, criarPatientModuleCache } from '../../../viewmodel/paciente/PatientModuleCache';
+import { PatientLayoutSkeleton } from '../shared/Skeleton';
+
+export interface PatientProfileOutletContext {
+  paciente: Paciente;
+  cacheDadosPaciente: PatientModuleCache;
+}
 
 function TabItem({ label, to, active }: { label: string; to: string; active: boolean }) {
   return (
@@ -30,14 +38,26 @@ export function PatientProfileLayout() {
   const [paciente, setPaciente] = useState<Paciente | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cacheDadosPaciente, setCacheDadosPaciente] = useState<PatientModuleCache | null>(null);
 
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     Container.getPacienteUseCase.execute(id)
-      .then(p => { if (!cancelled) { setPaciente(p); setLoading(false); } })
+      .then(p => {
+        if (!cancelled) {
+          const cache = criarPatientModuleCache(p.id);
+          setCacheDadosPaciente(cache);
+          // Não bloqueia a renderização da Visão Geral: as abas reutilizarão estas
+          // Promises em andamento ou já resolvidas quando forem acessadas.
+          void cache.preCarregar();
+          setPaciente(p);
+          setLoading(false);
+        }
+      })
       .catch(err => {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Erro ao carregar paciente.');
@@ -49,10 +69,10 @@ export function PatientProfileLayout() {
   }, [id]);
 
   if (loading) {
-    return <div style={{ padding: '48px 40px', color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando dados do paciente...</div>;
+    return <PatientLayoutSkeleton />;
   }
 
-  if (error || !paciente) {
+  if (error || !paciente || !cacheDadosPaciente) {
     return (
       <div style={{ padding: '48px 40px' }}>
         <div style={{
@@ -126,7 +146,20 @@ export function PatientProfileLayout() {
         <TabItem label="Anotações" to={`/dashboard/pacientes/${id}/anotacoes`} active={location.pathname.includes('/anotacoes')} />
       </div>
 
-      <Outlet context={{ paciente }} />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+        >
+          <Outlet context={{
+            paciente,
+            cacheDadosPaciente,
+          } satisfies PatientProfileOutletContext} />
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

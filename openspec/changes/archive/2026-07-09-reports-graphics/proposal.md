@@ -1,6 +1,6 @@
 ## Why
 
-A visualização da evolução do paciente através de gráficos (peso, adesão e medidas antropométricas) é essencial para o acompanhamento longitudinal e adequação do tratamento nutricional. Além disso, a capacidade de gerar relatórios consolidados em PDF agrega valor ao atendimento, reduz o trabalho manual do profissional e facilita a comunicação com o paciente (Implementa RF010, RF014, RF021, RF026–RF028, e HU-8, HU-13, HU-16, HU-17).
+A visualização da evolução do paciente através de gráficos (peso, adesão e medidas antropométricas) é essencial para o acompanhamento longitudinal e adequação do tratamento nutricional. Além disso, a capacidade de gerar relatórios consolidados em PDF agrega valor ao atendimento, reduz o trabalho manual do profissional e facilita a comunicação com o paciente (Implementa RF010, RF014, RF021, RF026–RF028, e HU-8, HU-13, HU-15, HU-16, HU-17).
 
 ## What Changes
 

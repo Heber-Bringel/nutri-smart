@@ -30,6 +30,7 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
   const [nextConsulta, setNextConsulta] = useState<Consulta | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!pacienteId) { setLoading(false); return; }
     let cancelled = false;
 

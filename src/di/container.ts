@@ -1,8 +1,12 @@
-import { SupabaseAuthService } from '../infra/auth/SupabaseAuthService';
+import { SupabaseAuthAdapter } from '../infra/auth/SupabaseAuthAdapter';
 import { SupabaseInviteService } from '../infra/auth/SupabaseInviteService';
 import { LoginUseCase } from '../usecase/auth/LoginUseCase';
 import { RegisterUseCase } from '../usecase/auth/RegisterUseCase';
 import { GetCurrentUserUseCase } from '../usecase/auth/GetCurrentUserUseCase';
+import { LogoutUseCase } from '../usecase/auth/LogoutUseCase';
+import { SubscribeAuthStateUseCase } from '../usecase/auth/SubscribeAuthStateUseCase';
+import { RequestPasswordResetUseCase } from '../usecase/auth/RequestPasswordResetUseCase';
+import { UpdatePasswordUseCase } from '../usecase/auth/UpdatePasswordUseCase';
 import { SupabasePacienteService } from '../infra/pacientes/SupabasePacienteService';
 import { CreatePacienteUseCase } from '../usecase/pacientes/CreatePacienteUseCase';
 import { ListPacientesUseCase } from '../usecase/pacientes/ListPacientesUseCase';
@@ -40,9 +44,11 @@ import { UpdateConsultaUseCase } from '../usecase/agenda/UpdateConsultaUseCase';
 import { CancelConsultaUseCase } from '../usecase/agenda/CancelConsultaUseCase';
 import { ListConsultasUseCase } from '../usecase/agenda/ListConsultasUseCase';
 import { GetNextConsultaUseCase } from '../usecase/agenda/GetNextConsultaUseCase';
+import { JsPdfReportAdapter } from '../infra/reports/JsPdfReportAdapter';
+import { GeneratePatientReportUseCase } from '../usecase/reports/GeneratePatientReportUseCase';
 
 class Container {
-  private static _authService = new SupabaseAuthService();
+  private static _authService = new SupabaseAuthAdapter();
   private static _pacienteService = new SupabasePacienteService();
   private static _inviteService = new SupabaseInviteService();
   private static _mealPlanService = new SupabaseMealPlanService();
@@ -54,6 +60,7 @@ class Container {
   private static _calendarAdapter = new ReactBigCalendarAdapter();
   private static _agendaValidator = new EvitarChoqueHorarioValidator();
   private static _consultaEventEmitter = ConsultaEventEmitter.getInstance();
+  private static _reportAdapter = new JsPdfReportAdapter();
 
   static get authService() {
     return this._authService;
@@ -97,6 +104,22 @@ class Container {
 
   static get getCurrentUserUseCase() {
     return new GetCurrentUserUseCase(this._authService);
+  }
+
+  static get logoutUseCase() {
+    return new LogoutUseCase(this._authService);
+  }
+
+  static get subscribeAuthStateUseCase() {
+    return new SubscribeAuthStateUseCase(this._authService);
+  }
+
+  static get requestPasswordResetUseCase() {
+    return new RequestPasswordResetUseCase(this._authService);
+  }
+
+  static get updatePasswordUseCase() {
+    return new UpdatePasswordUseCase(this._authService);
   }
 
   static get createPacienteUseCase() {
@@ -221,6 +244,14 @@ class Container {
 
   static get getNextConsultaUseCase() {
     return new GetNextConsultaUseCase(this._consultaRepository);
+  }
+
+  static get reportAdapter() {
+    return this._reportAdapter;
+  }
+
+  static get generatePatientReportUseCase() {
+    return new GeneratePatientReportUseCase(this._reportAdapter);
   }
 }
 

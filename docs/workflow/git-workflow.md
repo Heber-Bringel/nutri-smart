@@ -219,8 +219,8 @@ Um Milestone por Sprint acadêmico — reaproveita o cronograma que vocês já t
 ```
 Sprint 0 — Setup ( Héber )
 Sprint 1 — Auth + Core Nutricionista ( Héber )
-Sprint 2 — Plano Alimentar + Medidas ( Maria Escura )
-Sprint 3 — Área Paciente + Agenda ( Alisson do Grau )
+Sprint 2 — Plano Alimentar + Medidas ( Maria Clara )
+Sprint 3 — Área Paciente + Agenda ( Alisson )
 Sprint 4 — Relatórios + Gráficos
 Sprint 5 — Polimento e Entrega
 ```

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Container } from '../../../di/container';
-import type { Paciente } from '../../../model/entities/Paciente';
+import type { PatientProfileOutletContext } from '../../components/layouts/PatientProfileLayout';
 import { MealPlanForm } from '../../components/plano-alimentar/MealPlanForm';
+import { MealPlanSkeleton } from '../../components/shared/Skeleton';
+import { FadeIn } from '../../components/shared/FadeIn';
 
 interface RefeicaoForm {
   nome: string;
@@ -12,7 +14,7 @@ interface RefeicaoForm {
 }
 
 export function MealPlanPage() {
-  const { paciente } = useOutletContext<{ paciente: Paciente }>();
+  const { paciente, cacheDadosPaciente } = useOutletContext<PatientProfileOutletContext>();
   const [observacoes, setObservacoes] = useState('');
   const [refeicoes, setRefeicoes] = useState<RefeicaoForm[]>([]);
   const [saving, setSaving] = useState(false);
@@ -22,13 +24,17 @@ export function MealPlanPage() {
 
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
-    Container.getMealPlanUseCase.execute(paciente.id)
+    cacheDadosPaciente.carregarPlano()
       .then(existingPlan => {
         if (!cancelled && existingPlan) {
           setObservacoes(existingPlan.observacoes || '');
-          setRefeicoes(existingPlan.refeicoes || []);
+          setRefeicoes((existingPlan.refeicoes || []).map(r => ({
+            ...r,
+            horarioSugerido: r.horarioSugerido || '',
+          })));
         }
       })
       .catch(err => {
@@ -39,14 +45,14 @@ export function MealPlanPage() {
       });
 
     return () => { cancelled = true; };
-  }, [paciente.id]);
+  }, [paciente.id, cacheDadosPaciente]);
 
   async function handleSave() {
     setSaving(true);
     setError(null);
 
     try {
-      const existingPlan = await Container.getMealPlanUseCase.execute(paciente.id);
+      const existingPlan = await cacheDadosPaciente.carregarPlano();
 
       const refeicoesData = refeicoes.map(r => ({
         nome: r.nome,
@@ -60,18 +66,19 @@ export function MealPlanPage() {
         })),
       }));
 
-      if (existingPlan) {
-        await Container.updateMealPlanUseCase.execute(existingPlan.id, {
+      const planoSalvo = existingPlan
+        ? await Container.updateMealPlanUseCase.execute(existingPlan.id, {
           observacoes,
           refeicoes: refeicoesData,
-        });
-      } else {
-        await Container.createMealPlanUseCase.execute({
+        })
+        : await Container.createMealPlanUseCase.execute({
           pacienteId: paciente.id,
           observacoes,
           refeicoes: refeicoesData,
         });
-      }
+
+      cacheDadosPaciente.definirPlano(planoSalvo);
+      cacheDadosPaciente.invalidar('evolucao');
       setSuccessMsg('Plano alimentar salvo com sucesso!');
       setTimeout(() => setSuccessMsg(null), 4000);
     } catch (err: unknown) {
@@ -82,10 +89,11 @@ export function MealPlanPage() {
   }
 
   if (loading) {
-    return <div style={{ color: 'var(--color-ink-tertiary)', fontSize: 13 }}>Carregando plano alimentar...</div>;
+    return <MealPlanSkeleton />;
   }
 
   return (
+    <FadeIn>
     <div style={{ paddingBottom: 64 }}>
       {paciente.imc !== undefined && (
         <div style={{
@@ -159,5 +167,6 @@ export function MealPlanPage() {
         erro={error}
       />
     </div>
+    </FadeIn>
   );
 }

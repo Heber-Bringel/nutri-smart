@@ -4,7 +4,7 @@ import { AuthError } from '../../model/errors/AuthError';
 import { supabase } from '../supabase/client';
 import { UserMapper } from './mappers/UserMapper';
 
-export class SupabaseAuthService implements IAuthService {
+export class SupabaseAuthAdapter implements IAuthService {
   async login(credentials: LoginCredentials): Promise<User> {
     if (!credentials.email || !credentials.password) {
       throw new AuthError('E-mail e senha são obrigatórios.');
@@ -19,12 +19,7 @@ export class SupabaseAuthService implements IAuthService {
       throw new AuthError('E-mail ou senha inválidos.');
     }
 
-    // Busca dados do perfil público na tabela profiles
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('nome_completo, role')
-      .eq('id', data.user.id)
-      .single();
+    // Busca dados do perfil público na tabela profiles (substituido por fetchProfileWithPacienteId)
 
     const enrichedProfile = await this.fetchProfileWithPacienteId(data.user.id);
     return UserMapper.toDomain(data.user, enrichedProfile);
@@ -83,6 +78,37 @@ export class SupabaseAuthService implements IAuthService {
     const { error } = await supabase.auth.signOut();
     if (error) {
       throw new AuthError('Erro ao encerrar sessão.');
+    }
+  }
+
+  async requestPasswordReset(email: string, redirectTo: string): Promise<void> {
+    if (!email) {
+      throw new AuthError('Informe o e-mail para recuperação de senha.');
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+
+    // Nota de segurança: não diferenciamos e-mail existente de inexistente na
+    // mensagem exibida ao usuário, para evitar enumeração de contas. Um erro
+    // aqui indica falha de infraestrutura (ex.: SMTP indisponível).
+    if (error) {
+      throw new AuthError('Não foi possível enviar o e-mail de recuperação. Tente novamente.');
+    }
+  }
+
+  async updatePassword(newPassword: string): Promise<void> {
+    if (!newPassword) {
+      throw new AuthError('Informe a nova senha.');
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      throw new AuthError(error.message || 'Não foi possível redefinir a senha. O link pode ter expirado.');
     }
   }
 
