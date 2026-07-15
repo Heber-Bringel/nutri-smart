@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ReportPayload } from '../../model/services/IReportGenerator';
+import { Paciente } from '../../model/entities/Paciente';
+import { PatientModuleCache } from '../paciente/PatientModuleCache';
 import { Container } from '../../di/container';
 
 
@@ -11,7 +13,12 @@ function calculateAge(birthDate: string): number {
   return Math.abs(ageDate.getUTCFullYear() - 1970);
 }
 
-export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow: TimeWindow = 30) {
+export function usePatientReportViewModel(
+  pacienteId?: string,
+  initialTimeWindow: TimeWindow = 30,
+  pacientePreCarregado?: Paciente,
+  cacheDadosPaciente?: PatientModuleCache,
+) {
   const [timeWindow, setTimeWindow] = useState<TimeWindow>(initialTimeWindow);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,15 +35,28 @@ export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow
       return;
     }
 
+    const idPaciente = pacienteId;
     let cancelled = false;
     setIsLoading(true);
 
     async function loadData() {
       try {
-        const paciente = await Container.getPacienteUseCase.execute(pacienteId as string);
-        const mealPlan = await Container.getMealPlanUseCase.execute(pacienteId as string).catch(() => null);
-        const medidasRaw = await Container.listMeasurementsUseCase.execute(pacienteId as string).catch(() => []);
-        const evolucaoAdesaoRaw = await Container.getEvolutionChartDataUseCase.execute(pacienteId as string, 365).catch(() => []);
+        // Na área do nutricionista, paciente e módulos vêm do layout e do cache
+        // compartilhado. Na área do paciente, os fallbacks preservam o fluxo atual.
+        const [paciente, mealPlan, medidasRaw, evolucaoAdesaoRaw] = await Promise.all([
+          pacientePreCarregado
+            ? Promise.resolve(pacientePreCarregado)
+            : Container.getPacienteUseCase.execute(idPaciente),
+          cacheDadosPaciente
+            ? cacheDadosPaciente.carregarPlano().catch(() => null)
+            : Container.getMealPlanUseCase.execute(idPaciente).catch(() => null),
+          cacheDadosPaciente
+            ? cacheDadosPaciente.carregarMedidas().catch(() => [])
+            : Container.listMeasurementsUseCase.execute(idPaciente).catch(() => []),
+          cacheDadosPaciente
+            ? cacheDadosPaciente.carregarEvolucao().catch(() => [])
+            : Container.getEvolutionChartDataUseCase.execute(idPaciente, 365).catch(() => []),
+        ]);
 
         // Sort by date ascending to show chart properly
         const medidas = [...medidasRaw].sort((a, b) => new Date(a.dataAtendimento).getTime() - new Date(b.dataAtendimento).getTime());
@@ -89,7 +109,7 @@ export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow
     return () => {
       cancelled = true;
     };
-  }, [pacienteId]);
+  }, [pacienteId, pacientePreCarregado, cacheDadosPaciente]);
 
   const filteredMeasurements = useMemo(() => {
     if (!payloadData) return [];
@@ -122,7 +142,7 @@ export function usePatientReportViewModel(pacienteId?: string, initialTimeWindow
       if (measurement || adesao) {
         dataPoints.push({
           data: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-          peso: measurement?.peso || adesao?.peso || null,
+          peso: measurement?.peso || null,
           cintura: measurement?.circunferenciaCintura ?? null,
           quadril: measurement?.circunferenciaQuadril ?? null,
           adesao: adesao && adesao.adesaoPercentual > 0 ? adesao.adesaoPercentual : null,

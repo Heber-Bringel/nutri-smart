@@ -69,40 +69,34 @@ export class SupabaseAdesaoService implements IAdesaoService {
   }
 
   async getDailyProgress(pacienteId: string, data: string): Promise<DailyProgress> {
-    // Busca IDs dos planos ativos separadamente — .in() do SDK v2 não aceita subquery builder
-    const { data: planos, error: planosError } = await supabase
-      .from('planos_alimentares')
-      .select('id')
-      .eq('paciente_id', pacienteId)
-      .eq('ativo', true);
+    // Otimização: total de refeições (via planos ativos + refeições aninhadas) e
+    // contagem de concluídas rodam em paralelo, reduzindo de 3 roundtrips
+    // sequenciais para 1 (2 queries paralelas).
+    const [planosResult, adesaoResult] = await Promise.all([
+      supabase
+        .from('planos_alimentares')
+        .select('id, refeicoes(id)')
+        .eq('paciente_id', pacienteId)
+        .eq('ativo', true),
+      supabase
+        .from('adesao_refeicoes')
+        .select('*', { count: 'exact', head: true })
+        .eq('paciente_id', pacienteId)
+        .eq('data', data)
+        .eq('concluida', true),
+    ]);
 
-    if (planosError) throw new AdesaoError(planosError.message);
-
-    const planoIds = (planos || []).map(p => p.id);
+    if (planosResult.error) throw new AdesaoError(planosResult.error.message);
+    if (adesaoResult.error) throw new AdesaoError(adesaoResult.error.message);
 
     let totalRefeicoes = 0;
-    if (planoIds.length > 0) {
-      const { count: total, error: totalError } = await supabase
-        .from('refeicoes')
-        .select('*', { count: 'exact', head: true })
-        .in('plano_alimentar_id', planoIds);
-
-      if (totalError) throw new AdesaoError(totalError.message);
-      totalRefeicoes = total ?? 0;
+    for (const plano of planosResult.data || []) {
+      totalRefeicoes += ((plano.refeicoes as unknown[]) || []).length;
     }
-
-    const { count: concluidas, error: adError } = await supabase
-      .from('adesao_refeicoes')
-      .select('*', { count: 'exact', head: true })
-      .eq('paciente_id', pacienteId)
-      .eq('data', data)
-      .eq('concluida', true);
-
-    if (adError) throw new AdesaoError(adError.message);
 
     return AdesaoMapper.toDailyProgress(data, {
       total: totalRefeicoes,
-      concluidas: concluidas ?? 0,
+      concluidas: adesaoResult.count ?? 0,
     });
   }
 

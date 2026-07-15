@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { usePatientReportViewModel, TimeWindow } from '../../../viewmodel/reports/PatientReportViewModel';
 import { EvolutionChart } from '../../components/charts/EvolutionChart';
 import { useOutletContext } from 'react-router-dom';
-import { Paciente } from '../../../model/entities/Paciente';
-import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
+import type { PatientProfileOutletContext } from '../../components/layouts/PatientProfileLayout';
+import { EvolutionSkeleton } from '../../components/shared/Skeleton';
+import { FadeIn } from '../../components/shared/FadeIn';
 
 export const PatientReportDashboard: React.FC = () => {
-  const { paciente } = useOutletContext<{ paciente: Paciente }>();
+  const { paciente, cacheDadosPaciente } = useOutletContext<PatientProfileOutletContext>();
   const {
     timeWindow,
     setTimeWindow,
@@ -15,15 +16,16 @@ export const PatientReportDashboard: React.FC = () => {
     isGenerating,
     isLoading,
     error
-  } = usePatientReportViewModel(paciente?.id);
+  } = usePatientReportViewModel(paciente.id, 30, paciente, cacheDadosPaciente);
 
   const [chartImage, setChartImage] = useState<string | undefined>();
 
-  if (isLoading) return <LoadingSkeleton lines={4} />;
+  if (isLoading) return <EvolutionSkeleton />;
   if (error) return <div style={{ color: 'var(--color-danger)' }}>{error}</div>;
 
   return (
-    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+    <FadeIn>
+    <div>
       <header style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
         borderBottom: '1px solid var(--color-border)', paddingBottom: 20, marginBottom: 24
@@ -93,5 +95,6 @@ export const PatientReportDashboard: React.FC = () => {
         )}
       </section>
     </div>
+    </FadeIn>
   );
 };

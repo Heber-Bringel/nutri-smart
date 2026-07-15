@@ -1,44 +1,43 @@
-import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
-import { useNavigate } from 'react-router-dom';
 import { usePatientAreaViewModel } from '../../../viewmodel/paciente/PatientAreaViewModel';
+import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
 import { AdherenceToggle } from '../../components/paciente/AdherenceToggle';
 import { ProgressBar } from '../../components/paciente/ProgressBar';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
+import { motion, Variants } from 'framer-motion';
 
 export function PatientMealPlanPage() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const vm = usePatientAreaViewModel(user?.pacienteId);
 
   if (vm.loading) {
-    return <LoadingSkeleton lines={4} />;
+    return (
+      <div>
+        <LoadingSkeleton lines={4} />
+      </div>
+    );
   }
 
-  const headerBtn = {
-    padding: '8px 16px', cursor: 'pointer', borderRadius: 'var(--radius-md)',
-    border: '1px solid var(--color-border)', background: 'var(--color-surface)',
-    color: 'var(--color-ink-primary)', fontSize: 13, fontWeight: 500,
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: 'spring', stiffness: 300, damping: 24 }
+    }
   };
 
   return (
-    <div style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-        <div>
-          <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: 'var(--color-ink-primary)' }}>Meu Plano Alimentar</h1>
-          <p style={{ color: 'var(--color-ink-secondary)', margin: '4px 0 0', fontSize: 13 }}>
-            Bem-vindo(a), {user?.nomeCompleto}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button onClick={() => navigate('/paciente/evolucao')} style={headerBtn}>
-            Evolução
-          </button>
-          <button onClick={logout} style={{...headerBtn, background: 'var(--color-bg)'}}>
-            Sair
-          </button>
-        </div>
-      </div>
-
+    <motion.div 
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
+    >
       {vm.error && (
         <div style={{
           padding: '10px 14px', background: 'var(--color-danger-subtle)',
@@ -130,11 +129,12 @@ export function PatientMealPlanPage() {
           <p style={{ fontSize: 13 }}>Seu nutricionista ainda não cadastrou um plano para você.</p>
         </div>
       ) : (
-        <div>
+        <motion.div variants={containerVariants} initial="hidden" animate="show">
           {vm.mealPlan.refeicoes
             .sort((a, b) => a.ordem - b.ordem)
             .map(refeicao => (
-              <div
+              <motion.div
+                variants={itemVariants}
                 key={refeicao.id}
                 style={{
                   border: '1px solid var(--color-border)',
@@ -185,11 +185,11 @@ export function PatientMealPlanPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </motion.div>
             ))}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }
 

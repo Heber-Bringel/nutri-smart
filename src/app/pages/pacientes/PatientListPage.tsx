@@ -20,16 +20,21 @@ export function PatientListPage() {
   
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
+  const [buscaAplicada, setBuscaAplicada] = useState('');
   const [filtro, setFiltro] = useState<'todos' | 'ativo' | 'sem-plano'>('todos');
   const [selecionado, setSelecionado] = useState<string | null>(null);
   const pageSize = 50;
 
+  // Atraso apenas a busca digitada; a primeira carga e a paginação são imediatas.
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      fetchPacientes(query, page, pageSize);
-    }, 300);
+    const atraso = query ? 300 : 0;
+    const timeout = setTimeout(() => setBuscaAplicada(query), atraso);
     return () => clearTimeout(timeout);
-  }, [query, page, fetchPacientes]);
+  }, [query]);
+
+  useEffect(() => {
+    fetchPacientes(buscaAplicada, page, pageSize);
+  }, [buscaAplicada, page, fetchPacientes]);
 
   const pacientesFiltrados = pacientes.filter(p => {
     if (filtro === 'todos') return true;
