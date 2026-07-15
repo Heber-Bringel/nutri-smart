@@ -45,7 +45,7 @@ export const PatientEvolutionView: React.FC = () => {
   }, [patientData]);
 
   const historyTable = useMemo(() => {
-    return [...patientData].reverse().filter(d => (d.peso && d.peso > 0) || (d.adesao && d.adesao > 0));
+    return [...patientData].reverse().filter(d => d.peso != null && d.peso > 0);
   }, [patientData]);
 
   if (isLoading) {
