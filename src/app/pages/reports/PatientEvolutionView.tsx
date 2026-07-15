@@ -144,10 +144,23 @@ export const PatientEvolutionView: React.FC = () => {
             <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fontSize: 12, fill: 'var(--color-ink-secondary)' }} axisLine={false} tickLine={false} dx={10} />
             <Tooltip 
               contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 13 }}
+              formatter={(value, name) => [
+                name === 'Adesão ao Plano' ? `${value}%` : `${value} kg`,
+                name === 'Adesão ao Plano' ? 'Adesão' : 'Peso'
+              ]}
             />
             <Legend wrapperStyle={{ paddingTop: 20, fontSize: 13, color: 'var(--color-ink-primary)' }} />
-            <Line connectNulls={true} yAxisId="left" type="monotone" dataKey="peso" name="Peso (kg)" stroke="var(--color-primary)" strokeWidth={3} isAnimationActive={true} activeDot={{ r: 6, strokeWidth: 0 }} dot={{ r: 4, strokeWidth: 0, fill: 'var(--color-primary)' }} />
-            <Line connectNulls={true} yAxisId="right" type="monotone" dataKey="adesao" name="Adesão ao Plano (%)" stroke="#3b82f6" strokeWidth={3} isAnimationActive={true} dot={{ r: 4, strokeWidth: 0, fill: '#3b82f6' }} />
+            <Line 
+              connectNulls={true} yAxisId="left" type="monotone" dataKey="peso" name="Peso" 
+              stroke="var(--color-primary)" strokeWidth={3} isAnimationActive={true} 
+              activeDot={{ r: 6, strokeWidth: 0 }} dot={{ r: 4, strokeWidth: 0, fill: 'var(--color-primary)' }} 
+            />
+            <Line 
+              connectNulls={true} yAxisId="right" type="monotone" dataKey="adesao" name="Adesão ao Plano" 
+              stroke="#3b82f6" strokeWidth={3} isAnimationActive={true} 
+              dot={{ r: 4, strokeWidth: 0, fill: '#3b82f6' }} 
+              label={{ position: 'top', fill: '#3b82f6', fontSize: 12, fontWeight: 600, formatter: (val: any) => val ? `${val}%` : '' }}
+            />
           </LineChart>
         </ResponsiveContainer>
         )}
