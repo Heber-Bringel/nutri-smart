@@ -69,22 +69,44 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
   async function handleToggle(refeicaoId: string, concluida: boolean, pacienteId: string) {
     if (!pacienteId) return;
 
-    try {
-      await Container.markMealAsCompletedUseCase.execute(refeicaoId, pacienteId, concluida, selectedDate);
-      setAdesaoMap(prev => new Map(prev).set(refeicaoId, concluida));
+    // Snapshot do estado atual para possível rollback
+    const previousMap = new Map(adesaoMap);
+    const previousProgress = progress;
 
-      const [prog, estadosRaw] = await Promise.all([
-        Container.getDailyProgressUseCase.execute(pacienteId, selectedDate),
-        Container.getDailyAdesaoStatesUseCase.execute(pacienteId, selectedDate),
-      ]);
-      setProgress(prog);
-      const estados = Array.isArray(estadosRaw) ? estadosRaw : [];
-      const map = new Map<string, boolean>();
-      for (const e of estados) {
-        map.set(e.refeicaoId, e.concluida);
-      }
-      setAdesaoMap(map);
+    // 1. Atualização Otimista: Feedback imediato na UI
+    setAdesaoMap(prev => new Map(prev).set(refeicaoId, concluida));
+
+    if (progress && mealPlan) {
+      const total = mealPlan.refeicoes.length;
+      let concluidas = progress.concluidas;
+      if (concluida) concluidas++;
+      else concluidas = Math.max(0, concluidas - 1);
+      
+      setProgress({
+        concluidas,
+        totalRefeicoes: total,
+        percentual: total > 0 ? Math.round((concluidas / total) * 100) : 0
+      });
+    }
+
+    try {
+      // 2. Persiste em background
+      await Container.markMealAsCompletedUseCase.execute(refeicaoId, pacienteId, concluida, selectedDate);
+
+      // 3. Re-sincronização silenciosa (evita que a tela trave aguardando essa promessa)
+      Container.getDailyProgressUseCase.execute(pacienteId, selectedDate).then(prog => setProgress(prog)).catch(() => {});
+      Container.getDailyAdesaoStatesUseCase.execute(pacienteId, selectedDate).then(estadosRaw => {
+        const estados = Array.isArray(estadosRaw) ? estadosRaw : [];
+        const map = new Map<string, boolean>();
+        for (const e of estados) {
+          map.set(e.refeicaoId, e.concluida);
+        }
+        setAdesaoMap(map);
+      }).catch(() => {});
     } catch (err: unknown) {
+      // Em caso de erro de rede, faz rollback suave
+      setAdesaoMap(previousMap);
+      setProgress(previousProgress);
       setError(err instanceof Error ? err.message : 'Erro ao salvar. Tente novamente.');
     }
   }
