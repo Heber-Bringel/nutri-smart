@@ -93,17 +93,9 @@ export function usePatientAreaViewModel(pacienteId?: string): PatientAreaViewMod
     try {
       // 2. Persiste em background
       await Container.markMealAsCompletedUseCase.execute(refeicaoId, pacienteId, concluida, selectedDate);
-
-      // 3. Re-sincronização silenciosa (evita que a tela trave aguardando essa promessa)
-      Container.getDailyProgressUseCase.execute(pacienteId, selectedDate).then(prog => setProgress(prog)).catch(() => {});
-      Container.getDailyAdesaoStatesUseCase.execute(pacienteId, selectedDate).then(estadosRaw => {
-        const estados = Array.isArray(estadosRaw) ? estadosRaw : [];
-        const map = new Map<string, boolean>();
-        for (const e of estados) {
-          map.set(e.refeicaoId, e.concluida);
-        }
-        setAdesaoMap(map);
-      }).catch(() => {});
+      
+      // Sem re-fetch cego: A Atualização Otimista atômica já garantiu o estado local perfeito!
+      // (O rollback no catch lida com qualquer falha).
     } catch (err: unknown) {
       // Em caso de erro de rede, faz rollback suave
       setAdesaoMap(previousMap);
