@@ -11,13 +11,11 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { useAuth } from '../../../viewmodel/auth/AuthViewModel';
-import { useNavigate } from 'react-router-dom';
 import { LoadingSkeleton } from '../../components/shared/LoadingSkeleton';
 import { motion } from 'framer-motion';
 
 export const PatientEvolutionView: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   // O paciente enxerga os últimos 30 dias por padrão
   const { chartData, isLoading, error } = usePatientReportViewModel(user?.pacienteId, 30);
 
@@ -28,15 +26,9 @@ export const PatientEvolutionView: React.FC = () => {
     adesao: d.adesao // Valor real vindo do viewmodel
   }));
 
-  const headerBtn = {
-    padding: '8px 16px', cursor: 'pointer', borderRadius: 'var(--radius-md)',
-    border: '1px solid var(--color-border)', background: 'var(--color-surface)',
-    color: 'var(--color-ink-primary)', fontSize: 13, fontWeight: 500,
-  };
-
   if (isLoading) {
     return (
-      <div style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}>
+      <div>
         <LoadingSkeleton lines={6} />
       </div>
     );
@@ -44,7 +36,7 @@ export const PatientEvolutionView: React.FC = () => {
 
   if (error) {
     return (
-      <div style={{ padding: 32, maxWidth: 800, margin: '0 auto', color: 'var(--color-danger)' }}>
+      <div style={{ color: 'var(--color-danger)' }}>
         {error}
       </div>
     );
@@ -55,24 +47,7 @@ export const PatientEvolutionView: React.FC = () => {
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
       transition={{ duration: 0.3 }}
-      style={{ padding: 32, maxWidth: 800, margin: '0 auto' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-        <div>
-          <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0, color: 'var(--color-ink-primary)' }}>Minha Evolução</h1>
-          <p style={{ color: 'var(--color-ink-secondary)', margin: '4px 0 0', fontSize: 13 }}>
-            Histórico de Peso e Adesão (últimos 30 dias)
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button onClick={() => navigate('/paciente/meu-plano')} style={headerBtn}>
-            Meu Plano
-          </button>
-          <button onClick={logout} style={{...headerBtn, background: 'var(--color-bg)'}}>
-            Sair
-          </button>
-        </div>
-      </div>
 
       <motion.section 
         initial={{ y: 15, opacity: 0 }}
