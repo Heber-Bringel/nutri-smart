@@ -64,3 +64,64 @@ A segurança e o isolamento de dados são garantidos pelo uso de autenticação 
 ## Notas Adicionais
 
 - **Conformidade LGPD:** As anotações de consulta são dados pessoais sensíveis. Além da proteção de dados em repouso e trânsito (HTTPS), a opção de exclusão de dados (Art. 18) está contemplada no fluxo de exclusão de paciente. O Termo de Consentimento detalhado para a coleta de dados de saúde física será implementado na versão v2 comercial do software.
+
+
+---
+
+# Artefatos Obrigatórios da Entrega
+
+Esta seção consolida os artefatos exigidos pela Issue #61 e funciona como ponto de entrada para qualquer pessoa que ingresse no projeto.
+
+## Visão do Produto
+
+O NutriSmart é uma plataforma web responsiva que conecta nutricionistas e pacientes em um fluxo único de acompanhamento nutricional. A visão do produto é reduzir o trabalho operacional do profissional e aumentar a adesão do paciente por meio de prontuário, cálculos clínicos, plano alimentar, agenda e acompanhamento em um único ambiente seguro.
+
+## Valor de Mercado
+
+O produto atende uma necessidade recorrente de consultórios que ainda dependem de planilhas, papel e ferramentas fragmentadas. O valor entregue é: (a) redução do tempo administrativo por consulta com cálculos e dados centralizados; (b) redução de erros de transcrição em indicadores nutricionais; (c) retenção e engajamento do paciente com plano diário e registro de adesão; (d) histórico clínico organizado para decisões baseadas em evolução; e (e) menor custo operacional por utilizar uma aplicação web e serviços gerenciados no MVP. O produto não substitui o julgamento clínico do nutricionista: automatiza registro, cálculo e visualização.
+
+## Personas e Público-alvo
+
+| Persona | Contexto | Necessidade principal | Resultado esperado |
+|---|---|---|---|
+| **Nutricionista clínico (Ana)** | Atende vários pacientes e alterna entre consulta, planilhas e mensagens | Registrar dados rapidamente, acompanhar evolução e organizar agenda | Menos trabalho administrativo e prontuário confiável |
+| **Paciente em acompanhamento (João)** | Precisa seguir refeições e manter regularidade entre consultas | Consultar o plano do dia, registrar refeições e lembrar da próxima consulta | Mais autonomia e visibilidade da própria adesão |
+| **Gestor de consultório (Carla)** | Precisa padronizar o atendimento da equipe | Isolamento de dados, rastreabilidade e visão operacional | Processo consistente e menor risco de acesso indevido |
+
+## Escopo detalhado do MVP
+
+### Incluído
+
+- Autenticação, recuperação de senha e controle de acesso por perfil (RF000/RF000a, HU-00/HU-01).
+- Cadastro, listagem, consulta e exclusão de pacientes (RF001–RF003 e RF009, HU-02–HU-04).
+- Cálculo local de IMC, TMB por Mifflin-St Jeor e GET (RF004–RF006, HU-05).
+- Criação e edição de planos alimentares, base de alimentos e alimentos personalizados (RF007–RF008 e RF034, HU-06).
+- Área do paciente com plano diário, adesão e progresso (RF011–RF014, HU-08–HU-10).
+- Medidas corporais e histórico de evolução (RF020–RF022, HU-11–HU-12).
+- Anotações clínicas privadas com RLS (RF023–RF025, HU-13–HU-14).
+- Relatórios PDF e filtro de evolução de 30, 60 ou 90 dias (RF026–RF028, HU-15–HU-16).
+- Agenda diária/semanal, prevenção de conflitos, reagendamento, cancelamento e próxima consulta (RF029–RF033, HU-17–HU-20).
+
+### Fora do MVP
+
+Integração bidirecional com Google Calendar/Outlook, faturamento ou gateway de pagamento, WhatsApp Business/SMS, aplicativo nativo publicado em lojas e white label/customização de tema. Esses itens são candidatos a v2, conforme o escopo congelado na ERS.
+
+## Critérios de sucesso do produto
+
+| Critério | Meta de aceite | Como medir |
+|---|---|---|
+| Eficiência clínica | Cadastro/atualização com indicadores em menos de 500 ms e redução do fluxo administrativo para menos de 5 min | Medição no navegador e teste de tarefa |
+| Precisão | 100% dos cálculos cobertos por regras de domínio e sem cálculo manual na UI | Testes automatizados das fórmulas |
+| Adesão | Marcação de refeição em até dois toques e progresso atualizado sem recarregar | Teste de aceitação HU-09/HU-10 |
+| Segurança | Usuário só lê dados permitidos por seu perfil; anotações nunca são expostas ao paciente | Políticas RLS revisadas e testes de acesso |
+| Desempenho | Listagem para até 10 usuários simultâneos em menos de 2 s; PDF de até 90 dias em menos de 3 s | Smoke test e medição no ambiente publicado |
+| Usabilidade | Fluxos principais funcionam a partir de 360 px e atendem foco/labels/contraste | Checklist de acessibilidade e testes mobile |
+
+## Contratos e governança
+
+- Contrato de API: [`docs/contracts/openapi.yaml`](../contracts/openapi.yaml).
+- Contratos de dados: [`docs/contracts/schemas.json`](../contracts/schemas.json).
+- AI Harness e ciclo de qualidade: [`docs/ai-harness.md`](../ai-harness.md).
+- Regras de comportamento e cenários: ERS, USE_CASES e especificações em `openspec/specs/`.
+
+As rotas do OpenAPI representam o contrato lógico entre casos de uso e adapters. O MVP usa Supabase diretamente, portanto não existe um servidor HTTP próprio; a especificação documenta as operações que devem permanecer estáveis independentemente da implementação do adapter.
