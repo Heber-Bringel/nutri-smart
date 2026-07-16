@@ -1,0 +1,246 @@
+openapi: 3.1.0
+info:
+  title: NutriSmart — Contrato de API de Domínio
+  version: 1.0.0
+  description: |
+    Contrato lógico das operações usadas pelos casos de uso e adapters do NutriSmart.
+    O MVP usa Supabase como BaaS e não publica um servidor HTTP próprio; os paths
+    abaixo descrevem o contrato estável das operações sobre os dados.
+servers:
+  - url: https://{supabase-project}.supabase.co
+    variables:
+      supabase-project:
+        default: projeto-nutrismart
+security:
+  - bearerAuth: []
+tags:
+  - name: Autenticação
+  - name: Pacientes
+  - name: Plano alimentar
+  - name: Adesão
+  - name: Medidas e notas
+  - name: Agenda
+paths:
+  /auth/v1/token:
+    post:
+      tags: [Autenticação]
+      summary: Autenticar usuário
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Sessão criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthSession' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /rest/v1/pacientes:
+    get:
+      tags: [Pacientes]
+      summary: Listar pacientes do nutricionista autenticado
+      parameters:
+        - { $ref: '#/components/parameters/Select' }
+      responses:
+        '200':
+          description: Pacientes filtrados por RLS
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Paciente' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Pacientes]
+      summary: Cadastrar paciente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PacienteInput' }
+      responses:
+        '201':
+          description: Paciente criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Paciente' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+  /rest/v1/pacientes/{pacienteId}:
+    parameters:
+      - { $ref: '#/components/parameters/PacienteId' }
+    get:
+      tags: [Pacientes]
+      summary: Consultar paciente
+      responses:
+        '200':
+          description: Paciente autorizado por RLS
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Paciente' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Pacientes]
+      summary: Atualizar paciente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PacienteInput' }
+      responses:
+        '200':
+          description: Paciente atualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Paciente' }
+    delete:
+      tags: [Pacientes]
+      summary: Excluir paciente e dados vinculados
+      responses:
+        '204': { description: Exclusão concluída conforme LGPD Art. 18 }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /rest/v1/planos-alimentares:
+    post:
+      tags: [Plano alimentar]
+      summary: Criar plano alimentar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlanoAlimentarInput' }
+      responses:
+        '201':
+          description: Plano criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanoAlimentar' }
+    get:
+      tags: [Plano alimentar]
+      summary: Obter plano do paciente autenticado
+      parameters:
+        - { $ref: '#/components/parameters/PatientQuery' }
+      responses:
+        '200':
+          description: Plano autorizado por RLS
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PlanoAlimentar' }
+  /rest/v1/adesoes:
+    post:
+      tags: [Adesão]
+      summary: Marcar refeição como concluída
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AdesaoInput' }
+      responses:
+        '201':
+          description: Registro de adesão persistido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Adesao' }
+  /rest/v1/medidas-corporais:
+    get:
+      tags: [Medidas e notas]
+      summary: Listar histórico de medidas
+      parameters:
+        - { $ref: '#/components/parameters/PatientQuery' }
+      responses:
+        '200':
+          description: Histórico autorizado por RLS
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/MedidaCorporal' } }
+    post:
+      tags: [Medidas e notas]
+      summary: Registrar medida corporal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MedidaCorporalInput' }
+      responses:
+        '201':
+          description: Medida criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MedidaCorporal' }
+  /rest/v1/anotacoes-clinicas:
+    get:
+      tags: [Medidas e notas]
+      summary: Listar anotações clínicas do nutricionista responsável
+      parameters:
+        - { $ref: '#/components/parameters/PatientQuery' }
+      responses:
+        '200':
+          description: Anotações nunca são retornadas ao perfil paciente
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/AnotacaoClinica' } }
+    post:
+      tags: [Medidas e notas]
+      summary: Criar anotação clínica privada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnotacaoClinicaInput' }
+      responses:
+        '201':
+          description: Anotação criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnotacaoClinica' }
+  /rest/v1/consultas:
+    get:
+      tags: [Agenda]
+      summary: Listar consultas do usuário autorizado
+      responses:
+        '200':
+          description: Consultas filtradas por RLS
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Consulta' } }
+    post:
+      tags: [Agenda]
+      summary: Agendar consulta sem conflito de horário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConsultaInput' }
+      responses:
+        '201':
+          description: Consulta criada
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Consulta' }
+        '409': { description: Conflito de horário }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Select: { name: select, in: query, schema: { type: string } }
+    PacienteId: { name: pacienteId, in: path, required: true, schema: { type: string, format: uuid } }
+    PatientQuery: { name: paciente_id, in: query, required: true, schema: { type: string, format: uuid } }
+  responses:
+    BadRequest: { description: Payload inválido }
+    Unauthorized: { description: JWT ausente ou inválido }
+    Forbidden: { description: Operação bloqueada pela RLS }
+    NotFound: { description: Recurso não encontrado ou não autorizado }
+  schemas:
+    LoginRequest: { $ref: './schemas.json#/$defs/LoginRequest' }
+    AuthSession: { $ref: './schemas.json#/$defs/AuthSession' }
+    PacienteInput: { $ref: './schemas.json#/$defs/PacienteInput' }
+    Paciente: { $ref: './schemas.json#/$defs/Paciente' }
+    PlanoAlimentarInput: { $ref: './schemas.json#/$defs/PlanoAlimentarInput' }
+    PlanoAlimentar: { $ref: './schemas.json#/$defs/PlanoAlimentar' }
+    AdesaoInput: { $ref: './schemas.json#/$defs/AdesaoInput' }
+    Adesao: { $ref: './schemas.json#/$defs/Adesao' }
+    MedidaCorporalInput: { $ref: './schemas.json#/$defs/MedidaCorporalInput' }
+    MedidaCorporal: { $ref: './schemas.json#/$defs/MedidaCorporal' }
+    AnotacaoClinicaInput: { $ref: './schemas.json#/$defs/AnotacaoClinicaInput' }
+    AnotacaoClinica: { $ref: './schemas.json#/$defs/AnotacaoClinica' }
+    ConsultaInput: { $ref: './schemas.json#/$defs/ConsultaInput' }
+    Consulta: { $ref: './schemas.json#/$defs/Consulta' }
