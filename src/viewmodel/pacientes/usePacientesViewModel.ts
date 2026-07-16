@@ -39,7 +39,7 @@ export function usePacientesViewModel() {
     }
   }, []);
 
-  const createPaciente = useCallback(async (data: PatientFormData): Promise<{ senhaTemporaria: string | null; erroConvite: string | null }> => {
+  const createPaciente = useCallback(async (data: PatientFormData): Promise<{ paciente: Paciente; senhaTemporaria: string | null; erroConvite: string | null }> => {
     setLoading(true);
     setError(null);
     try {
@@ -52,7 +52,7 @@ export function usePacientesViewModel() {
         altura: data.altura,
         nivelAtividadeFisica: data.nivelAtividadeFisica,
       });
-      return { senhaTemporaria: resultado.senhaTemporaria, erroConvite: resultado.erroConvite };
+      return { paciente: resultado.paciente, senhaTemporaria: resultado.senhaTemporaria, erroConvite: resultado.erroConvite };
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao criar paciente.');
       throw err;

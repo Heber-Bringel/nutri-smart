@@ -16,7 +16,7 @@ export function PatientFormPage() {
   const [initialData, setInitialData] = useState<PatientFormData | undefined>(undefined);
 
   // Estado do modal de senha temporária
-  const [senhaModal, setSenhaModal] = useState<{ senha: string; email: string; aviso: string | null } | null>(null);
+  const [senhaModal, setSenhaModal] = useState<{ senha: string; email: string; aviso: string | null; pacienteId: string } | null>(null);
   const [copiado, setCopiado] = useState(false);
 
   useEffect(() => {
@@ -50,12 +50,14 @@ export function PatientFormPage() {
         await updatePaciente(id, formData);
         navigate('/dashboard/pacientes');
       } else {
-        const { senhaTemporaria, erroConvite } = await createPaciente(formData);
-        if (senhaTemporaria) {
-          setSenhaModal({ senha: senhaTemporaria, email: formData.email, aviso: erroConvite });
-        } else {
-          setSenhaModal({ senha: '', email: formData.email, aviso: erroConvite ?? 'Não foi possível gerar o acesso do paciente.' });
-        }
+        const { paciente, senhaTemporaria, erroConvite } = await createPaciente(formData);
+        // Sempre exibe o modal — com senha ou com aviso de falha
+        setSenhaModal({
+          senha: senhaTemporaria ?? '',
+          email: formData.email,
+          aviso: erroConvite,
+          pacienteId: paciente.id,
+        });
       }
     } catch {
       // erro clínico — gerenciado pelo viewmodel e exibido via `error`
@@ -73,8 +75,11 @@ export function PatientFormPage() {
   }
 
   function handleFecharModal() {
+    if (!senhaModal) return;
+    const pid = senhaModal.pacienteId;
     setSenhaModal(null);
-    navigate('/dashboard/pacientes');
+    // Navega ao perfil do paciente recém-criado
+    navigate(`/dashboard/pacientes/${pid}`);
   }
 
   if (pageLoading) {
