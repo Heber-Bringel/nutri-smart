@@ -30,4 +30,6 @@ export interface IPacienteService {
   findAll(filters: PacienteFilters): Promise<PaginatedResult<Paciente>>;
   findById(id: string): Promise<Paciente>;
   softDelete(id: string): Promise<void>;
+  /** Remove o paciente completamente: registro clínico, conta Auth e profile. */
+  hardDelete(id: string): Promise<void>;
 }
