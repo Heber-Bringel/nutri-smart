@@ -1,6 +1,6 @@
 import { IInviteService } from '../../model/services/IInviteService';
 import { PacienteError } from '../../model/errors/PacienteError';
-import { supabase } from '../supabase/client';
+import { createIsolatedClient } from '../supabase/client';
 
 /**
  * Gera uma senha temporária segura usando Web Crypto API.
@@ -34,7 +34,12 @@ export class SupabaseInviteService implements IInviteService {
   async sendInvite(email: string, nomeCompleto: string): Promise<string> {
     const senha = gerarSenhaTemporaria();
 
-    const { error } = await supabase.auth.signUp({
+    // Client isolado: o signUp autentica a sessão retornada. No client principal
+    // isso deslogaria o nutricionista e o logaria como o paciente. O client
+    // efêmero não persiste sessão, preservando a sessão ativa do nutricionista.
+    const isolatedClient = createIsolatedClient();
+
+    const { error } = await isolatedClient.auth.signUp({
       email,
       password: senha,
       options: {
