@@ -10,8 +10,9 @@ export function PatientFormPage() {
   const { id } = useParams<{ id: string }>();
   const editMode = !!id;
 
-  const { getPaciente, createPaciente, updatePaciente, loading, error } = usePacientesViewModel();
+  const { getPaciente, createPaciente, updatePaciente, error } = usePacientesViewModel();
   const [pageLoading, setPageLoading] = useState(editMode);
+  const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState<PatientFormData | undefined>(undefined);
 
   // Estado do modal de senha temporária
@@ -43,6 +44,7 @@ export function PatientFormPage() {
   }, [id, getPaciente]);
 
   async function handleSubmit(formData: PatientFormData) {
+    setSubmitting(true);
     try {
       if (editMode && id) {
         await updatePaciente(id, formData);
@@ -50,23 +52,15 @@ export function PatientFormPage() {
       } else {
         const { senhaTemporaria, erroConvite } = await createPaciente(formData);
         if (senhaTemporaria) {
-          // Exibe modal com a senha antes de navegar
-          setSenhaModal({
-            senha: senhaTemporaria,
-            email: formData.email,
-            aviso: erroConvite,
-          });
+          setSenhaModal({ senha: senhaTemporaria, email: formData.email, aviso: erroConvite });
         } else {
-          // Cadastro salvo mas criação do acesso falhou
-          setSenhaModal({
-            senha: '',
-            email: formData.email,
-            aviso: erroConvite ?? 'Não foi possível gerar o acesso do paciente.',
-          });
+          setSenhaModal({ senha: '', email: formData.email, aviso: erroConvite ?? 'Não foi possível gerar o acesso do paciente.' });
         }
       }
     } catch {
       // erro clínico — gerenciado pelo viewmodel e exibido via `error`
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -133,7 +127,7 @@ export function PatientFormPage() {
           background: 'var(--color-surface)', border: '1px solid var(--color-border)',
           borderRadius: 'var(--radius-lg)', padding: 32,
         }}>
-          <PatientForm onSubmit={handleSubmit} loading={loading} initialData={initialData} editMode={editMode} />
+          <PatientForm onSubmit={handleSubmit} loading={submitting} initialData={initialData} editMode={editMode} />
         </div>
       </div>
 
