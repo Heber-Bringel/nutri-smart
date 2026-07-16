@@ -140,6 +140,21 @@ export class SupabasePacienteService implements IPacienteService {
     if (error) throw new PacienteError('Erro ao excluir paciente.');
   }
 
+  async hardDelete(id: string): Promise<void> {
+    const { error } = await supabase.functions.invoke('delete-patient', {
+      method: 'POST',
+      body: { pacienteId: id },
+    });
+
+    if (error) {
+      throw new PacienteError(
+        error.message === 'Functions Fetch Failed'
+          ? 'Serviço de exclusão indisponível. Tente novamente.'
+          : `Erro ao excluir paciente: ${error.message}`
+      );
+    }
+  }
+
   private async enrichList(pacientes: Paciente[]): Promise<Paciente[]> {
     if (pacientes.length === 0) return pacientes;
 
