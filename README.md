@@ -115,3 +115,14 @@ O desenvolvimento utiliza o fluxo profissional baseado em Issues e Pull Requests
 ## 📄 Licença
 
 Este é um projeto acadêmico de código aberto desenvolvido para fins educacionais.
+
+### Artefatos de engenharia e contratos
+
+A documentação obrigatória da entrega está consolidada em:
+
+* [PRD e critérios de sucesso](docs/PRD/prd.md)
+* [Contrato de API OpenAPI](docs/contracts/openapi.yaml)
+* [Contratos de dados JSON Schema](docs/contracts/schemas.json)
+* [AI Harness — feedforward e feedback](docs/ai-harness.md)
+
+O OpenAPI descreve o contrato lógico entre os casos de uso e os adapters Supabase; o MVP não possui um servidor HTTP próprio. Alterações em payloads devem atualizar o JSON Schema e a especificação OpenAPI na mesma mudança.
