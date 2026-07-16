@@ -280,7 +280,7 @@ export function PatientFormPage() {
                         </motion.button>
                       </div>
                       <p style={{ margin: '6px 0 0', fontSize: 11, color: 'var(--color-ink-tertiary)' }}>
-                        O paciente pode alterar a senha após o primeiro acesso.
+                        O paciente pode redefinir a senha pela opção "Esqueci a senha" na tela de login.
                       </p>
                     </div>
                   </>
