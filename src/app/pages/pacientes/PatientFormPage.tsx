@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PatientForm } from '../../components/pacientes/PatientForm';
 import { usePacientesViewModel } from '../../../viewmodel/pacientes/usePacientesViewModel';
 import { PatientFormData } from '../../../viewmodel/pacientes/PatientSchema';
@@ -145,132 +146,164 @@ export function PatientFormPage() {
       </PageTransition>
 
       {/* Modal renderizado no body via portal — imune à animação de saída de rota */}
-      {senhaModal && createPortal(
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.5)', padding: 16,
-        }}>
-          <div style={{
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '32px 36px',
-            maxWidth: 440, width: '100%',
-            boxShadow: 'var(--shadow-card)',
-          }}>
-            {/* Ícone de sucesso */}
-            <div style={{
-              width: 44, height: 44, borderRadius: '50%',
-              background: 'var(--color-success-subtle, #ecfdf5)',
-              border: '1px solid var(--color-success-border, #a7f3d0)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 16,
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="var(--color-success, #059669)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-
-            <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700, color: 'var(--color-ink-primary)', letterSpacing: '-0.02em' }}>
-              Paciente cadastrado
-            </h2>
-            <p style={{ margin: '0 0 24px', fontSize: 13, color: 'var(--color-ink-secondary)', lineHeight: 1.5 }}>
-              Repasse as credenciais abaixo ao paciente para que ele acesse o sistema.
-            </p>
-
-            {senhaModal.aviso && (
-              <div style={{
-                padding: '10px 12px', marginBottom: 20,
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--color-warning-subtle, #fffbeb)',
-                border: '1px solid var(--color-warning-border, #fde68a)',
-                color: 'var(--color-warning, #92400e)',
-                fontSize: 12,
-              }}>
-                ⚠️ {senhaModal.aviso}
-              </div>
-            )}
-
-            {senhaModal.senha && (
-              <>
-                <div style={{ marginBottom: 12 }}>
-                  <label style={{
-                    display: 'block', fontSize: 11, fontWeight: 600,
-                    color: 'var(--color-ink-tertiary)', letterSpacing: '0.05em',
-                    textTransform: 'uppercase', marginBottom: 4,
-                  }}>
-                    E-mail
-                  </label>
-                  <div style={{
-                    padding: '9px 12px',
-                    background: 'var(--color-bg)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-md)',
-                    fontSize: 13, color: 'var(--color-ink-primary)',
-                    fontFamily: 'var(--font-mono)',
-                  }}>
-                    {senhaModal.email}
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: 24 }}>
-                  <label style={{
-                    display: 'block', fontSize: 11, fontWeight: 600,
-                    color: 'var(--color-ink-tertiary)', letterSpacing: '0.05em',
-                    textTransform: 'uppercase', marginBottom: 4,
-                  }}>
-                    Senha temporária
-                  </label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{
-                      flex: 1, padding: '9px 12px',
-                      background: 'var(--color-bg)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-md)',
-                      fontSize: 15, fontWeight: 600,
-                      color: 'var(--color-ink-primary)',
-                      fontFamily: 'var(--font-mono)',
-                      letterSpacing: '0.08em',
-                    }}>
-                      {senhaModal.senha}
-                    </div>
-                    <button
-                      onClick={handleCopiar}
-                      style={{
-                        padding: '9px 14px',
-                        background: copiado ? 'var(--color-success, #059669)' : 'var(--color-primary)',
-                        color: '#fff', border: 'none',
-                        borderRadius: 'var(--radius-md)',
-                        cursor: 'pointer', fontSize: 12, fontWeight: 600,
-                        transition: 'background 150ms ease-out',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {copiado ? '✓ Copiado' : 'Copiar'}
-                    </button>
-                  </div>
-                  <p style={{ margin: '6px 0 0', fontSize: 11, color: 'var(--color-ink-tertiary)' }}>
-                    O paciente pode alterar a senha após o primeiro acesso em Configurações.
-                  </p>
-                </div>
-              </>
-            )}
-
-            <button
-              onClick={handleFecharModal}
+      {createPortal(
+        <AnimatePresence>
+          {senhaModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
               style={{
-                width: '100%', padding: '10px 24px',
-                background: 'var(--color-primary)', color: '#fff',
-                border: 'none', borderRadius: 'var(--radius-md)',
-                cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                position: 'fixed', inset: 0, zIndex: 400,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(3px)', padding: 16,
               }}
             >
-              Concluir
-            </button>
-          </div>
-        </div>,
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 12 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                style={{
+                  background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '32px 36px',
+                  maxWidth: 440, width: '100%',
+                  boxShadow: 'var(--shadow-modal)',
+                }}
+              >
+                {/* Ícone de sucesso */}
+                <motion.div
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.1, type: 'spring', stiffness: 380, damping: 18 }}
+                  style={{
+                    width: 44, height: 44, borderRadius: '50%',
+                    background: 'var(--color-success-subtle)',
+                    border: '1px solid var(--color-success-border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 16,
+                  }}
+                >
+                  <motion.svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="var(--color-primary-hover)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <motion.polyline
+                      points="20 6 9 17 4 12"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ delay: 0.25, duration: 0.3, ease: 'easeOut' }}
+                    />
+                  </motion.svg>
+                </motion.div>
+
+                <h2 style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 700, color: 'var(--color-ink-primary)', letterSpacing: '-0.02em' }}>
+                  Paciente cadastrado
+                </h2>
+                <p style={{ margin: '0 0 24px', fontSize: 13, color: 'var(--color-ink-secondary)', lineHeight: 1.5 }}>
+                  Repasse as credenciais abaixo ao paciente para que ele acesse o sistema.
+                </p>
+
+                {senhaModal.aviso && (
+                  <div style={{
+                    padding: '10px 12px', marginBottom: 20,
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--color-danger-subtle)',
+                    border: '1px solid var(--color-danger-border)',
+                    color: 'var(--color-danger)',
+                    fontSize: 12, lineHeight: 1.5,
+                  }}>
+                    {senhaModal.aviso}
+                  </div>
+                )}
+
+                {senhaModal.senha && (
+                  <>
+                    <div style={{ marginBottom: 12 }}>
+                      <label style={{
+                        display: 'block', fontSize: 11, fontWeight: 600,
+                        color: 'var(--color-ink-tertiary)', letterSpacing: '0.05em',
+                        textTransform: 'uppercase', marginBottom: 4,
+                      }}>
+                        E-mail
+                      </label>
+                      <div style={{
+                        padding: '9px 12px',
+                        background: 'var(--color-bg)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 'var(--radius-md)',
+                        fontSize: 13, color: 'var(--color-ink-primary)',
+                        fontFamily: 'var(--font-mono)',
+                      }}>
+                        {senhaModal.email}
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: 24 }}>
+                      <label style={{
+                        display: 'block', fontSize: 11, fontWeight: 600,
+                        color: 'var(--color-ink-tertiary)', letterSpacing: '0.05em',
+                        textTransform: 'uppercase', marginBottom: 4,
+                      }}>
+                        Senha temporária
+                      </label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{
+                          flex: 1, padding: '9px 12px',
+                          background: 'var(--color-bg)',
+                          border: '1px solid var(--color-border)',
+                          borderRadius: 'var(--radius-md)',
+                          fontSize: 16, fontWeight: 600,
+                          color: 'var(--color-ink-primary)',
+                          fontFamily: 'var(--font-mono)',
+                          letterSpacing: '0.06em',
+                        }}>
+                          {senhaModal.senha}
+                        </div>
+                        <motion.button
+                          whileTap={{ scale: 0.95 }}
+                          onClick={handleCopiar}
+                          animate={{
+                            background: copiado ? 'var(--color-primary-hover)' : 'var(--color-primary)',
+                          }}
+                          transition={{ duration: 0.15 }}
+                          style={{
+                            padding: '9px 14px',
+                            color: '#fff', border: 'none',
+                            borderRadius: 'var(--radius-md)',
+                            cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {copiado ? '✓ Copiado' : 'Copiar'}
+                        </motion.button>
+                      </div>
+                      <p style={{ margin: '6px 0 0', fontSize: 11, color: 'var(--color-ink-tertiary)' }}>
+                        O paciente pode alterar a senha após o primeiro acesso em Configurações.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                <motion.button
+                  whileHover={{ background: 'var(--color-primary-hover)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleFecharModal}
+                  transition={{ duration: 0.15 }}
+                  style={{
+                    width: '100%', padding: '10px 24px',
+                    background: 'var(--color-primary)', color: '#fff',
+                    border: 'none', borderRadius: 'var(--radius-md)',
+                    cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                  }}
+                >
+                  Concluir
+                </motion.button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
         document.body
       )}
     </>

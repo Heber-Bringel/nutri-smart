@@ -4,24 +4,21 @@ import { createIsolatedClient } from '../supabase/client';
 
 /**
  * Gera uma senha temporária segura usando Web Crypto API.
- * Formato: 4 chars aleatórios + hífen + 4 chars aleatórios + hífen + 4 chars aleatórios
- * Ex.: "aB3x-9mKp-Lz2w"
+ * Formato: 8 caracteres alfanuméricos minúsculos, sem ambiguidade e sem separadores.
+ * Ex.: "k7rm9xq2"
  */
 function gerarSenhaTemporaria(): string {
-  const chars = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const bytes = new Uint8Array(12);
+  // Sem caracteres ambíguos: 'l', 'o', '0', '1' removidos.
+  const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+  const tamanho = 8;
+  const bytes = new Uint8Array(tamanho);
   crypto.getRandomValues(bytes);
 
-  const partes: string[] = [];
-  let bloco = '';
-  for (let i = 0; i < bytes.length; i++) {
-    bloco += chars[bytes[i] % chars.length];
-    if (bloco.length === 4) {
-      partes.push(bloco);
-      bloco = '';
-    }
+  let senha = '';
+  for (let i = 0; i < tamanho; i++) {
+    senha += chars[bytes[i] % chars.length];
   }
-  return partes.join('-');
+  return senha;
 }
 
 export class SupabaseInviteService implements IInviteService {
