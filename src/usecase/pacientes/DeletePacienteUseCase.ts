@@ -9,6 +9,7 @@ export class DeletePacienteUseCase {
       throw new PacienteError('ID do paciente é obrigatório.');
     }
 
-    return this.pacienteService.softDelete(id);
+    // Hard delete: remove o registro clínico, a conta Auth e o profile.
+    return this.pacienteService.hardDelete(id);
   }
 }
